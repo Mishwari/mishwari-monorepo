@@ -1,7 +1,9 @@
 # Mishwari Monorepo Architecture Plan
 
-**Version:** 1.0  
-**Status:** Planning - Future Implementation
+**Version:** 2.0  
+**Status:** Phase 1 - In Progress (35% Complete)
+
+**Last Updated:** 2025-01-02
 
 ---
 
@@ -141,29 +143,36 @@ mishwari-ecosystem/
 │   │   │   └── index.ts
 │   │   └── package.json
 │   │
-│   ├── ui-primitives/                    (Shared interfaces)
+│   ├── ui-primitives/                    (Shared types & hooks - 100% reusable)
 │   │   ├── src/
-│   │   │   ├── Button.types.ts
+│   │   │   ├── Button.types.ts          (Shared interfaces)
 │   │   │   ├── Input.types.ts
 │   │   │   ├── Card.types.ts
+│   │   │   ├── hooks/
+│   │   │   │   ├── useForm.ts           (Shared logic)
+│   │   │   │   └── useValidation.ts
 │   │   │   └── index.ts
 │   │   └── package.json
 │   │
-│   ├── ui-web/                           (Web components)
+│   ├── ui-web/                           (Web: HTML + Tailwind)
 │   │   ├── src/
-│   │   │   ├── Button.tsx
-│   │   │   ├── Input.tsx
-│   │   │   ├── Card.tsx
-│   │   │   ├── DatePicker.tsx
-│   │   │   ├── PhoneInput.tsx
+│   │   │   ├── components/
+│   │   │   │   ├── Button.tsx           (implements ButtonProps)
+│   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── DatePicker.tsx
+│   │   │   │   └── PhoneInput.tsx
+│   │   │   ├── lib/
+│   │   │   │   └── utils.ts             (cn helper)
 │   │   │   └── index.ts
 │   │   └── package.json
 │   │
-│   └── ui-native/                        (Mobile components)
+│   └── ui-native/                        (Mobile: React Native + NativeWind)
 │       ├── src/
-│       │   ├── Button.tsx
-│       │   ├── Input.tsx
-│       │   ├── Card.tsx
+│       │   ├── components/
+│       │   │   ├── Button.tsx           (implements ButtonProps)
+│       │   │   ├── Input.tsx
+│       │   │   └── Card.tsx
 │       │   └── index.ts
 │       └── package.json
 │
@@ -289,29 +298,90 @@ export const tripsApi = {
 }
 ```
 
-### @mishwari/ui (Platform-Specific)
+### @mishwari/ui (Platform-Specific with Shared Logic)
+
+**Reality: 70-75% Code Reuse (Not 100%)**
+
 ```typescript
-// packages/ui/primitives/src/Button.types.ts
+// packages/ui-primitives/src/Button.types.ts
+// ✅ 100% SHARED - Types & Interfaces
 export interface ButtonProps {
   variant?: 'primary' | 'secondary'
+  size?: 'sm' | 'md' | 'lg'
+  disabled?: boolean
+  loading?: boolean
   onPress: () => void
   children: React.ReactNode
 }
 
-// packages/ui/web/src/Button.tsx (Tailwind)
-export const Button = ({ variant, onPress, children }: ButtonProps) => (
-  <button onClick={onPress} className={`btn btn-${variant}`}>
-    {children}
-  </button>
-)
+// ✅ 100% SHARED - Business Logic
+export const useButtonState = (props: ButtonProps) => {
+  const handlePress = () => {
+    if (!props.disabled && !props.loading) {
+      props.onPress()
+    }
+  }
+  return { handlePress }
+}
 
-// packages/ui/native/src/Button.tsx (React Native)
-export const Button = ({ variant, onPress, children }: ButtonProps) => (
-  <TouchableOpacity onPress={onPress} style={styles[variant]}>
-    <Text>{children}</Text>
-  </TouchableOpacity>
-)
+// packages/ui-web/src/components/Button.tsx
+// ❌ PLATFORM-SPECIFIC - Web Rendering
+import { ButtonProps, useButtonState } from '@mishwari/ui-primitives'
+
+export const Button = (props: ButtonProps) => {
+  const { handlePress } = useButtonState(props) // Shared logic!
+  
+  return (
+    <button
+      onClick={handlePress}
+      className={`px-4 py-2 rounded-lg ${
+        props.variant === 'primary' ? 'bg-[#005687] text-white' : 'bg-gray-200'
+      }`}
+    >
+      {props.loading ? 'جاري التحميل...' : props.children}
+    </button>
+  )
+}
+
+// packages/ui-native/src/components/Button.tsx
+// ❌ PLATFORM-SPECIFIC - Mobile Rendering
+import { ButtonProps, useButtonState } from '@mishwari/ui-primitives'
+import { TouchableOpacity, Text, ActivityIndicator } from 'react-native'
+
+export const Button = (props: ButtonProps) => {
+  const { handlePress } = useButtonState(props) // Same logic!
+  
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      className={`px-4 py-2 rounded-lg ${
+        props.variant === 'primary' ? 'bg-[#005687]' : 'bg-gray-200'
+      }`}
+    >
+      {props.loading ? (
+        <ActivityIndicator color="white" />
+      ) : (
+        <Text className="text-white">{props.children}</Text>
+      )}
+    </TouchableOpacity>
+  )
+}
+
+// Usage in apps - SAME API!
+// apps/passenger-web
+import { Button } from '@mishwari/ui-web'
+<Button variant="primary" onPress={search}>بحث</Button>
+
+// apps/passenger-mobile
+import { Button } from '@mishwari/ui-native'
+<Button variant="primary" onPress={search}>بحث</Button>
 ```
+
+**What Gets Reused:**
+- ✅ TypeScript interfaces (100%)
+- ✅ Component logic & state (80%)
+- ✅ Styling approach (Tailwind classes)
+- ❌ JSX markup (0% - platform-specific)
 
 ### @mishwari/utils (Storage Abstraction)
 ```typescript
