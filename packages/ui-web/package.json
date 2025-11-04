@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "dependencies": {
-    "@mishwari/ui-primitives": "*",
+    "@mishwari/ui-primitives": "workspace:*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "tailwind-merge": "^2.0.0"

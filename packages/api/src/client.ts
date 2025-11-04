@@ -11,9 +11,21 @@ export const apiClient = axios.create({
 
 // Add auth token to requests
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (typeof window !== 'undefined') {
+    try {
+      const persistRoot = localStorage.getItem('persist:root');
+      if (persistRoot) {
+        const parsed = JSON.parse(persistRoot);
+        const auth = JSON.parse(parsed.auth || '{}');
+        if (auth.token) {
+          // Decrypt token (base64 decode)
+          const decrypted = decodeURIComponent(escape(atob(auth.token)));
+          config.headers.Authorization = `Bearer ${decrypted}`;
+        }
+      }
+    } catch (e) {
+      console.error('Error reading token:', e);
+    }
   }
   return config;
 });
