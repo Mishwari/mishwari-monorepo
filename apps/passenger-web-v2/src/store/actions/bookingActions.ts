@@ -1,65 +1,93 @@
-import { bookingsApi } from '@mishwari/api';
+import axios from 'axios';
 import { AppState, AppStore } from '../store';
 import { setStatus, setError, resetBookingCreationState } from "../slices/bookingCreationSlice";
 import { Passenger } from "@/types/passenger";
 import { Stripe } from '@stripe/stripe-js';
 import { encryptToken, decryptToken } from '@/utils/tokenUtils';
 
-
-
 export const createBooking = (stripe: Stripe | null) => async (dispatch:AppState, getState: () => AppStore)  =>{
-    const {bookingCreation, auth, user, selectedTrip, passengers} = getState();
-    console.log(bookingCreation)
+    const {bookingCreation, auth, user} = getState();
+
+    console.log('Creating booking, trip data:', bookingCreation.trip);
 
     if(!auth.isAuthenticated) {
-        dispatch(setError('User is not authenticated'))
+        alert('User is not authenticated');
+        dispatch(setError('User is not authenticated'));
         return;
     }
-    const bookingData = {
-         user: user.userDetails.id,
-        trip:bookingCreation.trip.id,
-        passengers: bookingCreation.passengers.filter((p:Passenger) => p.is_checked), // is_checked is true
-        amount: (bookingCreation.passengers.filter((p:Passenger) => p.is_checked).length * Number(bookingCreation.trip.price)),
-        is_paid: bookingCreation.isPaid,
-        payment_method:bookingCreation.paymentMethod,
-
+    if (!bookingCreation.trip?.id) {
+        alert('Trip information is missing');
+        dispatch(setError('Trip information is missing'));
+        return;
     }
+
+    // Fetch trip stops from backend
+    let fromStopId, toStopId;
     try {
-        // console.log("bookingData", bookingData)
-        // dispatch(setStatus('loading'));
-        const response = await bookingsApi.create(bookingData);
-      console.log('payment_url', response.data.payment_url);
-      if (response.status === 200) {
-          if (bookingData.payment_method === 'stripe') {
+        const stopsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}trip-stops/?trip=${bookingCreation.trip.id}`, {
+            headers: {
+                Authorization: `Bearer ${decryptToken(auth.token)}`,
+            },
+        });
+        const stops = stopsResponse.data;
+        console.log('Fetched stops:', stops);
+        
+        if (!stops || stops.length === 0) {
+            alert('No stops found for this trip');
+            dispatch(setError('No stops found for this trip'));
+            return;
+        }
+        
+        // Sort by sequence to get first and last
+        const sortedStops = stops.sort((a: any, b: any) => a.sequence - b.sequence);
+        fromStopId = sortedStops[0].id;
+        toStopId = sortedStops[sortedStops.length - 1].id;
+        console.log('Using stops - from:', fromStopId, 'to:', toStopId);
+        console.log('Stop details:', sortedStops[0], sortedStops[sortedStops.length - 1]);
+    } catch (error: any) {
+        console.error('Error fetching stops:', error);
+        alert('Failed to fetch trip stops');
+        dispatch(setError('Failed to fetch trip stops'));
+        return;
+    }
 
-            window.location.href = response.data.payment_url;
-          } else{
-            window.location.href = '/checkout/success'
-          }
-        // const { payment_url } = response.data.payment_url;
-      } else {
-        console.error('Unexpected response:', response);
-        window.location.href = '/checkout/cancel'
-      }
+    const bookingData = {
+        user: user.userDetails.id,
+        trip: bookingCreation.trip.id,
+        from_stop: fromStopId,
+        to_stop: toStopId,
+        passengers: bookingCreation.passengers.filter((p:Passenger) => p.is_checked),
+        total_fare: (bookingCreation.passengers.filter((p:Passenger) => p.is_checked).length * Number(bookingCreation.trip.price)),
+        is_paid: bookingCreation.isPaid,
+        payment_method: bookingCreation.paymentMethod,
+    };
+    
+    console.log('Sending booking data:', JSON.stringify(bookingData, null, 2));
 
-      // if (stripe) {
-      //   const result = await stripe.redirectToCheckout({
-      //     sessionId: session.id,
-      //   });
-  
-      //   if (result.error) {
-      //     throw new Error(result.error.message);
-      //   }
-      // }
-      
-        // dispatch(setStatus('succeeded'));
-        // dispatch(resetBookingCreationState());
-      } catch (error: any) {
-        console.log("failed to pay")
-        console.error('Error creating booking:', error);
+    try {
+        dispatch(setStatus('loading'));
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}booking/`, bookingData, {
+            headers: {
+                Authorization: `Bearer ${decryptToken(auth.token)}`,
+            },
+        });
+        if (response.status === 200 || response.status === 201) {
+            dispatch(setStatus('succeeded'));
+            if (bookingData.payment_method === 'stripe' && response.data.payment_url) {
+                window.location.href = response.data.payment_url;
+            } else {
+                window.location.href = '/checkout/success';
+            }
+        }
+    } catch (error: any) {
+        console.error('Booking creation error:', error.response?.status, error.response?.data);
+        localStorage.setItem('lastBookingError', JSON.stringify({
+            error: error.response?.data,
+            bookingData,
+            stops: { fromStopId, toStopId }
+        }));
         dispatch(setStatus('failed'));
-        dispatch(setError(error.response?.data?.message || 'Booking creation failed'));
-        window.location.href = '/checkout/cancel'
-      } 
-
-}
+        dispatch(setError(error.response?.data?.[0] || error.response?.data?.message || 'فشل إنشاء الحجز'));
+        setTimeout(() => window.location.href = '/checkout/cancel', 500);
+    }
+};

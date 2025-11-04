@@ -139,6 +139,7 @@ function trip_details() {
     const fetchTripDetails = async () => {
       try {
         const response = await tripsApi.getById(Number(tripId));
+        console.log('Fetched trip details:', response.data);
         setTripDetails(response.data);
       } catch (err: any) {
         console.error('Error fetching trip details:', err.message);
