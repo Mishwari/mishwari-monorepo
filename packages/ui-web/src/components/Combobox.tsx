@@ -111,8 +111,8 @@ export const Combobox = ({
               <li
                 key={index}
                 className={cn(
-                  'p-3 text-sm cursor-pointer hover:bg-mishwari-primary hover:text-white transition-colors',
-                  value === option.value && 'bg-mishwari-primary text-white font-semibold'
+                  'p-3 text-sm cursor-pointer hover:bg-brand-primary hover:text-white transition-colors',
+                  value === option.value && 'bg-brand-primary text-white font-semibold'
                 )}
                 onClick={() => handleSelect(option)}
               >

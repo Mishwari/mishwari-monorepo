@@ -57,8 +57,8 @@ const QuickDaySelector: React.FC<QuickDaySelectorProps> = ({ selectedDate, onDat
             onClick={() => onDateChange(format(day.date, 'yyyy-MM-dd'))}
             className={`flex-1 h-12 rounded-lg text-xs font-medium transition-colors flex flex-col items-center justify-center ${
               isSameDay(day.date, selectedDateObj)
-                ? 'bg-[#005687] text-white'
-                : 'bg-blue-100 text-[#005687] hover:bg-[#005687] hover:text-white'
+                ? 'bg-brand-primary text-white'
+                : 'bg-blue-100 text-brand-primary hover:bg-brand-primary hover:text-white'
             }`}
           >
             <div className="truncate text-[10px]">{day.label}</div>
@@ -68,7 +68,7 @@ const QuickDaySelector: React.FC<QuickDaySelectorProps> = ({ selectedDate, onDat
         
         <button
           onClick={() => setShowCalendar(!showCalendar)}
-          className="flex-1 h-12 rounded-lg bg-blue-100 text-[#005687] hover:bg-[#005687] hover:text-white flex flex-col items-center justify-center relative"
+          className="flex-1 h-12 rounded-lg bg-blue-100 text-brand-primary hover:bg-brand-primary hover:text-white flex flex-col items-center justify-center relative transition-colors"
         >
           <CalendarDaysIcon className="w-4 h-4" />
           <span className="text-[10px]">تقويم</span>

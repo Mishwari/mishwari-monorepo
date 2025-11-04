@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Mousewheel, FreeMode } from 'swiper/modules';
-import TripBox from '@/components/TripBox';
+import { TripCard } from '@mishwari/ui-web/src/components/TripCard';
 import SortDropdown from '@/components/filters_bar/SortDropdown';
 import { useRouter } from 'next/router';
 import FilterGroupModal from '@/components/filters_bar/FilterGroupModal';
@@ -14,7 +14,9 @@ import { Trip } from '@/types/trip';
 import BackButton from '@/components/BackButton';
 import FilterGroup from '@/components/filters_bar/FilterGroup';
 import TripSkeleton from '@/components/Skeletons/TripSkeleton';
-import QuickDaySelector from '@/components/QuickDaySelector';
+import { QuickDaySelector } from '@mishwari/ui-web';
+import { format } from 'date-fns';
+import { useTripsFilter, useTripsSort, SortOption } from '@mishwari/features-trips';
 
 export type SortItem = {
   code: string | null;
@@ -56,35 +58,27 @@ function index() {
     }
   }, [router.query, router.isReady]);
 
-  const [filteredTrips, setFilteredTrips] = useState<Trip[]>([]); //9 ref
-
-  const [finalFilteredTrips, setFinalFilteredTrips] = useState<Trip[]>([]);
-
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const { filteredTrips, filters, setFilters } = useTripsFilter(trips);
+  const { sortedTrips, sortBy, setSortBy } = useTripsSort(filteredTrips);
+  
   const [filterBuses, setFilterBuses] = useState<any>({
     BusType: [],
     Departure: [],
     Rating: [],
-    Min: [],
-    Max: [],
+    Min: 0,
+    Max: Infinity,
   });
-
-  useEffect(() => {
-    setFilterBuses((prevState: any) => ({
-      ...prevState,
-      Min: [],
-      Max: [],
-    }));
-  }, []);
 
   const [isEditFromTo, setIsEditFromTo] = useState<boolean>(false);
 
-  const sortList = [
-    { id: 1, name: ' المغادرة', code: null },
-    { id: 2, name: 'الارخص', code: null },
-    { id: 3, name: ' الوصول', code: null },
-    { id: 4, name: ' التقييم', code: null },
+  const sortList: Array<{ id: number; name: string; value: SortOption }> = [
+    { id: 1, name: 'المغادرة', value: 'departure' },
+    { id: 2, name: 'الأرخص', value: 'price' },
+    { id: 3, name: 'الوصول', value: 'arrival' },
+    { id: 4, name: 'التقييم', value: 'rating' },
   ];
-  const [selectedSort, setSelectedSort] = useState<SortItem>(sortList[0]);
+  const [selectedSort, setSelectedSort] = useState(sortList[0]);
 
   // Filters
 
@@ -99,7 +93,7 @@ function index() {
           to_city: router.query.destination as string,
           date: router.query.date as string
         });
-        setFilteredTrips(response.data);
+        setTrips(response.data);
         setIsLoading(false);
       } catch (err: any) {
         setIsLoading(false);
@@ -110,83 +104,31 @@ function index() {
   }, [router.isReady, router.query.pickup, router.query.destination, router.query.date]);
 
   useEffect(() => {
-    let newFinal = [];
-    for (let i = 0; i < filteredTrips?.length; i++) {
-      if (
-        (filterBuses.BusType.length === 0 ||
-          filterBuses.BusType.includes(
-            filteredTrips[i].bus?.bus_type
-          )) &&
-        (filterBuses.Rating.length === 0 ||
-          Number(filteredTrips[i].driver?.driver_rating) >
-            Math.min(...filterBuses.Rating)) &&
-        Number(filteredTrips[i].price) >= Number(filterBuses.Min) &&
-        Number(filteredTrips[i].price) <= Number(filterBuses.Max)
-      ) {
-        newFinal.push(filteredTrips[i]);
-      }
-    }
-    setFinalFilteredTrips(newFinal);
-  }, [filteredTrips, filterBuses]);
+    setFilters({
+      busTypes: filterBuses.BusType,
+      ratings: filterBuses.Rating,
+      minPrice: filterBuses.Min || 0,
+      maxPrice: filterBuses.Max || Infinity,
+    });
+  }, [filterBuses, setFilters]);
 
   // For minPrice only
-  const [minimumTrip, setMinimumTrip] = useState(0);
+  const minimumTrip = sortedTrips.length > 0 ? Math.min(...sortedTrips.map(t => t.price)) : 0;
 
   useEffect(() => {
-    if (finalFilteredTrips && finalFilteredTrips.length > 0) {
-      const prices = finalFilteredTrips.map((trip: any) => trip.price); // Extract prices from trips
-      setMinimumTrip(Math.min(...prices)); // Spread operator to pass all prices as arguments
-    }
-    finalFilteredTrips;
-  }, [finalFilteredTrips]);
-
-  useEffect(() => {
-    if (selectedSort.id == 1) {
-      const sortedTrips = [...filteredTrips].sort((a, b) => {
-        const departureTimeA: any = new Date(a.departure_time);
-        const departureTimeB: any = new Date(b.departure_time);
-        return departureTimeA - departureTimeB;
-      });
-      setFilteredTrips(sortedTrips);
-      // arrival time
-    } else if (selectedSort.id == 3) {
-      const sortedTrips = [...filteredTrips].sort((a, b) => {
-        const arrivalTimeA: any = new Date(a.arrival_time);
-        const arrivalTimeB: any = new Date(b.arrival_time);
-        return arrivalTimeA - arrivalTimeB;
-      });
-      setFilteredTrips(sortedTrips);
-    } else if (selectedSort.id == 2) {
-      const sortedTrips = [...filteredTrips].sort((a, b) => a.price - b.price);
-      setFilteredTrips(sortedTrips);
-    }
-    //rate
-    else if (selectedSort.id == 4) {
-      const sortedTrips: Trip[] = [...filteredTrips].sort(
-        (a, b) =>
-          Number(b.driver?.driver_rating || 0) -
-          Number(a.driver?.driver_rating || 0)
-      );
-      setFilteredTrips(sortedTrips);
-    }
-  }, [selectedSort]);
+    setSortBy(selectedSort.value);
+  }, [selectedSort, setSortBy]);
 
   return (
-    <div className='flex flex-col items-center bg-[#F4FAFE] bg-scroll h-screen '>
-      <section className=' fixed top-0 w-full z-10  bg-[#005687] overflow-y-hidden'>
+    <div className='flex flex-col items-center bg-gray-50 bg-scroll h-screen'>
+      <section className='fixed top-0 w-full z-10 bg-brand-primary overflow-y-hidden'>
         <div className='my-2'>
           <div className='flex justify-between items-center w-full'>
             <div className='flex items-center gap-4 pt-1 mr-2'>
               <BackButton />
 
               <div className='text-white'>
-                <p className='text-right text-xs font-bold underline'>
-                  {tripType == 1
-                    ? `داخل المدينة / ${router.query.city}`
-                    : tripType == 2
-                    ? 'بين المدن'
-                    : 'غير معروف'}
-                </p>
+                
                 <h1 className='text-xl	font-bold	'>
                   {pickup} - {destination}
                 </h1>
@@ -213,19 +155,16 @@ function index() {
             />
           </div>
         </div>
-        <div className='md:hidden m-3 mt-5 pb-4 '>
-          <QuickDaySelector 
-            selectedDate={selectedDate || new Date().toISOString().split('T')[0]}
-            onDateChange={handleDateChange}
+        <div className='md:hidden m-3 mt-5 pb-4'>
+          <QuickDaySelector
+            selectedDate={new Date(selectedDate || new Date())}
+            onDateSelect={(date) => handleDateChange(format(date, 'yyyy-MM-dd'))}
           />
           <div className=' flex gap-2 mt-3'>
             <div
-              className='flex items-center justify-center rounded-full px-6  gap-1.5 w-[90px] h-[30px]'
-              style={{
-                backgroundColor: 'lightblue',
-              }}
+              className='flex items-center bg-blue-100 justify-center rounded-full px-6  gap-1.5 w-[90px] h-[30px] hover:bg-blue-200 transition-colors'
               onClick={() => setIsFilterOpen(true)}>
-              <h2 className='m-0 font-semibold cursor-pointer'>فلترة </h2>
+              <span className='font-semibold'>فلترة</span>
               <Image
                 src='/icons/filter.svg'
                 alt='down arrow'
@@ -240,7 +179,7 @@ function index() {
               setFilterBuses={setFilterBuses}
               isFilterOpen={isFilterOpen}
               setIsFilterOpen={setIsFilterOpen}
-              filteredTrips={filteredTrips}
+              filteredTrips={trips}
             />
 
             <div className=' items-start justify-start '>
@@ -258,9 +197,7 @@ function index() {
                 slidesPerView={'auto'}
                 modules={[FreeMode, Mousewheel]}>
                 <SwiperSlide style={{ width: 'auto' }}>
-                  <div
-                    className='rounded-full  px-3 flex items-center justify-center  h-[30px]'
-                    style={{ backgroundColor: 'lightblue' }}>
+                  <div className='rounded-full px-3 flex items-center justify-center h-[30px] bg-blue-100'>
                     {/* Component */}
                     <SortDropdown
                       selectedSort={selectedSort}
@@ -271,9 +208,7 @@ function index() {
                   </div>
                 </SwiperSlide>
                 <SwiperSlide style={{ width: 'auto' }}>
-                  <div
-                    className='rounded-full px-3 flex items-center justify-center h-[30px]'
-                    style={{ backgroundColor: 'lightblue' }}>
+                  <div className='rounded-full px-3 flex items-center justify-center h-[30px] bg-blue-100'>
                     <h2 className='m-0 mr-1'>نوع الباص </h2>
                     <Image
                       src='/icons/downArrow.svg'
@@ -284,9 +219,7 @@ function index() {
                   </div>
                 </SwiperSlide>
                 <SwiperSlide style={{ width: 'auto' }}>
-                  <div
-                    className='rounded-full px-3 flex items-center justify-center h-[30px]'
-                    style={{ backgroundColor: 'lightblue' }}>
+                  <div className='rounded-full px-3 flex items-center justify-center h-[30px] bg-blue-100'>
                     <h2 className='m-0 mr-1'>وقت المغادرة (1)</h2>
                     <Image
                       src='/icons/downArrow.svg'
@@ -302,11 +235,11 @@ function index() {
         </div>
       </section>
 
-      <section className='w-full h-full px-2 mt-[145px] md:mt-[80px] md:flex md:justify-between md:gap-4 md:overflow-y-hidden'>
-        <div className='hidden md:block sticky md:w-[35%] pb-8 overflow-y-auto scrollbar-hide '>
-          <QuickDaySelector 
-            selectedDate={selectedDate || new Date().toISOString().split('T')[0]}
-            onDateChange={handleDateChange}
+      <section className='w-full h-full px-2 pt-[210px] md:pt-[80px] md:flex md:justify-between md:gap-4 md:overflow-y-hidden'>
+        <div className='hidden md:block sticky md:w-[35%] pb-8 overflow-y-auto scrollbar-hide'>
+          <QuickDaySelector
+            selectedDate={new Date(selectedDate || new Date())}
+            onDateSelect={(date) => handleDateChange(format(date, 'yyyy-MM-dd'))}
           />
           <div className=' '>
             <div className='flex flex-col gap-3 mt-4'>
@@ -316,23 +249,20 @@ function index() {
                   <div
                     onClick={() => setSelectedSort(item)}
                     key={index}
-                    className={`
-                    flex justify-center items-center py-1.5 px-3 lg:px-0 lg:w-[19%] text-سs bg-white border border-slate-400 rounded-3xl  
-                    ${
+                    className={`flex justify-center items-center py-1.5 px-3 lg:px-0 lg:w-[19%] text-sm border rounded-3xl cursor-pointer transition-colors ${
                       item.id == selectedSort.id
-                        ? '!bg-[#005687] text-white'
-                        : ''
-                    } 
-                   `}>
+                        ? 'bg-brand-primary text-white border-brand-primary'
+                        : 'bg-white border-gray-400 hover:border-brand-primary'
+                    }`}>
                     <button>{item.name}</button>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          <div className=' border-2 bg-white rounded-2xl h-max mt-2'>
+          <div className='border-2 bg-white rounded-2xl h-max mt-2'>
             <FilterGroup
-              filteredTrips={filteredTrips}
+              filteredTrips={trips}
               filterBuses={filterBuses}
               setFilterBuses={setFilterBuses}
             />
@@ -346,11 +276,9 @@ function index() {
               <TripSkeleton />
             ))}
           </div>
-        ) : finalFilteredTrips.length !== 0 ? (
+        ) : sortedTrips.length !== 0 ? (
           <div className='w-full pb-8 md:w-[65%] overflow-y-auto scrollbar-hide'>
-            <div
-              className='flex items-center rounded-xl border border-slate-300	p-2 mb-3 gap-2'
-              style={{ backgroundColor: 'azure' }}>
+            <div className='flex items-center rounded-xl border border-gray-300 p-2 mb-3 gap-2 bg-blue-50'>
               <Image
                 src='/icons/busFrontView.svg'
                 alt='bus front View'
@@ -360,9 +288,9 @@ function index() {
               <h2 className='m-0 text-xs  text-gray-500 font-light '>
                 تم العثور على{' '}
                 <strong className='font-semibold text-black'>
-                  {finalFilteredTrips.length}
+                  {sortedTrips.length}
                 </strong>{' '}
-                {finalFilteredTrips.length > 1 && finalFilteredTrips.length < 9
+                {sortedTrips.length > 1 && sortedTrips.length < 9
                   ? 'رحلات'
                   : 'رحلة'}
                 ، تبدأ من {''}
@@ -373,14 +301,12 @@ function index() {
               </h2>
             </div>
 
-            {finalFilteredTrips.map((trip: Trip, index) => (
-              <div className='just-to-maintain-md '>
-                <Link
-                  href={`/bus_list/${trip.id}`}
-                  key={index}>
-                  <TripBox trip={trip} />
-                </Link>
-              </div>
+            {sortedTrips.map((trip: Trip, index) => (
+              <Link
+                href={`/bus_list/${trip.id}`}
+                key={index}>
+                <TripCard trip={trip} />
+              </Link>
             ))}
           </div>
         ) : (

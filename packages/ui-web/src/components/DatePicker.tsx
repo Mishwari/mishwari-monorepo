@@ -25,30 +25,30 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onDateSele
   const dayNamesShort = ['س', 'ح', 'ن', 'ث', 'ر', 'خ', 'ج'];
 
   return (
-    <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 w-[calc(100vw-2rem)] sm:w-full max-w-md border border-mishwari-gray-200">
+    <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 w-[calc(100vw-2rem)] sm:w-full max-w-md border border-gray-200">
       <div className="flex justify-between items-center mb-4 sm:mb-6">
         <button 
           type="button"
           onClick={goToPreviousMonth} 
-          className="p-2 hover:bg-mishwari-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          <ChevronRightIcon className="w-5 h-5 text-mishwari-text-dark" />
+          <ChevronRightIcon className="w-5 h-5 text-brand-text-dark" />
         </button>
-        <h3 className="text-lg font-bold text-mishwari-text-dark">
+        <h3 className="text-lg font-bold text-brand-text-dark">
           {format(currentMonth, 'MMMM yyyy', { locale: ar })}
         </h3>
         <button 
           type="button"
           onClick={goToNextMonth} 
-          className="p-2 hover:bg-mishwari-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          <ChevronLeftIcon className="w-5 h-5 text-mishwari-text-dark" />
+          <ChevronLeftIcon className="w-5 h-5 text-brand-text-dark" />
         </button>
       </div>
 
       <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-3">
         {dayNames.map((day, index) => (
-          <div key={index} className="text-center text-xs sm:text-sm font-semibold text-mishwari-gray-600 py-2">
+          <div key={index} className="text-center text-xs sm:text-sm font-semibold text-gray-600 py-2">
             <span className="hidden sm:inline">{day}</span>
             <span className="sm:hidden">{dayNamesShort[index]}</span>
           </div>
@@ -72,20 +72,20 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onDateSele
                 relative aspect-square rounded-lg text-sm sm:text-base font-medium transition-all flex items-center justify-center
                 ${
                   isPast
-                    ? 'text-mishwari-gray-300 cursor-not-allowed'
+                    ? 'text-gray-300 cursor-not-allowed'
                     : isSelected
-                      ? 'bg-mishwari-primary text-white shadow-md scale-105'
+                      ? 'bg-brand-primary text-white shadow-md scale-105'
                       : isTodayDate
-                        ? 'bg-mishwari-primary/10 text-mishwari-primary font-bold ring-2 ring-mishwari-primary/30'
+                        ? 'bg-brand-primary/10 text-brand-primary font-bold ring-2 ring-brand-primary/30'
                         : isCurrentMonth
-                          ? 'text-mishwari-text-dark hover:bg-mishwari-gray-100 hover:scale-105'
-                          : 'text-mishwari-gray-400'
+                          ? 'text-brand-text-dark hover:bg-gray-100 hover:scale-105'
+                          : 'text-gray-400'
                 }
               `}
             >
               {format(day, 'd')}
               {isTodayDate && !isSelected && (
-                <span className="absolute bottom-0.5 sm:bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-mishwari-primary rounded-full" />
+                <span className="absolute bottom-0.5 sm:bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-brand-primary rounded-full" />
               )}
             </button>
           );

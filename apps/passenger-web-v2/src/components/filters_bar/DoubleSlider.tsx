@@ -73,47 +73,19 @@ function DoubleSlider({
   };
 
   return (
-    <div className=' flex justify-center items-center'>
+    <div className='flex justify-center items-center'>
       <div className='relative max-w-xl w-full mx-2'>
-        <div className='flex justify-between items-center py-2 mb-5 gap-2 w-full'>
-          <div>
-            <h1>من</h1>
-            <input
-              type='text'
-              maxLength={5}
-              value={inputMinPrice}
-              onChange={(e) => {
-                handleInputMinChange(e); // Assuming handleInputMinChange can handle the event directly
-                setMinPrice(Number(e.target.value)); // Directly set the minPrice state
-              }}
-              onBlur={handleMinBlur}
-              className='font-bold px-1  border-1 border-gray-400 rounded-lg bg-[#ECF3F4] w-20 text-center focus:outline-[#005687]'
-            />
+        <div className='flex justify-between items-center mb-6'>
+          <div className='text-sm text-gray-700'>
+            <span className='font-semibold'>{minPrice}</span>
+            <span className='text-xs mr-1'>ريال</span>
           </div>
-          <div>---</div>
-          <div>
-            <h1>الى</h1>
-            <input
-              type='text'
-              maxLength={5}
-              value={inputMaxPrice}
-              onChange={(e) => {
-                handleInputMaxChange(e);
-                setMaxPrice(Number(e.target.value));
-              }}
-              onBlur={handleMaxBlur}
-              className='font-bold px-1  border-1 border-gray-400 rounded-lg bg-[#ECF3F4] w-20 text-center focus:outline-[#005687] '
-            />
-          </div>
-          <div className='items-center text-center justify-center'>
-            <a
-              href='#'
-              className='text-sky-700 '>
-              Reset
-            </a>
+          <div className='text-sm text-gray-700'>
+            <span className='font-semibold'>{maxPrice}</span>
+            <span className='text-xs mr-1'>ريال</span>
           </div>
         </div>
-        <div className='w-full '>
+        <div className='w-full relative'>
           <input
             type='range'
             step='10'
@@ -155,10 +127,6 @@ function DoubleSlider({
               style={{ left: `${maxThumb}%` }}>
               <div className='w-4 h-4 bg-[#005687] rounded-full  '></div>
             </div>
-          </div>
-          <div className='flex justify-between pl-1 mt-2'>
-            <span>{Math.floor(min / 10) * 10}</span>
-            <span>{Math.ceil(max / 10) * 10}</span>
           </div>
         </div>
       </div>

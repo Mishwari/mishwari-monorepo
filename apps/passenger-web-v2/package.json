@@ -12,6 +12,7 @@
     "@mishwari/api": "workspace:*",
     "@mishwari/types": "workspace:*",
     "@mishwari/features-auth": "workspace:*",
+    "@mishwari/features-trips": "workspace:*",
     "@mishwari/ui-web": "workspace:*",
     "@mishwari/ui-primitives": "workspace:*",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",

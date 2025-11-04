@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import TextInput from '@/components/TextInput';
+import { Input } from '@mishwari/ui-web';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppState } from '@/store/store';
 import { setPaymentMethod } from '@/store/slices/bookingCreationSlice';
@@ -71,21 +71,21 @@ function Payment() {
 
   useEffect(() => {
     const fetchWalletBalance = async () => {
+      if (!token) return;
+      
       try {
         const response = await axios.get('/api/next-external/wallet/balance', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        setWalletBalance(response.data.balance || null);
-      } catch (error) {
-        console.error('Error fetching wallet balance:', error);
-        setWalletBalance(null);
+        setWalletBalance(response.data.balance || 0);
+      } catch (error: any) {
+        setWalletBalance(0);
       }
     };
     fetchWalletBalance();
-  }, []);
+  }, [token]);
 
   const variants = {
     hidden: { height: 0, opacity: 1, y: 0, transition: { duration: 0.7 } }, // op:0 y:-20
@@ -105,44 +105,36 @@ function Payment() {
       content: (
         <>
           <div>
-            <TextInput
+            <Input
               value={cardHolderDetails.email}
-              setValue={(value: string) =>
-                handleCardDetailsInput('email', value)
-              }
-              title='الايميل'
-              placeholder=' '
+              onChange={(e) => handleCardDetailsInput('email', e.target.value)}
+              label='الايميل'
+              placeholder='example@email.com'
             />
           </div>
           <div>
-            <TextInput
+            <Input
               value={cardHolderDetails.address}
-              setValue={(value: string) =>
-                handleCardDetailsInput('address', value)
-              }
-              title='عنوان السكن'
-              placeholder=' '
+              onChange={(e) => handleCardDetailsInput('address', e.target.value)}
+              label='عنوان السكن'
+              placeholder='أدخل عنوان السكن'
             />
           </div>
-          <div className='flex '>
-            <div>
-              <TextInput
+          <div className='flex gap-2'>
+            <div className='flex-1'>
+              <Input
                 value={cardHolderDetails.city}
-                setValue={(value: string) =>
-                  handleCardDetailsInput('city', value)
-                }
-                title='المدينة'
-                placeholder=' '
+                onChange={(e) => handleCardDetailsInput('city', e.target.value)}
+                label='المدينة'
+                placeholder='المدينة'
               />
             </div>
-            <div>
-              <TextInput
+            <div className='flex-1'>
+              <Input
                 value={cardHolderDetails.country}
-                setValue={(value: string) =>
-                  handleCardDetailsInput('country', value)
-                }
-                title='البلد'
-                placeholder=' '
+                onChange={(e) => handleCardDetailsInput('country', e.target.value)}
+                label='البلد'
+                placeholder='البلد'
               />
             </div>
           </div>
@@ -174,9 +166,9 @@ function Payment() {
   ];
 
   return (
-    <main className='flex flex-col m-0 mb-0 bg-[#F4FAFE] bg-scroll h-screen'>
+    <main className='flex flex-col m-0 mb-0 bg-gray-50 bg-scroll h-screen'>
       <HeaderLayout title='الدفع' />
-      <section className='mx-3 mt-4 p-4 bg-white shadow-lg text-[#042F40] rounded-xl'>
+      <section className='mx-3 mt-4 p-4 bg-white shadow-lg text-brand-text-dark rounded-xl'>
         <div className='flex justify-between items-center'>
           خط الرحلة: {booking_details?.trip?.pickup?.city} -{' '}
           {booking_details?.trip?.destination?.city} - الخط الساحلي
@@ -216,7 +208,7 @@ function Payment() {
         {paymentOptions.map((option, index) => (
           <div
             key={index}
-            className='overflow-hidden shadow-lg bg-white text-[#042F40] rounded-xl'>
+            className='overflow-hidden shadow-lg bg-white text-brand-text-dark rounded-xl'>
             <div
               className='flex justify-between items-center w-full p-4 rounded-xl bg-inherit cursor-pointer'
               onClick={() => dispatch(setPaymentMethod(option.name))}>
@@ -235,7 +227,7 @@ function Payment() {
                     {option.content}
                     <button
                       disabled={option.name === 'wallet' && !walletBalance}
-                      className='mt-4 px-6 mx-auto bg-[#005687] text-white p-2 rounded-xl'
+                      className='mt-4 px-6 mx-auto bg-brand-primary text-white p-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed'
                       onClick={handleSubmitBooking}>
                       {option.button_label}
                     </button>

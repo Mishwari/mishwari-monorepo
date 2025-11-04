@@ -4,6 +4,7 @@ export { OtpInput } from './components/OtpInput';
 export { Combobox } from './components/Combobox';
 export { DatePicker } from './components/DatePicker';
 export { QuickDateButtons } from './components/QuickDateButtons';
+export { QuickDaySelector } from './components/QuickDaySelector';
 export { Input } from './components/ui/input';
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 export { ToggleSwitch } from './components/ToggleSwitch';

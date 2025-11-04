@@ -1,0 +1,10 @@
+{
+  "name": "@mishwari/features-trips",
+  "version": "1.0.0",
+  "main": "./src/core/index.ts",
+  "types": "./src/core/index.ts",
+  "dependencies": {
+    "@mishwari/types": "workspace:*",
+    "react": "^18.2.0"
+  }
+}
