@@ -42,11 +42,11 @@ function Navbar() {
   const [selectedSort, setSelectedSort] = useState<SortItem>(sortList[0]);
 
   return (
-    <div className=' fixed z-20 top-0 bg-[#005687] max-w-[100rem] flex justify-between items-center px-4 h-16 w-full  '>
+    <div className=' fixed z-20 top-0 bg-brand-primary max-w-[100rem] flex justify-between items-center px-4 h-16 w-full  '>
       <Link
         href='/'
         className='w-max flex gap-1 '>
-        <h1 className='text-[#d5f0ff] font-bold text-xl'>مشواري</h1>
+        <h1 className='text-white font-bold text-xl'>مشواري</h1>
         <h1 className='text-white text-[10px] font-normal self-end'>(Demro)</h1>
       </Link>
 
@@ -62,19 +62,6 @@ function Navbar() {
         <div className='hidden md:block items-center'>مساعدة</div>
 
         <div className='flex gap-2 px-2 p-1   items-center overflows-hidden'>
-          {/* <Link
-            href='/profile'
-            className=' md:hidden'>
-            <span className='  rounded-full  hover:bg-[#d8f1ff20]'>
-
-              <svg
-                className='h-6 w-6 bg-[#0081cc] text-gray-300 rounded-full p-0.5'
-                fill='currentColor'
-                viewBox='0 0 24 24'>
-                <path d='M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z' />
-              </svg>
-            </span>
-          </Link> */}
           {isAuthenticated ? (
             <>
               {/* for mobile */}
@@ -91,16 +78,13 @@ function Navbar() {
               {/* for desktop */}
               <div className='hidden md:flex gap-2 justify-center'>
                 <>
-                  <span className='  rounded-full  hover:bg-[#d8f1ff20]'>
-                    {/* <div className=' bg-[#ffffff34] rounded-full p-1 flex items-center justify-center'> */}
-
+                  <span className='rounded-full hover:bg-white/10'>
                     <svg
-                      className='h-6 w-6 bg-[#0081cc] text-gray-300 rounded-full p-0.5'
+                      className='h-6 w-6 bg-brand-primary text-gray-300 rounded-full p-0.5'
                       fill='currentColor'
                       viewBox='0 0 24 24'>
                       <path d='M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z' />
                     </svg>
-                    {/* </div> */}
                   </span>
                   <Menu
                     as='div'
@@ -128,7 +112,7 @@ function Navbar() {
                             <Link
                               href='/profile'
                               className={`${
-                                active ? 'bg-[lightblue] text-[#005687] ' : ''
+                                active ? 'bg-gray-100 text-brand-primary' : ''
                               } group flex w-full text-gray-900 items-center rounded-md px-6 py-2 text-sm`}>
                               الاعدادت
                             </Link>
@@ -139,7 +123,7 @@ function Navbar() {
                             <Link
                               href='/my_trips'
                               className={`${
-                                active ? 'bg-[lightblue] text-[#005687]' : ''
+                                active ? 'bg-gray-100 text-brand-primary' : ''
                               } group flex w-full items-center text-gray-900 rounded-md px-6 py-2 text-sm`}>
                               الرحلات
                             </Link>
@@ -151,7 +135,7 @@ function Navbar() {
                             <Link
                               href='/profile/wallet'
                               className={`${
-                                active ? 'bg-[lightblue] text-[#005687]' : ''
+                                active ? 'bg-gray-100 text-brand-primary' : ''
                               } group flex w-full items-center text-gray-900 rounded-md px-6 py-2 text-sm`}>
                               المحفظة
                             </Link>
@@ -164,7 +148,7 @@ function Navbar() {
                                 logout();
                               }}
                               className={`${
-                                active ? 'bg-[lightblue] text-[#005687]' : ''
+                                active ? 'bg-gray-100 text-brand-primary' : ''
                               } group flex w-full items-center text-gray-900 rounded-md px-6 py-2 text-sm`}>
                               تسجيل الخروج
                             </button>
@@ -179,18 +163,13 @@ function Navbar() {
           ) : (
             <Link
               href='/login'
-              className='flex gap-2 text-sm md:text-base items-center justify-center text-white border-1 border-blue-300 rounded-full px-4 py-1.5 bg-[#ffffff1a]'>
+              className='flex gap-2 text-sm md:text-base items-center justify-center text-white border-1 border-white/30 rounded-full px-4 py-1.5 bg-white/10'>
               تسجيل الدخول
               <ArrowLeftStartOnRectangleIcon className='w-5 md:w-6 h-5 md:h-6' />
             </Link>
           )}
         </div>
       </div>
-
-      {/* <button className='hidden md:block' onClick={() => setBurgerIsOpen(true)}>
-          <Image width={15} height={15} src="./icons/burger_menu.svg" alt="burger_menu" className='h-6 w-6' />
-        </button>
-        <SideMenu isOpen={isBurgerOpen} setIsOpen={setBurgerIsOpen} /> */}
     </div>
   );
 }

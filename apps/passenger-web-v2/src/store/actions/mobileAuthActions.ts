@@ -175,7 +175,7 @@ export const performRegister = (profileData: Profile, router: any) => async (dis
       // console.log('edit', response[0].data.purpose)
       router.push('/')
     }
-    dispatch(fetchProfileDetails(response[0].data.tokens.access))
+    dispatch(fetchProfileDetails(encryptToken(response[0].data.tokens.access)))
     
   } catch (error:any) {
       toast.dismiss(waitingRegister);
@@ -184,12 +184,12 @@ export const performRegister = (profileData: Profile, router: any) => async (dis
       hideProgressBar: true,
       })
       setTimeout(() => {
-          toast.error(error.message,{
+          toast.error(error.response?.data?.message || error.message,{
           autoClose:1500,
           hideProgressBar: true,
           })
       },2800)
-      console.error('Register failed:', error);
+      console.error('Register failed:', error.response?.data || error);
 
   }
 }

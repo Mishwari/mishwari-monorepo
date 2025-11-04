@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import SwitchSlide from './SwitchSlide';
-import TextInput from './TextInput';
+import React from 'react';
+import { Input, Button, ToggleSwitch } from '@mishwari/ui-web';
 import { Profile } from '@/types/profileDetails';
+import { CheckIcon } from '@heroicons/react/24/outline';
 
 interface ProfileDataProps {
   profileData: Profile;
@@ -17,70 +17,83 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
   handleSubmit,
 }) => {
   return (
-    <div>
-      <form
-        className='space-y-6'
-        onSubmit={handleSubmit}>
-        <TextInput
-          value={profileData.user.username}
-          setValue={(value: string) =>
-            updateProfileData('user.username', value)
-          }
-          title='اسم المستخدم  '
-          placeholder='ادخل اسم المستخدم  '
-          isDisabled={isDisabled}
-        />
+    <form
+      className='space-y-6'
+      onSubmit={handleSubmit}>
+      <div className='space-y-5'>
+        <div>
+          <label className='text-sm font-medium text-gray-700 block mb-2'>اسم المستخدم</label>
+          <Input
+            value={profileData.user.username}
+            onChange={(e) => updateProfileData('user.username', e.target.value)}
+            placeholder={isDisabled ? '(لا يوجد)' : 'ادخل اسم المستخدم'}
+            disabled={isDisabled}
+            className='w-full'
+          />
+        </div>
 
-        <TextInput
-          value={profileData.full_name}
-          setValue={(value: string) => updateProfileData('full_name', value)}
-          title='اسمك الكامل'
-          placeholder='ادخل اسمك الكامل'
-          isDisabled={isDisabled}
-        />
+        <div>
+          <label className='text-sm font-medium text-gray-700 block mb-2'>الاسم الكامل</label>
+          <Input
+            value={profileData.full_name}
+            onChange={(e) => updateProfileData('full_name', e.target.value)}
+            placeholder={isDisabled ? '(لا يوجد)' : 'ادخل الاسم الكامل'}
+            disabled={isDisabled}
+            className='w-full'
+          />
+        </div>
 
-        <TextInput
-          value={profileData.user.email}
-          setValue={(value: string) => updateProfileData('user.email', value)}
-          title='الايميل'
-          placeholder='ادخل الايميل'
-          isDisabled={isDisabled}
-        />
+        <div>
+          <label className='text-sm font-medium text-gray-700 block mb-2'>البريد الإلكتروني</label>
+          <Input
+            type='email'
+            value={profileData.user.email}
+            onChange={(e) => updateProfileData('user.email', e.target.value)}
+            placeholder={isDisabled ? '(لا يوجد)' : 'ادخل البريد الإلكتروني'}
+            disabled={isDisabled}
+            className='w-full'
+          />
+        </div>
 
-        <div className='flex py-4 justify-start gap-4 items-center '>
-          <div className='w-1/4'>
-            <TextInput
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div>
+            <label className='text-sm font-medium text-gray-700 block mb-2'>تاريخ الميلاد</label>
+            <Input
+              type='date'
               value={profileData?.birth_date}
-              setValue={(value: string) =>
-                updateProfileData('birth_date', value)
-              }
-              title='العمر'
-              placeholder=''
-              type='number'
-              isDisabled={isDisabled}
+              onChange={(e) => updateProfileData('birth_date', e.target.value)}
+              disabled={isDisabled}
+              className='w-full'
             />
           </div>
-          <div className='w-1/2 mx-auto mt-auto '>
-            <SwitchSlide
-              initial={profileData.gender}
-              setInitial={(value: string) => updateProfileData('gender', value)}
-              isDisabled={isDisabled}
+          <div>
+            <label className='text-sm font-medium text-gray-700 block mb-2'>الجنس</label>
+            <ToggleSwitch
+              value={profileData.gender}
+              onChange={(value: string) => updateProfileData('gender', value)}
+              options={[
+                { value: 'male', label: 'ذكر' },
+                { value: 'female', label: 'أنثى' },
+              ]}
+              disabled={isDisabled}
             />
           </div>
         </div>
+      </div>
 
-        <div
-          className={`${
-            isDisabled ? ' hidden ' : ' '
-          } flex-shrink-0 px-4 mt-auto flex justify-center`}>
-          <button
+      {!isDisabled && (
+        <div className='flex justify-end gap-3 pt-6 border-t border-gray-200'>
+          <Button
             type='submit'
-            className=' inline-flex justify-center py-2 w-1/3 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-[#005687] hover:bg-[#148ace] focus:outline-none '>
-            حفظ
-          </button>
+            variant='default'
+            size='default'
+            className='flex gap-2 items-center'>
+            <CheckIcon className='w-4 h-4' />
+            حفظ التغييرات
+          </Button>
         </div>
-      </form>
-    </div>
+      )}
+    </form>
   );
 };
 

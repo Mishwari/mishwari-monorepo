@@ -9,7 +9,7 @@ interface HeaderLayoutProps {
 const HeaderLayout: React.FC<HeaderLayoutProps> = ({ children, title }) => {
   return (
     <>
-      <header className='sticky top-0 z-20 py-4 px-2 bg-[#005687] '>
+      <header className='sticky top-0 z-20 py-4 px-2 bg-brand-primary '>
         <div className='  flex gap-2 text-xl text-white '>
           <BackButton />
           <h1 className=''>{title}</h1>

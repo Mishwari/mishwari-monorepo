@@ -1,14 +1,8 @@
-import type { Config } from 'tailwindcss'
-const { nextui } = require("@nextui-org/react");
-
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: ["class"],
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/layouts/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
-    "../../packages/ui-web/src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {
@@ -63,10 +57,6 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -74,37 +64,5 @@ const config: Config = {
       },
     },
   },
-  darkMode: "class",
-  plugins: [
-    require("tailwindcss-animate"),
-    nextui({
-      themes: {
-        light: {
-          colors: {
-            background: "#FFFFFF",
-            foreground: "#11181C",
-            primary: {
-              foreground: "#FFFFFF",
-              DEFAULT: "#005687",
-            },
-            secondary: {
-              foreground: "#FFFFFF",
-              DEFAULT: "#006FEE",
-            }
-          },
-        },
-        dark: {
-          colors: {
-            background: "#000000",
-            foreground: "#ECEDEE",
-            primary: {
-              foreground: "#000",
-              DEFAULT: "#FFF",
-            },
-          },
-        }
-      }
-    })
-  ],
+  plugins: [require("tailwindcss-animate")],
 }
-export default config

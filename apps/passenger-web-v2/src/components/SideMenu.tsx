@@ -53,8 +53,8 @@ function SideMenu({ isOpen, setIsOpen }: SideMenuProps) {
             leave='transition ease-in duration-300 transform'
             leaveFrom='translate-x-0'
             leaveTo='-translate-x-full'>
-            <div className='bg-slate-100 w-[70%] h-full flex flex-col bg-scroll absolute left-0 top-0 rounded-b-md'>
-              <div className='bg-[#005687] p-4 w-full h-max'>
+            <div className='bg-gray-50 w-[70%] h-full flex flex-col bg-scroll absolute left-0 top-0 rounded-b-md'>
+              <div className='bg-brand-primary p-4 w-full h-max'>
                 <div
                   className='absolute left-0 ml-2  cursor-pointer overflow-hidden '
                   onClick={() => setIsOpen(false)}
@@ -80,7 +80,7 @@ function SideMenu({ isOpen, setIsOpen }: SideMenuProps) {
                         setIsOpen(false);
                       }}
                       href='/profile'
-                      className='text-lg font-semibold border rounded-md p-2 bg-[#005687]'>
+                      className='text-lg font-semibold border rounded-md p-2 bg-brand-primary'>
                       الملف الشخصي
                     </Link>
                     <Link
@@ -88,17 +88,17 @@ function SideMenu({ isOpen, setIsOpen }: SideMenuProps) {
                         setIsOpen(false);
                       }}
                       href='/my_trips'
-                      className='text-lg font-semibold border rounded-md p-2 bg-[#005687]'>
+                      className='text-lg font-semibold border rounded-md p-2 bg-brand-primary'>
                       الرحلات
                     </Link>
                     <Link
-                      className='text-lg font-semibold border rounded-md p-2 bg-[#005687]'
+                      className='text-lg font-semibold border rounded-md p-2 bg-brand-primary'
                       href='profile/wallet'>
                       المحفظة
                     </Link>
                   </>
                 )}
-                <h2 className='text-lg font-semibold border rounded-md p-2 bg-[#005687]'>
+                <h2 className='text-lg font-semibold border rounded-md p-2 bg-brand-primary'>
                   قائمة الركاب
                 </h2>
                 {/* 
@@ -117,7 +117,7 @@ function SideMenu({ isOpen, setIsOpen }: SideMenuProps) {
                   <button
                     type='button'
                     onClick={logout}
-                    className='text-lg mt-auto mb-4 font-semibold border rounded-md p-2 bg-[#005687] cursor-poi'>
+                    className='text-lg mt-auto mb-4 font-semibold border rounded-md p-2 bg-brand-primary cursor-pointer'>
                     تسجيل الخروج
                   </button>
                 )}

@@ -13,9 +13,9 @@ export const Button = ({
   const baseStyles = 'rounded-lg font-medium transition-colors';
   
   const variants = {
-    primary: 'bg-[#005687] text-white hover:bg-[#004570]',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
-    ghost: 'bg-transparent text-[#005687] hover:bg-gray-100'
+    primary: 'bg-mishwari-primary text-white hover:opacity-90',
+    secondary: 'bg-mishwari-gray-200 text-mishwari-text-dark hover:bg-mishwari-gray-300',
+    ghost: 'bg-transparent text-mishwari-primary hover:bg-mishwari-gray-100'
   };
   
   const sizes = {

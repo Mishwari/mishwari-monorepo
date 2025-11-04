@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { performMobileLogin } from '@/store/actions/mobileAuthActions';
 import { useRouter } from 'next/router';
 import { AppState } from '../../store/store';
-import TextInput from '@/components/TextInput';
-import PhoneInput from '@/components/PhoneInput';
+import { PhoneInput, Button, countries } from '@mishwari/ui-web';
 import { Link } from '@nextui-org/react';
 import useAuth from '@/hooks/useAuth';
 
@@ -43,31 +41,29 @@ function Login() {
 
   return (
     <div className='w-full h-screen bg-white flex justify-center items-center'>
-      <div className='flex min-h-full sm:min-h-fit flex-col justify-center  sm:h-max sm:msx-auto w-full sm:max-w-md px-12 sm:px-6 py-8 sm:py-4  lg:px-8 sm:border border-blue-200 sm:rounded-xl bg-slate-100 '>
+      <div className='flex min-h-full sm:min-h-fit flex-col justify-center sm:h-max sm:msx-auto w-full sm:max-w-md px-12 sm:px-6 py-8 sm:py-4 lg:px-8 sm:border border-gray-200 sm:rounded-xl bg-gray-100'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
-          <h1 className='mt-5 text-center text-2xl  font-bold leading-9 tracking-tight text-gray-600'>
+          <h1 className='mt-5 text-center text-2xl font-bold leading-9 tracking-tight text-brand-text-dark'>
             سجل دخولك في مشواري
           </h1>
         </div>
         <div className='flex flex-col justify-center items-center mt-10 sm:mx-auto sm:w-full sm:max-w-sm'>
-          <form
-            className='space-y-6'
-            onSubmit={handleSubmit}>
-            <PhoneInput setMobileNumber={setMobileNumber} />
+          <form className='space-y-6 w-full' onSubmit={handleSubmit}>
+            <PhoneInput
+              value={mobileNumber}
+              onChange={setMobileNumber}
+              countries={countries}
+            />
 
-            <div className='flex-shrink-0 px-4 py-4 flex justify-center'>
-              <button
-                type='submit'
-                className=' inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#005687] hover:bg-[#148ace] focus:outline-none '>
+            <div className='flex justify-center pt-4'>
+              <Button type='submit' variant='default' size='lg'>
                 طلب رمز التحقق
-              </button>
+              </Button>
             </div>
           </form>
-          <div>
-            <Link
-              href='/'
-              className=' flex text-center  text-slate-600'>
-              <p className='font-light border-b  border-slate-600'>ليس الان</p>؟
+          <div className='mt-4'>
+            <Link href='/' className='flex text-center text-gray-600'>
+              <p className='font-light border-b border-gray-600'>ليس الان</p>؟
             </Link>
           </div>
         </div>

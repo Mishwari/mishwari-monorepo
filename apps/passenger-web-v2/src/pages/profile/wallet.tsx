@@ -81,7 +81,7 @@ const WalletPage: React.FC = () => {
       </div> */}
       <SideNav>
         <section className=' flex flex-col gap-0 '>
-          <div className='flex sticky top-16 justify-between p-4  bg-slate-200'>
+          <div className='flex sticky top-16 justify-between p-4 bg-gray-100'>
             <div className='flex flex-col gap-2'>
               <h1 className='text-sm'>المبلغ المتوفر</h1>
               <div className='h-[60px]'>

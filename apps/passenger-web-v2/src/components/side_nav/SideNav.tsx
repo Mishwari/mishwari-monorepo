@@ -36,7 +36,7 @@ export default function SideNav() {
   return (
     <div className='flex h-full w-full flex-col spx-3 py-4 md:psx-2 '>
       <Link
-        className='mb-2 flex h-20 items-end justify-start rounded-md bgg-[#005687] p-4 md:h-40'
+        className='mb-2 flex h-20 items-end justify-start rounded-md p-4 md:h-40'
         href='/'>
         <div className='w-32 tsext-white md:w-40'>
           {/* <h1 className='text-2xl'>Mishwari</h1> */}
@@ -50,9 +50,9 @@ export default function SideNav() {
               key={link.name}
               href={link.href}
               className={clsx(
-                'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-[lightblue] hover:text-[#005687] md:flex-none md:justify-start md:p-2 md:px-3',
+                'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-gray-100 hover:text-brand-primary md:flex-none md:justify-start md:p-2 md:px-3',
                 {
-                  'bg-[lightblue] text-[#005687] [&>p]:font-bold':
+                  'bg-gray-100 text-brand-primary [&>p]:font-bold':
                     pathname === link.href,
                 }
               )}>

@@ -64,9 +64,9 @@ const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onDateSelect }) =
               className={`
                 p-3 text-sm rounded-lg transition-colors
                 ${isSelected 
-                  ? 'bg-[#005687] text-white' 
+                  ? 'bg-brand-primary text-white' 
                   : isTodayDate 
-                    ? 'bg-blue-100 text-[#005687] font-bold'
+                    ? 'bg-brand-primary/10 text-brand-primary font-bold'
                     : 'hover:bg-gray-100'
                 }
               `}

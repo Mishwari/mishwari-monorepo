@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import axios from 'axios';
 import { Booking } from '@/types/booking';
+import { bookingsApi } from '@mishwari/api';
 import MiniTicket from '@/components/MiniTicket';
 import BackButton from '@/components/BackButton';
 import HeaderLayout from '@/layouts/HeaderLayout';
@@ -24,14 +24,7 @@ function index() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await axios.get(
-          '/api/next-external/booking/getBooking/',
-          {
-            headers: {
-              Authorization: `Bearer ${decryptToken(token)}`,
-            },
-          }
-        );
+        const response = await bookingsApi.getAll(decryptToken(token));
         setBookings(response.data);
         setFilteredBookings(response.data);
       } catch (err) {
@@ -42,7 +35,7 @@ function index() {
       }
     };
     fetchBookings();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (filter === 'all') {
@@ -62,7 +55,7 @@ function index() {
   ];
 
   return (
-    <main className='flex flex-col   w-full   bg-[#F4FAFE] '>
+    <main className='flex flex-col w-full bg-gray-50'>
       {/* <div className='fixed w-full top-0 z-10'>
         <Navbar />
       </div> */}
@@ -73,10 +66,10 @@ function index() {
               <button
                 key={option.id}
                 onClick={() => setFilter(option.value)}
-                className={` py-1.5 w-20  rounded-full text-center  font-bold ${
+                className={`py-1.5 w-20 rounded-full text-center font-bold ${
                   filter == option.value
-                    ? 'bg-[#005687] text-white'
-                    : 'bg-slate-200'
+                    ? 'bg-brand-primary text-white'
+                    : 'bg-gray-200'
                 }`}>
                 {option.label}
               </button>

@@ -2,5 +2,5 @@
 module.exports = {
   reactStrictMode: false,
   distDir: 'build',
-  transpilePackages: ['@mishwari/api', '@mishwari/types'],
+  transpilePackages: ['@mishwari/api', '@mishwari/types', '@mishwari/ui-web', '@mishwari/ui-primitives'],
 }
