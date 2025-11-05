@@ -1,8 +1,7 @@
-import React, { Fragment, useEffect, useRef, useState } from 'react';
-import TextInput from './TextInput';
-import SwitchSlide from './SwitchSlide';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Passenger } from '@/types/passenger';
+import { Input, Button, ToggleSwitch } from '@mishwari/ui-web';
 
 function PassengerModal({
   isAddPassenger,
@@ -74,70 +73,70 @@ function PassengerModal({
                   {isEdit ? 'تعديل معلومات الراكب' : 'اضف معلومات الراكب'}
                 </Dialog.Title>
 
-                <div className='flex flex-col mx-4 p-4   text-[#042F40] rounded-xl text-right'>
+                <div className='flex flex-col mx-4 p-4 text-[#042F40] rounded-xl text-right space-y-4'>
                   <div>
-                    <TextInput
+                    <label className='block text-sm font-medium mb-1'>الاسم</label>
+                    <Input
                       value={passengerData.name}
-                      setValue={(value: string) =>
-                        updatePassengerData('name', value)
-                      }
-                      title='الاسم'
+                      onChange={(e) => updatePassengerData('name', e.target.value)}
                       placeholder='اسم الراكب'
+                      className='text-right'
                     />
                   </div>
-                  <div className='flex mt-4 justify-start gap-4 items-center '>
-                    <div className='w-1/4'>
-                      <TextInput
-                        value={passengerData?.age}
-                        setValue={(value: number) =>
-                          updatePassengerData('age', Number(value))
-                        }
-                        title='العمر'
-                        placeholder=''
+                  <div className='flex justify-start gap-4 items-end'>
+                    <div className='w-1/3'>
+                      <label className='block text-sm font-medium mb-1'>العمر</label>
+                      <Input
+                        value={passengerData?.age || ''}
+                        onChange={(e) => updatePassengerData('age', Number(e.target.value))}
+                        placeholder='العمر'
                         type='number'
+                        className='text-right'
                       />
                     </div>
-                    <div className='w-1/2 mx-auto mt-auto '>
-                      <SwitchSlide
-                        initial={passengerData.gender}
-                        setInitial={(value: number) =>
-                          updatePassengerData('gender', value)
-                        }
+                    <div className='flex-1'>
+                      <label className='block text-sm font-medium mb-1'>الجنس</label>
+                      <ToggleSwitch
+                        value={passengerData.gender}
+                        onChange={(value) => updatePassengerData('gender', value)}
+                        options={[
+                          { value: 'male', label: 'ذكر' },
+                          { value: 'female', label: 'انثى' },
+                        ]}
+                        activeColor='bg-[#005687]'
                       />
                     </div>
                   </div>
-                  <div className='flex mt-4'>
-                    <TextInput
+                  <div>
+                    <label className='block text-sm font-medium mb-1'>رقم الجوال</label>
+                    <Input
                       value={passengerData?.phone}
-                      setValue={(value: string) =>
-                        updatePassengerData('phone', value)
-                      }
-                      title=' رقم الجوال'
-                      placeholder=''
-                      type='number'
+                      onChange={(e) => updatePassengerData('phone', e.target.value)}
+                      placeholder='رقم الجوال'
+                      type='tel'
+                      className='text-right'
                     />
                   </div>
-                  <div className='flex mt-4'>
-                    <TextInput
+                  <div>
+                    <label className='block text-sm font-medium mb-1'>الايميل</label>
+                    <Input
                       value={passengerData?.email}
-                      setValue={(value: string) =>
-                        updatePassengerData('email', value)
-                      }
-                      title='  الايميل'
-                      placeholder=''
-                      type='text'
+                      onChange={(e) => updatePassengerData('email', e.target.value)}
+                      placeholder='الايميل'
+                      type='email'
+                      className='text-right'
                     />
                   </div>
                 </div>
                 <div className='mt-4'>
-                  <button
-                    className=' justify-center items-center text-center text-white text-lg bg-[#005687] font-semibold w-full p-2'
+                  <Button
+                    className='w-full bg-[#005687] hover:bg-[#005687]/90 text-white text-lg font-semibold'
                     onClick={() => {
                       handleOperation(passengerData);
                       setIsAddPassenger(false);
                     }}>
                     {isEdit ? 'تحديث' : 'إضافة'}
-                  </button>
+                  </Button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

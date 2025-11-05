@@ -1,14 +1,9 @@
 import { setAuthState,resetAuthState } from '../slices/authSlice';
 import { setUserDetails,resetUserState } from '../slices/userSlice';
-// import { resetDriverState } from '@/slices/driverSlice';
-// import { resetTripsState } from '@/slices/tripsSlice';
 import { toast } from 'react-toastify';
 import axios, { AxiosResponse } from 'axios';
-import { userApi, profileApi } from '@mishwari/api';
+import { userApi, profileApi, apiClient } from '@mishwari/api';
 import { setProfileDetails } from '../slices/profileSlice';
-import { decryptToken } from '@/utils/tokenUtils';
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 interface LoginResponse {
   access: string;
 }
@@ -61,15 +56,10 @@ export const performLogin = (username: string, password: string) => async (dispa
 };
 
 
-export const fetchUserDetails = (token: string) => async (dispatch: any) => {
+export const fetchUserDetails = () => async (dispatch: any) => {
   try {
-    const response = await axios.get(`${apiBaseUrl}user/`, {
-      headers: {
-        Authorization: `Bearer ${decryptToken(token)}`,
-      },
-    });
-    dispatch(setUserDetails( response.data[0]));
-
+    const response = await apiClient.get('user/');
+    dispatch(setUserDetails(response.data[0]));
   } catch (error: any) {
     console.error('Error fetching user details:', error.message);
   }
@@ -78,17 +68,11 @@ export const fetchUserDetails = (token: string) => async (dispatch: any) => {
 
 
 
-export const fetchProfileDetails = (token: string) => async (dispatch: any) => {
+export const fetchProfileDetails = () => async (dispatch: any) => {
   try {
-    const response = await axios.get(`${apiBaseUrl}profile/`, {
-      headers: {
-        Authorization: `Bearer ${decryptToken(token)}`,
-      },
-    });
-    dispatch(setProfileDetails( response.data));
-    console.log('fetch prof',response.data)
-
+    const response = await apiClient.get('profile/');
+    dispatch(setProfileDetails(response.data));
   } catch (error: any) {
-    console.error('Error fetching user details:', error.message);
+    console.error('Error fetching profile details:', error.message);
   }
 };

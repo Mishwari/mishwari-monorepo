@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { PencilSquareIcon, UserIcon, XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
+import {
+  PencilSquareIcon,
+  UserIcon,
+  XMarkIcon,
+  CheckIcon,
+} from '@heroicons/react/24/outline';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import useAuth from '@/hooks/useAuth';
@@ -32,7 +37,7 @@ function index() {
   });
 
   useEffect(() => {
-    if (profile) {
+    if (profile && profile.user) {
       setProfileData({
         user: {
           id: profile.user.id,
@@ -77,8 +82,6 @@ function index() {
     // }
   };
 
-
-
   return (
     <main className='h-full flex flex-col'>
       <SideNav>
@@ -86,7 +89,9 @@ function index() {
           <div className='flex justify-between items-center mb-6'>
             <div className='flex gap-3 items-center'>
               <UserIcon className='w-6 h-6 text-brand-primary' />
-              <h1 className='text-xl font-bold text-brand-text-dark'>المعلومات الشخصية</h1>
+              <h1 className='text-xl font-bold text-brand-text-dark'>
+                المعلومات الشخصية
+              </h1>
             </div>
             {!isEditing ? (
               <Button

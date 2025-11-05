@@ -1,9 +1,8 @@
-import axios from 'axios';
+import { bookingsApi, apiClient } from '@mishwari/api';
 import { AppState, AppStore } from '../store';
 import { setStatus, setError, resetBookingCreationState } from "../slices/bookingCreationSlice";
 import { Passenger } from "@/types/passenger";
 import { Stripe } from '@stripe/stripe-js';
-import { encryptToken, decryptToken } from '@/utils/tokenUtils';
 
 export const createBooking = (stripe: Stripe | null) => async (dispatch:AppState, getState: () => AppStore)  =>{
     const {bookingCreation, auth, user} = getState();
@@ -24,11 +23,7 @@ export const createBooking = (stripe: Stripe | null) => async (dispatch:AppState
     // Fetch trip stops from backend
     let fromStopId, toStopId;
     try {
-        const stopsResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}trip-stops/?trip=${bookingCreation.trip.id}`, {
-            headers: {
-                Authorization: `Bearer ${decryptToken(auth.token)}`,
-            },
-        });
+        const stopsResponse = await apiClient.get(`trip-stops/?trip=${bookingCreation.trip.id}`);
         const stops = stopsResponse.data;
         console.log('Fetched stops:', stops);
         
@@ -66,11 +61,7 @@ export const createBooking = (stripe: Stripe | null) => async (dispatch:AppState
 
     try {
         dispatch(setStatus('loading'));
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}booking/`, bookingData, {
-            headers: {
-                Authorization: `Bearer ${decryptToken(auth.token)}`,
-            },
-        });
+        const response = await bookingsApi.create(bookingData);
         if (response.status === 200 || response.status === 201) {
             dispatch(setStatus('succeeded'));
             if (bookingData.payment_method === 'stripe' && response.data.payment_url) {

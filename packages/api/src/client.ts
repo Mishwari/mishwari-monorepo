@@ -13,12 +13,11 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     try {
-      const persistRoot = localStorage.getItem('persist:root');
+      const persistRoot = localStorage.getItem('persist:nextjs');
       if (persistRoot) {
         const parsed = JSON.parse(persistRoot);
         const auth = JSON.parse(parsed.auth || '{}');
-        if (auth.token) {
-          // Decrypt token (base64 decode)
+        if (auth.token && auth.token !== 'undefined' && auth.token !== 'null') {
           const decrypted = decodeURIComponent(escape(atob(auth.token)));
           config.headers.Authorization = `Bearer ${decrypted}`;
         }

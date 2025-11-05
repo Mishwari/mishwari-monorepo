@@ -34,15 +34,8 @@ export default function SideNav() {
   const dispatch = useDispatch();
 
   return (
-    <div className='flex h-full w-full flex-col spx-3 py-4 md:psx-2 '>
-      <Link
-        className='mb-2 flex h-20 items-end justify-start rounded-md p-4 md:h-40'
-        href='/'>
-        <div className='w-32 tsext-white md:w-40'>
-          {/* <h1 className='text-2xl'>Mishwari</h1> */}
-        </div>
-      </Link>
-      <div className='flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
+    <div className='flex h-full w-full flex-col justify-between px-3 pt-20 pb-6'>
+      <nav className='flex flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2'>
         {links.map((link) => {
           const LinkIcon = link.icon;
           return (
@@ -57,19 +50,17 @@ export default function SideNav() {
                 }
               )}>
               <LinkIcon className='w-6' />
-              <p className='hidden md:block '>{link.name}</p>
+              <p className='hidden md:block'>{link.name}</p>
             </Link>
           );
         })}
-
-        <div className='hidden h-full w-full grow rounded-md bg-gray-50 md:block'></div>
-        <button
-          onClick={logout}
-          className='flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-400 hover:text-white md:flex-none md:justify-start md:p-2 md:px-3'>
-          <PowerIcon className='w-6' />
-          <div className='hidden md:block'>تسجيل الخروج</div>
-        </button>
-      </div>
+      </nav>
+      <button
+        onClick={logout}
+        className='flex h-[48px] w-full items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-red-400 hover:text-white md:justify-start md:p-2 md:px-3'>
+        <PowerIcon className='w-6' />
+        <div className='hidden md:block'>تسجيل الخروج</div>
+      </button>
     </div>
   );
 }

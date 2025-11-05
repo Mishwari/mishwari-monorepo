@@ -27,7 +27,7 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
             value={profileData.user.username}
             onChange={(e) => updateProfileData('user.username', e.target.value)}
             placeholder={isDisabled ? '(لا يوجد)' : 'ادخل اسم المستخدم'}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             className='w-full'
           />
         </div>
@@ -38,7 +38,7 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
             value={profileData.full_name}
             onChange={(e) => updateProfileData('full_name', e.target.value)}
             placeholder={isDisabled ? '(لا يوجد)' : 'ادخل الاسم الكامل'}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             className='w-full'
           />
         </div>
@@ -50,7 +50,7 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
             value={profileData.user.email}
             onChange={(e) => updateProfileData('user.email', e.target.value)}
             placeholder={isDisabled ? '(لا يوجد)' : 'ادخل البريد الإلكتروني'}
-            disabled={isDisabled}
+            readOnly={isDisabled}
             className='w-full'
           />
         </div>
@@ -62,7 +62,7 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
               type='date'
               value={profileData?.birth_date}
               onChange={(e) => updateProfileData('birth_date', e.target.value)}
-              disabled={isDisabled}
+              readOnly={isDisabled}
               className='w-full'
             />
           </div>

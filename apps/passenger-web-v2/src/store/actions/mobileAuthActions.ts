@@ -175,7 +175,7 @@ export const performRegister = (profileData: Profile, router: any) => async (dis
       // console.log('edit', response[0].data.purpose)
       router.push('/')
     }
-    dispatch(fetchProfileDetails(encryptToken(response[0].data.tokens.access)))
+    dispatch(fetchProfileDetails() as any)
     
   } catch (error:any) {
       toast.dismiss(waitingRegister);

@@ -40,10 +40,8 @@ function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     if (isAuthenticated && token) {
-      dispatch(fetchUserDetails(token) as any);
-      dispatch(fetchProfileDetails(token) as any);
-      // dispatch(fetchTripsDetails(token) as any);
-      // dispatch(fetchDriverDetails(token) as any)
+      dispatch(fetchUserDetails() as any);
+      dispatch(fetchProfileDetails() as any);
     }
   }, [dispatch, isAuthenticated, token]);
 
