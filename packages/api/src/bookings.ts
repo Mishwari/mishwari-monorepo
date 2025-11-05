@@ -9,4 +9,7 @@ export const bookingsApi = {
 
   getMyBookings: () =>
     apiClient.get('/booking/'),
+
+  getAll: (token?: string) =>
+    apiClient.get('/booking/'),
 };

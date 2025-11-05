@@ -1,17 +1,12 @@
-import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Booking } from '@/types/booking';
-import { bookingsApi } from '@mishwari/api';
-import MiniTicket from '@/components/MiniTicket';
-import BackButton from '@/components/BackButton';
-import HeaderLayout from '@/layouts/HeaderLayout';
-import MiniTicketSkeleton from '@/components/Skeletons/MiniTicketSkeleton';
-import Navbar from '@/components/Navbar';
-import SideNav from '@/layouts/SideNav';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useSelector } from 'react-redux';
+import { Booking } from '@/types/booking';
 import { AppState } from '@/store/store';
 import { decryptToken } from '@/utils/tokenUtils';
+import MiniTicket from '@/components/MiniTicket';
+import MiniTicketSkeleton from '@/components/Skeletons/MiniTicketSkeleton';
+import SideNav from '@/layouts/SideNav';
 
 function index() {
   const token = useSelector((state: AppState) => state.auth.token);
@@ -23,12 +18,26 @@ function index() {
 
   useEffect(() => {
     const fetchBookings = async () => {
+      if (!token) {
+        console.log('No token available');
+        setLoading(false);
+        return;
+      }
+      
       try {
-        const response = await bookingsApi.getAll(decryptToken(token));
+        const decryptedToken = decryptToken(token);
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}booking/`,
+          {
+            headers: {
+              Authorization: `Bearer ${decryptedToken}`,
+            },
+          }
+        );
         setBookings(response.data);
         setFilteredBookings(response.data);
-      } catch (err) {
-        console.log(err);
+      } catch (err: any) {
+        console.error('Error fetching bookings:', err);
         setError('Error getting bookings');
       } finally {
         setLoading(false);
@@ -49,51 +58,46 @@ function index() {
 
   const bookingOptions = [
     { id: 1, label: 'الكل', value: 'all' },
-    { id: 2, label: 'نشط', value: 'active' },
-    { id: 3, label: 'مكتمل', value: 'completed' },
-    { id: 4, label: 'ملغي', value: 'cancelled' },
+    { id: 2, label: 'قيد الانتظار', value: 'pending' },
+    { id: 3, label: 'نشط', value: 'active' },
+    { id: 4, label: 'مكتمل', value: 'completed' },
+    { id: 5, label: 'ملغي', value: 'cancelled' },
   ];
 
   return (
-    <main className='flex flex-col w-full bg-gray-50'>
-      {/* <div className='fixed w-full top-0 z-10'>
-        <Navbar />
-      </div> */}
+    <main className="flex flex-col w-full bg-gray-50">
       <SideNav>
-        <section className='relative bg-inherit '>
-          <div className='sticky  z-10 top-16 bg-white px-2  md:px-4 lg:px-6 flex justify-between bg-inherit w-full  text-sm py-4 lg:py-6 h-full shadow-[0_35px_60px_-15px_rgba(0,0,0,0.1)] '>
+        <section className="relative">
+          <div className="sticky z-10 top-16 bg-white px-4 md:px-6 flex justify-between gap-1.5 md:gap-2 w-full py-4 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
             {bookingOptions.map((option) => (
               <button
                 key={option.id}
                 onClick={() => setFilter(option.value)}
-                className={`py-1.5 w-20 rounded-full text-center font-bold ${
-                  filter == option.value
+                className={`py-2 px-1.5 md:px-2 flex-1 rounded-full text-center font-semibold transition-colors text-xs md:text-sm whitespace-nowrap ${
+                  filter === option.value
                     ? 'bg-brand-primary text-white'
-                    : 'bg-gray-200'
-                }`}>
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
                 {option.label}
               </button>
             ))}
           </div>
-          <div className='flex  flex-col gap-4 overflow-y-scroll  scrollbar-hide px-2  md:px-4 lg:px-6 mx-4 bg-inherit mb-24  '>
+          <div className="flex flex-col gap-4 px-4 md:px-6 py-6 mb-24">
             {loading ? (
               Array.from({ length: 5 }).map((_, index) => (
                 <MiniTicketSkeleton key={index} />
               ))
             ) : filteredBookings.length > 0 ? (
-              filteredBookings.map((booking: Booking, key) => (
-                <MiniTicket
-                  key={key}
-                  booking={booking}
-                />
+              filteredBookings.map((booking) => (
+                <MiniTicket key={booking.id} booking={booking} />
               ))
             ) : (
-              <p className='h-full'>ليس لديك رحلات</p>
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">ليس لديك رحلات</p>
+              </div>
             )}
           </div>
-          {/* <div className="mask h-24 w-32 bg-blue-700">
-        <div className="">dgdg</div>
-      </div> */}
         </section>
       </SideNav>
     </main>
