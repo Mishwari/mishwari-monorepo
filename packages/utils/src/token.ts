@@ -9,9 +9,12 @@ export const encryptToken = (token: string) => {
 
 export const decryptToken = (encryptedToken: string) => {
   try {
+    if (!encryptedToken || encryptedToken === 'undefined' || encryptedToken === 'null') {
+      return null;
+    }
     return decodeURIComponent(escape(atob(encryptedToken)));
   } catch (error: any) {
     console.error('Error decrypting token:', error);
-    return encryptedToken;
+    return null;
   }
 };
