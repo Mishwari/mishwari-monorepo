@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600">
+    <!-- Red stripe -->
+    <rect width="900" height="200" y="0" fill="#CE1126"/>
+    <!-- White stripe -->
+    <rect width="900" height="200" y="200" fill="#FFFFFF"/>
+    <!-- Black stripe -->
+    <rect width="900" height="200" y="400" fill="#000000"/>
+</svg>

@@ -10,3 +10,14 @@ export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 export { ToggleSwitch } from './components/ToggleSwitch';
 export { cn } from './lib/utils';
 export { countries } from './data';
+
+// Asset paths
+export const ASSETS = {
+  icons: {
+    common: '/ui-web/icons/common',
+    transport: '/ui-web/icons/transport',
+    amenities: '/ui-web/icons/amenities',
+    navigation: '/ui-web/icons/navigation',
+  },
+  images: '/ui-web/images',
+} as const;

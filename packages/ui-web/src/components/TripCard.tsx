@@ -1,5 +1,9 @@
 import React from 'react';
 import Image from 'next/image';
+import StarIcon from '@mishwari/ui-web/public/icons/common/star.svg';
+import AirConditionarIcon from '@mishwari/ui-web/public/icons/amenities/airConditionar.svg';
+import WifiIcon from '@mishwari/ui-web/public/icons/amenities/wifiIcon.svg';
+import MobileIcon from '@mishwari/ui-web/public/icons/amenities/mobileIcon.svg';
 
 export interface TripCardProps {
   trip: {
@@ -95,7 +99,7 @@ export function TripCard({ trip, onClick }: TripCardProps) {
             rating >= 3.5 ? 'bg-green-500' : 'bg-orange-400'
           }`}>
           <span className='text-white font-bold text-sm'>{rating.toFixed(1)}</span>
-          <Image src='/icons/star.svg' alt='star' height={16} width={16} />
+          <StarIcon width={16} height={16} />
         </div>
       </div>
       <div className='flex gap-3 md:gap-9 justify-between items-center py-2 border-t border-gray-100'>
@@ -108,31 +112,13 @@ export function TripCard({ trip, onClick }: TripCardProps) {
           </div>
           <div className='flex gap-3'>
             {trip.bus?.amenities?.ac && (
-              <Image
-                src='/icons/airConditionar.svg'
-                alt='ac logo'
-                height={16}
-                width={16}
-                className='opacity-70'
-              />
+              <AirConditionarIcon width={16} height={16} className='opacity-70' />
             )}
             {trip.bus?.amenities?.wifi && (
-              <Image
-                src='/icons/wifiIcon.svg'
-                alt='wifi logo'
-                height={16}
-                width={16}
-                className='opacity-70'
-              />
+              <WifiIcon width={16} height={16} className='opacity-70' />
             )}
             {trip.bus?.amenities?.charger && (
-              <Image
-                src='/icons/mobileIcon.svg'
-                alt='charger logo'
-                height={16}
-                width={16}
-                className='opacity-70'
-              />
+              <MobileIcon width={16} height={16} className='opacity-70' />
             )}
           </div>
         </div>

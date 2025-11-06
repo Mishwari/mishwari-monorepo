@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+
+
+
+/* App.css */
+input[type=range]::-webkit-slider-thumb {
+    pointer-events: all;
+    width: 24px;
+    height: 24px;
+    appearance: none;
+  }
+  
+
+.font-cairo {
+font-family: 'Cairo', sans-serif ;
+}
+
+.noto-color-emoji {
+  font-family: 'Noto Color Emoji';
+  
+}
+
+
+.upper-part {
+  -webkit-mask:
+  /* radial-gradient(circle at left center, transparent 10px, black 11px, black 65%, transparent 0),
+  radial-gradient(circle at right center, transparent 10px, black 11px, black 65%, transparent 0); */
+    /* radial-gradient(circle 30px at top    left ,#0000 98%,#000) top    left,
+    radial-gradient(circle 30px at top    right,#0000 98%,#000) top    right, */
+    radial-gradient(circle 17px at  left 57%,transparent 100%,#000 ) 0 100%,
+    radial-gradient(circle 17px at  right 57%,transparent 100%,#000)  100% 0;
+  -webkit-mask-size:60% 100%;
+  -webkit-mask-repeat:no-repeat;
+}
+
+.upper-part2 {
+  mask-image: radial-gradient(circle at left 60%, transparent 15px, black 11px, black 65%, transparent 0),
+              radial-gradient(circle at right 60%, transparent 15px, black 11px, black 65%, transparent 0);
+/* Ensure no clipping on top and bottom */
+margin-top: 5px; 
+margin-bottom: 5px;
+}
+
+.upper-part3{
+  clip-path: polygon(0% 0%, 60% 0%, 60% 15px, 0% 15px, 0% 100%, 60% 100%, 60% calc(100% - 15px),
+   0% calc(100% - 15px),
+    100% calc(100% - 15px),
+     40% calc(100% - 15px),
+      40% 100%, 100% 100%, 100% 0%, 40% 0%, 40% 15px, 100% 15px);
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.upper-part4{
+  clip-path: circle(15px at 0 50px);
+  ;
+}
+
+
+.upper-part5 {
+  clip-path: path("M200.1,15.7v40.9c-13.8-4.5-29.5-3-42.7,5.6c-13.4,8.8-21.1,23-22.2,37.9H15.6C7,100.1,0,93.1,0,84.5V15.6  C0,7,7,0,15.6,0h168.9C193.1,0.1,200.1,7.1,200.1,15.7z");
+}
