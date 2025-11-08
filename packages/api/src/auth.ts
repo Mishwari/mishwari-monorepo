@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import type { Profile } from '@mishwari/types';
 
 export const authApi = {
   requestOtp: (data: { phone: string }) =>
@@ -12,4 +13,7 @@ export const authApi = {
 
   refreshToken: (refreshToken: string) =>
     apiClient.post('/token/refresh/', { refresh: refreshToken }),
+
+  getMe: () =>
+    apiClient.get<Profile>('/profile/me/')
 };

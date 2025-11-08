@@ -1,22 +1,28 @@
+import { Driver } from './driver';
+import { Bus } from './bus';
+
+export interface City {
+  id: number;
+  city: string;
+}
+
 export interface Trip {
   id: number;
-  from_city?: { city: string };
-  to_city?: { city: string };
-  pickup?: { city: string };
-  destination?: { city: string };
-  price: number;
-  departure_time: string;
-  arrival_time: string;
-  distance?: number;
-  planned_route_name?: string;
-  path_road?: string;
-  trip_type?: string;
-  driver?: {
-    driver_name?: string;
-    driver_rating?: number;
-    operator?: { name: string };
-  };
-  bus?: {
-    bus_type?: string;
-  };
+  driver: Driver | null;
+  bus: Bus | null;
+  from_city: City;
+  to_city: City;
+  planned_route_name: string;
+  journey_date: string;
+  status: 'draft' | 'published' | 'active' | 'completed' | 'cancelled';
+  trip_type: 'scheduled' | 'flexible';
+  planned_departure: string | null;
+  departure_window_start: string | null;
+  departure_window_end: string | null;
+  actual_departure: string | null;
+  departure_time: string | null;
+  arrival_time: string | null;
+  available_seats: number | null;
+  price: number | null;
+  can_publish: boolean;
 }

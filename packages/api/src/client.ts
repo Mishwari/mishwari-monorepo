@@ -13,7 +13,10 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     try {
-      const persistRoot = localStorage.getItem('persist:nextjs');
+      let persistRoot = localStorage.getItem('persist:driver-web');
+      if (!persistRoot) {
+        persistRoot = localStorage.getItem('persist:nextjs');
+      }
       if (persistRoot) {
         const parsed = JSON.parse(persistRoot);
         const auth = JSON.parse(parsed.auth || '{}');

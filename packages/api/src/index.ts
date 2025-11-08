@@ -5,3 +5,5 @@ export * from './bookings';
 export * from './profile';
 export * from './wallet';
 export * from './operator';
+export * from './fleet';
+export * from './drivers';
