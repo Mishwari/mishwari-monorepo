@@ -27,10 +27,10 @@ export function ToggleSwitch({
         disabled ? 'cursor-not-allowed opacity-50' : ''
       }`}>
       <div
-        className={`absolute top-1 bottom-1 rounded-md transition-all duration-300 ease-in-out ${activeColor} z-0`}
+        className={`absolute top-1 bottom-1 left-1 right-1 rounded-md transition-all duration-300 ease-in-out ${activeColor} z-0`}
         style={{
           width: `calc(${itemWidth}% - 0.5rem)`,
-          left: `calc(${activeIndex * itemWidth}% + 0.25rem)`,
+          transform: `translateX(calc(${activeIndex * 100}% + ${activeIndex * 0.25}rem))`,
         }}
       />
       {options.map((option) => (

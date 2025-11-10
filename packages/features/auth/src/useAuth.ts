@@ -47,13 +47,9 @@ export const useAuth = ({ token, refreshToken, onAuthChange, isProtected = false
         refreshAccessToken();
       } else {
         setIsTokenValid(true);
-        onAuthChange({ token, refreshToken, isAuthenticated: true });
       }
     } else {
       setIsTokenValid(false);
-      if (isProtected) {
-        onAuthChange({ token: null, refreshToken: null, isAuthenticated: false });
-      }
     }
 
     const intervalId = setInterval(() => {
@@ -63,7 +59,7 @@ export const useAuth = ({ token, refreshToken, onAuthChange, isProtected = false
     }, 5 * 60 * 1000);
 
     return () => clearInterval(intervalId);
-  }, [token, refreshToken, isProtected, refreshAccessToken, isTokenExpired, onAuthChange]);
+  }, [token, isTokenExpired, refreshAccessToken]);
 
   return {
     isAuthenticated: !!(token && refreshToken),

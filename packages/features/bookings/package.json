@@ -1,15 +1,16 @@
 {
-  "name": "@mishwari/features-trips",
+  "name": "@mishwari/features-bookings",
   "version": "1.0.0",
-  "main": "./src/index.ts",
+  "main": "src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
     "./passenger": "./src/passenger/index.ts",
     "./driver": "./src/driver/index.ts"
   },
   "dependencies": {
     "@mishwari/api": "workspace:*",
-    "@mishwari/types": "workspace:*",
-    "react": "^18.2.0"
+    "@mishwari/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
   }
 }
