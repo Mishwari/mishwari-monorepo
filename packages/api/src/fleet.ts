@@ -16,4 +16,7 @@ export const fleetApi = {
 
   delete: (id: number) =>
     apiClient.delete(`/operator/fleet/${id}/`),
+
+  getDrivers: () =>
+    apiClient.get<Array<{ id: number; name: string }>>('/operator/drivers/').then(res => res.data),
 };

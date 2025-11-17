@@ -6,6 +6,16 @@ export interface City {
   city: string;
 }
 
+export interface TripStop {
+  id: number;
+  city: { id: number; name: string };
+  sequence: number;
+  distance_from_start_km: number;
+  price_from_start: number;
+  planned_arrival: string;
+  planned_departure: string;
+}
+
 export interface Trip {
   id: number;
   driver: Driver | null;
@@ -25,4 +35,5 @@ export interface Trip {
   available_seats: number | null;
   price: number | null;
   can_publish: boolean;
+  stops?: TripStop[];
 }

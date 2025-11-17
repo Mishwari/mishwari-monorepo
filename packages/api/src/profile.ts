@@ -6,6 +6,9 @@ export const profileApi = {
 
   update: (data: any) =>
     apiClient.put('/profile/', data),
+
+  completeProfile: (data: any) =>
+    apiClient.post('/mobile-login/complete-profile/', data),
 };
 
 export const userApi = {

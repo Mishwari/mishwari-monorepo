@@ -1,0 +1,17 @@
+{
+  "name": "@mishwari/features-passengers",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./core": "./src/core/index.ts",
+    "./passenger": "./src/passenger/index.ts"
+  },
+  "dependencies": {
+    "@mishwari/api": "workspace:*",
+    "@mishwari/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  }
+}

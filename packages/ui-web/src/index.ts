@@ -1,10 +1,13 @@
 export { Button } from './components/ui/button';
 export { Badge } from './components/ui/badge';
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './components/ui/card';
+export { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './components/ui/dialog';
+export { ConfirmDialog } from './components/ConfirmDialog';
 export { PhoneInput } from './components/PhoneInput';
 export { OtpInput } from './components/OtpInput';
 export { Combobox } from './components/Combobox';
 export { DatePicker } from './components/DatePicker';
+export { TimePicker } from './components/TimePicker';
 export { QuickDateButtons } from './components/QuickDateButtons';
 export { QuickDaySelector } from './components/QuickDaySelector';
 export { FileUpload } from './components/FileUpload';
@@ -14,6 +17,7 @@ export { ToggleSwitch } from './components/ToggleSwitch';
 export { UserDropdownMenu } from './components/UserDropdownMenu';
 export { TripCardBase } from './components/TripCardBase';
 export { BookingCardBase } from './components/BookingCardBase';
+export * from './components/passengers';
 export { cn } from './lib/utils';
 export { countries } from './data';
 

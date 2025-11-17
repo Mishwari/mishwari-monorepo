@@ -4,6 +4,7 @@ import StarIcon from '@mishwari/ui-web/public/icons/common/star.svg';
 import AirConditionarIcon from '@mishwari/ui-web/public/icons/amenities/airConditionar.svg';
 import WifiIcon from '@mishwari/ui-web/public/icons/amenities/wifiIcon.svg';
 import MobileIcon from '@mishwari/ui-web/public/icons/amenities/mobileIcon.svg';
+import { convertToReadableTime } from '@mishwari/utils';
 
 export interface TripCardProps {
   trip: {
@@ -45,20 +46,6 @@ export interface TripCardProps {
     status?: string;
   };
   onClick?: () => void;
-}
-
-function convertToReadableTime(isoString: string): string {
-  const date = new Date(isoString);
-  let hours = date.getHours();
-  const minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'مساءاً' : 'صباحاً';
-
-  hours = hours % 12;
-  hours = hours || 12;
-
-  const minutesStr = minutes < 10 ? '0' + minutes : minutes;
-
-  return `${hours}:${minutesStr} ${ampm}`;
 }
 
 function calculateDuration(departure: string, arrival: string): string {

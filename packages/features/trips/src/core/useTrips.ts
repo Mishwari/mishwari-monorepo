@@ -26,9 +26,9 @@ export const useTrips = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await tripsApi.search(params);
-      setTrips(response.data);
-      return response.data;
+      const data = await tripsApi.search(params);
+      setTrips(data);
+      return data;
     } catch (err: any) {
       setError(err.message || 'Failed to search trips');
       return [];
@@ -41,8 +41,8 @@ export const useTrips = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await tripsApi.getById(id);
-      return response.data;
+      const data = await tripsApi.getById(id);
+      return data;
     } catch (err: any) {
       setError(err.message || 'Failed to fetch trip');
       throw err;
