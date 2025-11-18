@@ -17,6 +17,7 @@ export { ToggleSwitch } from './components/ToggleSwitch';
 export { UserDropdownMenu } from './components/UserDropdownMenu';
 export { TripCardBase } from './components/TripCardBase';
 export { BookingCardBase } from './components/BookingCardBase';
+export { BUS_AMENITIES_WITH_ICONS } from './data/amenities';
 export * from './components/passengers';
 export { cn } from './lib/utils';
 export { countries } from './data';

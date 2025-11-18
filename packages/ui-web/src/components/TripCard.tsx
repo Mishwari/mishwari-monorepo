@@ -1,10 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 import StarIcon from '@mishwari/ui-web/public/icons/common/star.svg';
-import AirConditionarIcon from '@mishwari/ui-web/public/icons/amenities/airConditionar.svg';
-import WifiIcon from '@mishwari/ui-web/public/icons/amenities/wifiIcon.svg';
-import MobileIcon from '@mishwari/ui-web/public/icons/amenities/mobileIcon.svg';
 import { convertToReadableTime } from '@mishwari/utils';
+import { BUS_AMENITIES_WITH_ICONS } from '../data/amenities';
 
 export interface TripCardProps {
   trip: {
@@ -98,15 +96,13 @@ export function TripCard({ trip, onClick }: TripCardProps) {
             <span className='text-xs text-gray-500'>({tripDuration})</span>
           </div>
           <div className='flex gap-3'>
-            {trip.bus?.amenities?.ac && (
-              <AirConditionarIcon width={16} height={16} className='opacity-70' />
-            )}
-            {trip.bus?.amenities?.wifi && (
-              <WifiIcon width={16} height={16} className='opacity-70' />
-            )}
-            {trip.bus?.amenities?.charger && (
-              <MobileIcon width={16} height={16} className='opacity-70' />
-            )}
+            {BUS_AMENITIES_WITH_ICONS.filter(a => trip.bus?.amenities?.[a.key] === 'true').map((amenity) => (
+              amenity.Icon ? (
+                <amenity.Icon key={amenity.key} width={16} height={16} className='opacity-70' />
+              ) : (
+                <span key={amenity.key} className='text-xs text-gray-600 opacity-70'>{amenity.label}</span>
+              )
+            ))}
           </div>
         </div>
         <div className='text-left shrink-0'>

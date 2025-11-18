@@ -8,6 +8,9 @@ export const driversApi = {
   getById: (id: number) =>
     apiClient.get<Driver>(`/operator/drivers/${id}/`).then(res => res.data),
 
+  create: (data: { mobile_number: string; full_name: string; national_id?: string; driver_license?: string; email?: string }) =>
+    apiClient.post<Driver>('/operator/drivers/', data).then(res => res.data),
+
   invite: (phone: string) =>
     apiClient.post('/operator/drivers/invite/', { phone }).then(res => res.data),
 
