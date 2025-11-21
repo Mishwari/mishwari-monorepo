@@ -20,6 +20,7 @@ export const OtpInput: React.FC<OtpInputProps> = ({
             ref={(el) => (inputRefs.current[index] = el)}
             type="text"
             inputMode="numeric"
+            dir="ltr"
             maxLength={1}
             value={otp[index]}
             onChange={(e) => handleChange(index, e.target.value)}
