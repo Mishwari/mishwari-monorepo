@@ -91,7 +91,7 @@ export const performRegister = (profileData: any, router: any) => async (dispatc
 
   try {
     const [response] = await Promise.all([
-      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/mobile-login/complete-profile/`, data, {
+      axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}mobile-login/complete-profile/`, data, {
         headers: {
           Authorization: `Bearer ${decryptToken(auth.token)}`,
         },

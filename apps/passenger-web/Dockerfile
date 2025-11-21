@@ -8,6 +8,10 @@ COPY . .
 # Install all dependencies at root
 RUN pnpm install --frozen-lockfile
 
+# Set API URL for build
+ARG NEXT_PUBLIC_API_BASE_URL=https://api.mishwari.online/api/
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 # Build packages with TypeScript in non-strict mode
 RUN cd packages/types && (pnpm build || npx tsc --noEmitOnError false || true)
 RUN cd packages/utils && (pnpm build || npx tsc --noEmitOnError false || true)

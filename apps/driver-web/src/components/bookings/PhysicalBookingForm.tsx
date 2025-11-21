@@ -54,7 +54,7 @@ export default function PhysicalBookingForm() {
     if (selectedTrip) {
       const fetchStops = async () => {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/trip-stops/?trip=${selectedTrip.id}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}trip-stops/?trip=${selectedTrip.id}`);
           const data = await response.json();
           setStops(data);
         } catch (error) {
