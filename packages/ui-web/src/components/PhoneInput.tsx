@@ -117,6 +117,7 @@ export const PhoneInput: React.FC<PhoneInputWithCountriesProps> = ({
           <Input
             type="tel"
             inputMode="numeric"
+            dir="ltr"
             value={phoneNumber}
             onChange={(e) => handlePhoneNumberChange(e.target.value)}
             placeholder={`ادخل ${selectedCountry.digitLength} ${
