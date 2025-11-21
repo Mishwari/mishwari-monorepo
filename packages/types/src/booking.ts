@@ -1,13 +1,12 @@
 import { z } from "zod";
 import  {UserDetailsSchema} from './userDetails'
-import { TripSchema } from "./trip";
 import { PassengerSchema } from "./passenger"
 
 export const BookingSchema = z.object({ 
     id: z.number(),
     user: UserDetailsSchema,
     status: z.enum(['completed', 'cancelled', 'active','pending']),
-    trip: TripSchema,
+    trip: z.any(), // Trip type from trip.ts
     from_stop: z.object({
         id: z.number(),
         city: z.object({ id: z.number(), name: z.string() }),

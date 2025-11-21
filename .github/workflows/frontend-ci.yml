@@ -1,0 +1,44 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ['apps/**', 'packages/**']
+  pull_request:
+    branches: [main, develop]
+    paths: ['apps/**', 'packages/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      
+      - name: Install pnpm
+        run: npm install -g pnpm
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build packages
+        run: pnpm build:packages
+      
+      - name: Lint
+        run: pnpm lint
+      
+      - name: Type check
+        run: pnpm type-check
+      
+      - name: Test
+        run: pnpm test
+      
+      - name: Build apps
+        run: |
+          pnpm --filter @mishwari/passenger-web-v2 build
+          pnpm --filter @mishwari/driver-web build

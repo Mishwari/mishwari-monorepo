@@ -1,10 +1,28 @@
 {
   "name": "@mishwari/features-bookings",
   "version": "1.0.0",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    "./passenger": "./src/passenger/index.ts",
-    "./driver": "./src/driver/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./passenger": {
+      "types": "./dist/passenger/index.d.ts",
+      "development": "./src/passenger/index.ts",
+      "default": "./dist/passenger/index.js"
+    },
+    "./driver": {
+      "types": "./dist/driver/index.d.ts",
+      "development": "./src/driver/index.ts",
+      "default": "./dist/driver/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
   },
   "dependencies": {
     "@mishwari/api": "workspace:*",
@@ -12,5 +30,10 @@
   },
   "peerDependencies": {
     "react": "^18.0.0"
-  }
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "typescript": "^5.0.0"
+  },
+  "files": ["dist", "src"]
 }

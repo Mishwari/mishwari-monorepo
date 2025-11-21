@@ -16,7 +16,9 @@ export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 export { ToggleSwitch } from './components/ToggleSwitch';
 export { UserDropdownMenu } from './components/UserDropdownMenu';
 export { TripCardBase } from './components/TripCardBase';
+export { TripCard } from './components/TripCard';
 export { BookingCardBase } from './components/BookingCardBase';
+export { CollapsibleSection } from './components/common/CollapsibleSection';
 export { BUS_AMENITIES_WITH_ICONS } from './data/amenities';
 export * from './components/passengers';
 export { cn } from './lib/utils';

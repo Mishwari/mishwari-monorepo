@@ -62,3 +62,7 @@ packages/**/package-lock.json
 
 # Generated assets (copied from packages)
 apps/**/public/ui-web/
+
+# Docker
+.env
+!.env.example
