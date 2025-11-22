@@ -13,7 +13,7 @@ export const OtpInput: React.FC<OtpInputProps> = ({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="flex gap-2 dir-ltr">
+      <div className="flex gap-2 flex-row-reverse">
         {Array.from({ length }).map((_, index) => (
           <input
             key={index}
