@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { format } from 'date-fns';
-import { Button, DatePicker, TimePicker } from '@mishwari/ui-web';
+import { Button, DatePicker, TimePicker, CityDropdown } from '@mishwari/ui-web';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mishwari/ui-web';
+import type { CityOption } from '@mishwari/ui-web';
 import { tripsApi, fleetApi } from '@mishwari/api';
 import type { Bus, City } from '@mishwari/types';
 import { CalendarDaysIcon, ClockIcon } from '@heroicons/react/24/outline';
@@ -18,7 +19,7 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Step1Props) {
   const profile = useSelector((state: AppState) => state.auth.profile);
   const isDriver = profile?.role === 'driver';
   const [buses, setBuses] = useState<Bus[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -36,7 +37,7 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Step1Props) {
       fleetApi.getDrivers().catch(() => [])
     ]).then(([b, c, d]) => {
       setBuses(b);
-      setCities(c);
+      setCities(c.map((city: City) => ({ id: city.id, city: city.city })));
       setDrivers(d);
       
       // Auto-select for individual drivers
@@ -129,29 +130,31 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Step1Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-2">من *</label>
-          <Select value={data.from_city_id?.toString() || ''} onValueChange={(value) => onChange({ ...data, from_city_id: Number(value) })}>
-            <SelectTrigger>
-              <SelectValue placeholder="حدد اليوم واختر مدينة الانطلاق" />
-            </SelectTrigger>
-            <SelectContent>
-              {cities.map((city) => (
-                <SelectItem key={city.id} value={city.id.toString()}>{city.city}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="px-4 py-2 border rounded-lg">
+            <CityDropdown
+              options={cities}
+              value={cities.find(c => c.id === data.from_city_id)?.city || ''}
+              onChange={(cityName) => {
+                const city = cities.find(c => c.city === cityName);
+                if (city) onChange({ ...data, from_city_id: city.id });
+              }}
+              emptyMessage="لا توجد مدن متاحة"
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-2">إلى *</label>
-          <Select value={data.to_city_id?.toString() || ''} onValueChange={(value) => onChange({ ...data, to_city_id: Number(value) })}>
-            <SelectTrigger>
-              <SelectValue placeholder="اختر مدينة الوجهة" />
-            </SelectTrigger>
-            <SelectContent>
-              {cities.map((city) => (
-                <SelectItem key={city.id} value={city.id.toString()}>{city.city}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="px-4 py-2 border rounded-lg">
+            <CityDropdown
+              options={cities}
+              value={cities.find(c => c.id === data.to_city_id)?.city || ''}
+              onChange={(cityName) => {
+                const city = cities.find(c => c.city === cityName);
+                if (city) onChange({ ...data, to_city_id: city.id });
+              }}
+              emptyMessage="لا توجد مدن متاحة"
+            />
+          </div>
         </div>
       </div>
 

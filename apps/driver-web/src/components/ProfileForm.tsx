@@ -1,6 +1,7 @@
-import React from 'react';
-import { Input, Button, ToggleSwitch } from '@mishwari/ui-web';
-import { CheckIcon } from '@heroicons/react/24/outline';
+import React, { useState } from 'react';
+import { Input, Button, ToggleSwitch, DatePicker } from '@mishwari/ui-web';
+import { CheckIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { format } from 'date-fns';
 
 interface ProfileDataProps {
   profileData: {
@@ -27,6 +28,17 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
   updateProfileData,
   handleSubmit,
 }) => {
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    profileData.birth_date ? new Date(profileData.birth_date) : new Date()
+  );
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    updateProfileData('birth_date', format(date, 'yyyy-MM-dd'));
+    setShowDatePicker(false);
+  };
+
   return (
     <form
       className='space-y-6'
@@ -69,13 +81,32 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>
             <label className='text-sm font-medium text-gray-700 block mb-2'>تاريخ الميلاد</label>
-            <Input
-              type='date'
-              value={profileData?.birth_date}
-              onChange={(e) => updateProfileData('birth_date', e.target.value)}
-              readOnly={isDisabled}
-              className='w-full'
-            />
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => !isDisabled && setShowDatePicker(!showDatePicker)}
+                disabled={isDisabled}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed text-right"
+              >
+                <CalendarDaysIcon className="w-5 h-5 text-brand-primary" />
+                <span className="text-sm">
+                  {profileData.birth_date ? format(new Date(profileData.birth_date), 'd MMMM yyyy', { locale: require('date-fns/locale/ar').ar }) : 'اختر تاريخ الميلاد'}
+                </span>
+              </button>
+              {showDatePicker && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowDatePicker(false)} />
+                  <div className="absolute top-full mt-2 left-0 z-50">
+                    <DatePicker
+                      selectedDate={selectedDate}
+                      onDateSelect={handleDateSelect}
+                      minDate={new Date(1900, 0, 1)}
+                      showMonthYearPicker={true}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           </div>
           <div>
             <label className='text-sm font-medium text-gray-700 block mb-2'>الجنس</label>

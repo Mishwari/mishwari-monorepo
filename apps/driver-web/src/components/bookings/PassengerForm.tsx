@@ -1,4 +1,4 @@
-import { Input } from '@mishwari/ui-web';
+import { Input, ToggleSwitch } from '@mishwari/ui-web';
 
 interface Passenger {
   name: string;
@@ -62,15 +62,14 @@ export default function PassengerForm({ passenger, onChange }: PassengerFormProp
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">الجنس</label>
-        <select
-          value={passenger.gender || ''}
-          onChange={(e) => onChange('gender', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-        >
-          <option value="">اختر</option>
-          <option value="male">ذكر</option>
-          <option value="female">أنثى</option>
-        </select>
+        <ToggleSwitch
+          value={passenger.gender || 'male'}
+          onChange={(value) => onChange('gender', value)}
+          options={[
+            { value: 'male', label: 'ذكر' },
+            { value: 'female', label: 'أنثى' },
+          ]}
+        />
       </div>
     </div>
   );

@@ -26,7 +26,7 @@ export const PhoneInput: React.FC<PhoneInputWithCountriesProps> = ({
     setSearchTerm,
     handlePhoneNumberChange,
     handleCountryChange,
-  } = usePhoneInput(onChange, defaultCountry || countries[0]);
+  } = usePhoneInput(onChange, defaultCountry || countries[0], value, countries);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 

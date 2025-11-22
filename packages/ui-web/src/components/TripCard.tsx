@@ -1,8 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
-import StarIcon from '@mishwari/ui-web/public/icons/common/star.svg';
 import { convertToReadableTime } from '@mishwari/utils';
 import { BUS_AMENITIES_WITH_ICONS } from '../data/amenities';
+import { RatingBadge } from './RatingBadge';
 
 export interface TripCardProps {
   trip: {
@@ -61,7 +61,6 @@ export function TripCard({ trip, onClick }: TripCardProps) {
   const formattedDepartureTime = convertToReadableTime(trip.departure_time);
   const formattedArrivalTime = convertToReadableTime(trip.arrival_time);
   const tripDuration = calculateDuration(trip.departure_time, trip.arrival_time);
-  const rating = Number(trip.driver?.driver_rating || 0);
 
   return (
     <div
@@ -79,13 +78,7 @@ export function TripCard({ trip, onClick }: TripCardProps) {
             {trip.bus?.bus_type || 'غير محدد'} - {trip.planned_route_name}
           </p>
         </div>
-        <div
-          className={`flex justify-center items-center rounded-lg px-1.5 py-0.5 gap-0.5 shrink-0 ${
-            rating >= 3.5 ? 'bg-green-500' : 'bg-orange-400'
-          }`}>
-          <span className='text-white font-bold text-sm'>{rating.toFixed(1)}</span>
-          <StarIcon width={16} height={16} />
-        </div>
+        <RatingBadge rating={trip.driver?.driver_rating} size='sm' className='shrink-0' />
       </div>
       <div className='flex gap-3 md:gap-9 justify-between items-center py-2 border-t border-gray-100'>
         <div className='flex-1'>

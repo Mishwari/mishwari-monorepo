@@ -2,9 +2,8 @@ import Link from 'next/link';
 import React, { useEffect, useState, Fragment } from 'react';
 import Image from 'next/image';
 import { Transition, Dialog } from '@headlessui/react';
-import StarIcon from '@mishwari/ui-web/public/icons/common/star.svg';
 import GreenCheckIcon from '@mishwari/ui-web/public/icons/common/greenCheck.svg';
-import { Input, Button, PassengerList, PassengerForm, ConfirmDialog } from '@mishwari/ui-web';
+import { Input, Button, PassengerList, PassengerForm, ConfirmDialog, RatingBadge } from '@mishwari/ui-web';
 import { useRouter } from 'next/router';
 import { tripsApi } from '@mishwari/api';
 import { convertToReadableTime } from '@mishwari/utils';
@@ -13,7 +12,6 @@ import { Passenger } from '@mishwari/types';
 import { Trip } from '@/types/trip';
 import { AppState } from '@/store/store';
 import { useSelector } from 'react-redux';
-import BackButton from '@/components/BackButton';
 import PageHeader from '@/layouts/PageHeader';
 import useAuth from '@/hooks/useAuth';
 import { UserDropdownMenu } from '@mishwari/ui-web';
@@ -299,7 +297,7 @@ function trip_details() {
   };
 
   return (
-    <main className='flex flex-col m-0 bg-gray-50 bg-scroll h-screen'>
+    <main className='flex flex-col m-0 bg-gray-50 min-h-screen'>
       <PageHeader title='معلومات الرحلة'>
         {isAuthenticated && (
           <div className='absolute left-4 top-4'>
@@ -374,19 +372,7 @@ function trip_details() {
                 <h1 className='font-bold'>
                   باص: {tripDetails?.driver?.operator?.name || 'غير محدد'}
                 </h1>
-                {tripDetails?.driver?.driver_rating && (
-                  <div
-                    className={`flex justify-center items-center rounded-xl px-1 py-0.5 h-[25px] w-[60px] ${
-                      Number(tripDetails.driver.driver_rating) >= 3.5
-                        ? 'bg-green-500'
-                        : 'bg-orange-400'
-                    }`}>
-                    <h1 className='text-white font-black pr-1'>
-                      {Number(tripDetails.driver.driver_rating).toFixed(1)}
-                    </h1>
-                    <StarIcon width={25} height={25} />
-                  </div>
-                )}
+                <RatingBadge rating={tripDetails?.driver?.driver_rating} size='md' />
               </div>
               <div className='flex flex-wrap justify-start items-center gap-2 mt-4'>
                 {tripDetails?.bus?.amenities && Object.entries(tripDetails.bus.amenities).map(([key, value]) => {

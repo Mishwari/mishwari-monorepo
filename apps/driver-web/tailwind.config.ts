@@ -23,8 +23,22 @@ const config: Config = {
               foreground: "#FFFFFF",
               DEFAULT: "#005687",
             },
+            secondary: {
+              foreground: "#FFFFFF",
+              DEFAULT: "#006FEE",
+            }
           },
         },
+        dark: {
+          colors: {
+            background: "#000000",
+            foreground: "#ECEDEE",
+            primary: {
+              foreground: "#000",
+              DEFAULT: "#FFF",
+            },
+          },
+        }
       }
     })
   ],

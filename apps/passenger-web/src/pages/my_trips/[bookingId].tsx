@@ -7,7 +7,7 @@ import { decryptToken } from '@/utils/tokenUtils';
 import { convertToReadableTime } from '@mishwari/utils';
 import MainLayout from '@/layouts/MainLayout';
 import GreenCheckIcon from '@mishwari/ui-web/public/icons/common/greenCheck.svg';
-import StarIcon from '@mishwari/ui-web/public/icons/common/star.svg';
+import { RatingBadge } from '@mishwari/ui-web';
 
 const statusConfig = {
   active: { label: 'نشط', bg: 'bg-green-100', text: 'text-green-700' },
@@ -143,16 +143,7 @@ export default function BookingDetails() {
             <h2 className="text-lg font-bold mb-4">معلومات الباص</h2>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold">باص: {booking.trip.driver?.operator?.name || 'غير محدد'}</h3>
-              {booking.trip.driver?.driver_rating && (
-                <div className={`flex justify-center items-center rounded-xl px-2 py-1 ${
-                  Number(booking.trip.driver.driver_rating) >= 3.5 ? 'bg-green-500' : 'bg-orange-400'
-                }`}>
-                  <span className="text-white font-black pr-1">
-                    {Number(booking.trip.driver.driver_rating).toFixed(1)}
-                  </span>
-                  <StarIcon width={20} height={20} />
-                </div>
-              )}
+              <RatingBadge rating={booking.trip.driver?.driver_rating} size='md' />
             </div>
             <div className="flex flex-wrap gap-2 mb-4">
               {booking.trip.bus.amenities && Object.entries(booking.trip.bus.amenities).map(([key, value]: [string, any]) => (

@@ -9,7 +9,7 @@ export const OtpInput: React.FC<OtpInputProps> = ({
   error,
   disabled = false,
 }) => {
-  const { otp, inputRefs, handleChange, handleKeyDown, handlePaste } = useOtpInput(length, onChange);
+  const { otp, inputRefs, handleChange, handleKeyDown, handlePaste } = useOtpInput(length, onChange, value);
 
   return (
     <div className="flex flex-col items-center gap-2">

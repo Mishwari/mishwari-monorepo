@@ -9,6 +9,7 @@
       "development": "./src/index.ts",
       "default": "./dist/index.js"
     },
+    "./styles/*": "./src/styles/*",
     "./public/*": "./public/*",
     "./tailwind.config": "./tailwind.config.js"
   },

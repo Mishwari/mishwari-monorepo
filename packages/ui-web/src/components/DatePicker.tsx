@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { format, addMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, isSameMonth, isBefore, startOfDay } from 'date-fns';
+import { format, addMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, isSameMonth, isBefore, startOfDay, setMonth, setYear } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface DatePickerProps {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
   minDate?: Date;
+  showMonthYearPicker?: boolean;
 }
 
-export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onDateSelect, minDate = new Date() }) => {
+export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onDateSelect, minDate = new Date(), showMonthYearPicker = false }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const monthStart = startOfMonth(currentMonth);
@@ -34,9 +36,38 @@ export const DatePicker: React.FC<DatePickerProps> = ({ selectedDate, onDateSele
         >
           <ChevronRightIcon className="w-5 h-5 text-brand-text-dark" />
         </button>
-        <h3 className="text-lg font-bold text-brand-text-dark">
-          {format(currentMonth, 'MMMM yyyy', { locale: ar })}
-        </h3>
+        {showMonthYearPicker ? (
+          <div className="flex gap-2">
+            <Select value={currentMonth.getMonth().toString()} onValueChange={(value) => setCurrentMonth(setMonth(currentMonth, Number(value)))}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <SelectItem key={i} value={i.toString()}>
+                    {format(setMonth(new Date(), i), 'MMMM', { locale: ar })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={currentMonth.getFullYear().toString()} onValueChange={(value) => setCurrentMonth(setYear(currentMonth, Number(value)))}>
+              <SelectTrigger className="w-24">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 99 + i).map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : (
+          <h3 className="text-lg font-bold text-brand-text-dark">
+            {format(currentMonth, 'MMMM yyyy', { locale: ar })}
+          </h3>
+        )}
         <button 
           type="button"
           onClick={goToNextMonth} 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Button, Input } from '@mishwari/ui-web';
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mishwari/ui-web';
 import { operatorApi } from '@mishwari/api';
 import { Trip } from '@mishwari/types';
 import PassengerForm from './PassengerForm';
@@ -155,37 +155,35 @@ export default function PhysicalBookingForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">من</label>
-              <select
-                value={fromStop || ''}
-                onChange={(e) => setFromStop(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                required
-              >
-                <option value="">اختر نقطة البداية</option>
-                {stops.map((stop) => (
-                  <option key={stop.id} value={stop.id}>
-                    {stop.city.city}
-                  </option>
-                ))}
-              </select>
+              <Select value={fromStop?.toString() || ''} onValueChange={(value) => setFromStop(Number(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="اختر نقطة البداية" />
+                </SelectTrigger>
+                <SelectContent>
+                  {stops.map((stop) => (
+                    <SelectItem key={stop.id} value={stop.id.toString()}>
+                      {stop.city.city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {fromStop && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">إلى</label>
-                <select
-                  value={toStop || ''}
-                  onChange={(e) => setToStop(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  required
-                >
-                  <option value="">اختر نقطة النهاية</option>
-                  {getAvailableToStops().map((stop) => (
-                    <option key={stop.id} value={stop.id}>
-                      {stop.city.city}
-                    </option>
-                  ))}
-                </select>
+                <Select value={toStop?.toString() || ''} onValueChange={(value) => setToStop(Number(value))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر نقطة النهاية" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAvailableToStops().map((stop) => (
+                      <SelectItem key={stop.id} value={stop.id.toString()}>
+                        {stop.city.city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
           </div>

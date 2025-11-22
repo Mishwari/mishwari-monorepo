@@ -1,5 +1,4 @@
-import '@/styles/globals.css';
-import '@/styles/fonts.css';
+import '@mishwari/ui-web/styles/globals.css';
 import { NextUIProvider } from '@nextui-org/react';
 import type { AppProps } from 'next/app';
 import { makeStore, AppState } from '@/store/store';
@@ -27,18 +26,20 @@ function App({ Component, pageProps }: AppProps) {
   useRevalidate();
 
   return (
-    <NextUIProvider className='light'>
-      <PersistGate persistor={store.__persistor} loading={<div>loading</div>}>
-        <ToastContainer
-          toastStyle={{ fontFamily: "'Cairo', sans-serif " }}
-          position={toast.POSITION.TOP_CENTER}
-          transition={Slide}
-          newestOnTop={true}
-          rtl={true}
-        />
-        <Component {...pageProps} />
-      </PersistGate>
-    </NextUIProvider>
+    <div className='m-auto max-w-[100rem]'>
+      <NextUIProvider className='light'>
+        <PersistGate persistor={store.__persistor} loading={<div>loading</div>}>
+          <ToastContainer
+            toastStyle={{ fontFamily: "'Cairo', sans-serif " }}
+            position={toast.POSITION.TOP_CENTER}
+            transition={Slide}
+            newestOnTop={true}
+            rtl={true}
+          />
+          <Component {...pageProps} />
+        </PersistGate>
+      </NextUIProvider>
+    </div>
   );
 }
 

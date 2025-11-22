@@ -30,6 +30,9 @@ export * from './layouts';
 // Utility components
 export { Logo } from './components/Logo';
 export { LogoutButton } from './components/LogoutButton';
+export { RatingBadge } from './components/RatingBadge';
+export { default as CityDropdown } from './components/CityDropdown';
+export type { CityOption, CityDropdownProps } from './components/CityDropdown';
 
 // Asset paths
 export const ASSETS = {

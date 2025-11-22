@@ -85,20 +85,14 @@ function Payment() {
     // setSelectedPayment((prev) => (prev === paymentIndex ? null : paymentIndex));
   };
 
-  const redirectToStripe = () => {
-    // Redirect to Stripe Checkout
-  };
 
-  const performWalletPayment = () => {
-    // Perform wallet payment
-  };
-
-  const performCashPayment = () => {
-    // Perform cash payment
-  };
 
   useEffect(() => {
     setWalletBalance(0);
+    // Set first payment option as default if none selected
+    if (!selectedPayment) {
+      dispatch(setPaymentMethod('cash'));
+    }
   }, []);
 
   useEffect(() => {

@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlusCircleIcon } from '@heroicons/react/24/solid';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/router';
 import BalanceSkeleton from './BalanceSkeleton';
-import BackButton from '../BackButton'
 
 interface HeaderProps {
   balance: number | undefined;
@@ -10,10 +11,16 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ balance, loading }) => {
+  const router = useRouter();
+
   return (
     <header className="sticky top-0 py-4 px-2 bg-[#005687] z-20 text-white">
       <div className="flex gap-2 text-xl">
-        <BackButton />
+        <button
+          onClick={() => router.back()}
+          className='text-white hover:bg-white/10 rounded-full p-2 transition-colors'>
+          <ChevronRightIcon className='w-6 h-6' />
+        </button>
         <h1>محفظتي</h1>
       </div>
       <div className="flex justify-between p-4 mt-4">

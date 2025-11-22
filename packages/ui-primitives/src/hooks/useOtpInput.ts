@@ -1,8 +1,15 @@
-import { useState, useRef, KeyboardEvent, ClipboardEvent } from 'react';
+import { useState, useRef, useEffect, KeyboardEvent, ClipboardEvent } from 'react';
 
-export const useOtpInput = (length: number, onChange: (value: string) => void) => {
+export const useOtpInput = (length: number, onChange: (value: string) => void, value?: string) => {
   const [otp, setOtp] = useState<string[]>(Array(length).fill(''));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if (value !== undefined) {
+      const newOtp = value.split('').concat(Array(length).fill('')).slice(0, length);
+      setOtp(newOtp);
+    }
+  }, [value, length]);
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;

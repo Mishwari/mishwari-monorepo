@@ -9,7 +9,8 @@ import DestIcon from '@mishwari/ui-web/public/icons/navigation/destIcon.svg';
 import SwitchArrowsIcon from '@mishwari/ui-web/public/icons/common/SwitchArrows.svg';
 import { tripsApi } from '@mishwari/api';
 import { Button, DatePicker, QuickDateButtons } from '@mishwari/ui-web';
-import CityCombobox from './CityCombobox';
+import { CityDropdown } from '@mishwari/ui-web';
+import type { CityOption } from '@mishwari/ui-web';
 import type { CityWithTripCount } from '@mishwari/api';
 
 export default function TripSearchForm() {
@@ -17,8 +18,8 @@ export default function TripSearchForm() {
   const [toCity, setToCity] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showCalendar, setShowCalendar] = useState<boolean>(false);
-  const [departureCities, setDepartureCities] = useState<CityWithTripCount[]>([]);
-  const [destinationCities, setDestinationCities] = useState<CityWithTripCount[]>([]);
+  const [departureCities, setDepartureCities] = useState<CityOption[]>([]);
+  const [destinationCities, setDestinationCities] = useState<CityOption[]>([]);
   const [loadingFrom, setLoadingFrom] = useState(false);
   const [loadingTo, setLoadingTo] = useState(false);
   const router = useRouter();
@@ -103,13 +104,14 @@ export default function TripSearchForm() {
           <PickIcon className="sm:hidden object-contain w-[18px] h-auto" />
           <div className="flex flex-col w-full">
             <span className="text-xs font-medium text-gray-600">الانطلاق</span>
-            <CityCombobox
+            <CityDropdown
               options={departureCities}
               value={fromCity}
               onChange={setFromCity}
               placeholder="حدد اليوم واختر مدينة الانطلاق"
               emptyMessage="لا توجد رحلات متاحة"
               loading={loadingFrom}
+              showTripCount={true}
             />
           </div>
         </div>
@@ -126,13 +128,14 @@ export default function TripSearchForm() {
           <DestIcon className="sm:hidden object-contain w-[15px] h-auto" />
           <div className="flex flex-col w-full">
             <span className="text-xs font-medium text-gray-600">الوجهة</span>
-            <CityCombobox
+            <CityDropdown
               options={destinationCities}
               value={toCity}
               onChange={setToCity}
               placeholder={fromCity ? "اختر مدينة الوجهة" : "اختر مدينة الانطلاق أولاً"}
               emptyMessage="لا توجد وجهات متاحة"
               loading={loadingTo}
+              showTripCount={true}
             />
           </div>
         </div>

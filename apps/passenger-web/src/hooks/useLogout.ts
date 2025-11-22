@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { resetAuthState } from '@/store/slices/authSlice'; // Adjust the path
+import { resetAuthState } from '@/store/slices/authSlice';
+import { resetUserState } from '@/store/slices/profileSlice';
 
 const useLogout = () => {
   const dispatch = useDispatch();
@@ -22,8 +23,9 @@ const useLogout = () => {
         }
       });
 
-      // Reset auth state
+      // Reset auth and profile state
       dispatch(resetAuthState());
+      dispatch(resetUserState());
 
       // Redirect to the login page
       await router.push('/login');

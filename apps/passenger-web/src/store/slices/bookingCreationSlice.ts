@@ -27,7 +27,7 @@ const initialState: BookingCreationSlice = {
     isPaid: false,
     status: 'idle',
     error: null,
-    paymentMethod: 'stripe',
+    paymentMethod: 'cash',
 };
 
 export const bookingCreationSlice = createSlice({
