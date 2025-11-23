@@ -1,8 +1,18 @@
-export const createFormData = (files: File[], fieldName: string = 'documents'): FormData => {
+export const createFormData = (data: File[] | Record<string, File | null>, fieldName: string = 'documents'): FormData => {
   const formData = new FormData();
-  files.forEach((file) => {
-    formData.append(fieldName, file);
-  });
+  
+  if (Array.isArray(data)) {
+    data.forEach((file) => {
+      formData.append(fieldName, file);
+    });
+  } else {
+    Object.entries(data).forEach(([key, file]) => {
+      if (file) {
+        formData.append(key, file);
+      }
+    });
+  }
+  
   return formData;
 };
 

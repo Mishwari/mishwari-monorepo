@@ -11,10 +11,10 @@ import { HomeIcon as HomeIconSolid, TicketIcon as TicketIconSolid, UserIcon as U
 export const passengerNavConfig = {
   desktop: {
     items: [
-      { name: 'الاعدادات', href: '/profile', icon: Cog6ToothIcon },
+      { name: 'معلومات المستخدم', href: '/profile', icon: UserIcon },
       { name: 'رحلاتي', href: '/my_trips', icon: TicketIcon },
       { name: 'المحفظة', href: '/profile/wallet', icon: BanknotesIcon },
-      { name: 'الركاب', href: '/passengers', icon: UserGroupIcon },
+      { name: 'قائمة الركاب', href: '/passengers', icon: UserGroupIcon },
     ],
   },
   mobile: {
@@ -23,7 +23,7 @@ export const passengerNavConfig = {
       { name: 'بروفايل', href: '/profile', icon: UserIconSolid },
       { name: 'رحلاتي', href: '/my_trips', icon: TicketIconSolid },
       { name: 'المحفظة', href: '/profile/wallet', icon: BanknotesIcon },
-      { name: 'الركاب', href: '/passengers', icon: UserGroupIcon },
+      { name: 'قائمة الركاب', href: '/passengers', icon: UserGroupIcon },
     ],
   },
 };

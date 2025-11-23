@@ -7,7 +7,7 @@ export const getNavigationItems = (profile: Profile | null) => {
   
   const baseItems = [
     { name: 'الرحلات', href: '/trips', icon: MapIcon },
-    { name: 'الأسطول', href: '/fleet', icon: TruckIcon },
+    { name: role === 'operator_admin' ? 'الأسطول' : 'حافلتي', href: '/fleet', icon: TruckIcon },
     { name: 'الملف الشخصي', href: '/profile', icon: UserIcon },
   ];
 

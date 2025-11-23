@@ -14,7 +14,17 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@mishwari/api": ["../../packages/api/src"],
+      "@mishwari/types": ["../../packages/types/src"],
+      "@mishwari/utils": ["../../packages/utils/src"],
+      "@mishwari/ui-web": ["../../packages/ui-web/src"],
+      "@mishwari/ui-primitives": ["../../packages/ui-primitives/src"],
+      "@mishwari/features-auth": ["../../packages/features/auth/src"],
+      "@mishwari/features-bookings": ["../../packages/features/bookings/src"],
+      "@mishwari/features-passengers": ["../../packages/features/passengers/src"],
+      "@mishwari/features-profile": ["../../packages/features/profile/src"],
+      "@mishwari/features-trips": ["../../packages/features/trips/src"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

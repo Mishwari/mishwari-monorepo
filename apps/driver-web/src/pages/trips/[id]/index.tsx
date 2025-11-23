@@ -1,24 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useSelector } from 'react-redux';
-import { AppState } from '@/store/store';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import BookingsList from '@/components/bookings/BookingsList';
 import { Button, ConfirmDialog } from '@mishwari/ui-web';
 import { tripsApi, operatorApi } from '@mishwari/api';
 import { Trip } from '@mishwari/types';
 import { convertToReadableTime } from '@mishwari/utils';
+import { useCanPublishTrip } from '@/hooks/useCanPublishTrip';
 import { CalendarIcon, ClockIcon, MapPinIcon, TruckIcon, ArrowRightIcon, PlayIcon, XMarkIcon, UserIcon, TableCellsIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
 
 export default function TripDetailsPage() {
   const router = useRouter();
   const { id } = router.query;
-  const { canPublish, profile } = useSelector((state: AppState) => state.auth);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-
+  
+  const { message: publishMessage } = useCanPublishTrip(trip?.bus || undefined, trip?.driver || undefined);
+  
   useEffect(() => {
     if (!id) return;
     
@@ -135,39 +136,6 @@ export default function TripDetailsPage() {
     new Date() >= new Date(trip.departure_window_start) &&
     new Date() <= new Date(trip.departure_window_end);
 
-  const getPublishMessage = () => {
-    if (!trip) return '';
-    if (trip.can_publish) return '';
-    
-    const missing = [];
-    
-    // Check operator
-    if (trip.operator && !trip.operator.is_verified) {
-      missing.push('المشغل');
-    }
-    
-    // Check bus
-    if (trip.bus) {
-      if (!trip.bus.is_verified) {
-        missing.push('الحافلة');
-      }
-    } else {
-      missing.push('الحافلة (غير محددة)');
-    }
-    
-    // Check driver
-    if (trip.driver) {
-      if (!trip.driver.is_verified) {
-        missing.push('السائق');
-      }
-    } else {
-      missing.push('السائق (غير محدد)');
-    }
-    
-    if (missing.length === 0) return 'لا يمكن نشر الرحلة';
-    return `لنشر هذه الرحلة، يجب توثيق: ${missing.join('، ')}`;
-  };
-
   return (
     <DashboardLayout>
       <ConfirmDialog
@@ -212,7 +180,7 @@ export default function TripDetailsPage() {
                   variant="default"
                   disabled={!trip.can_publish}
                   loading={actionLoading}
-                  title={getPublishMessage()}
+                  title={publishMessage}
                 >
                   نشر
                 </Button>
@@ -336,16 +304,16 @@ export default function TripDetailsPage() {
           )}
         </div>
 
-        {!trip.can_publish && trip.status === 'draft' && (
+        {!trip.can_publish && trip.status === 'draft' && publishMessage && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
             <p className="text-amber-800">
-              💡 {getPublishMessage()}
+              💡 {publishMessage}
             </p>
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
             <h2 className="text-xl font-semibold">الحجوزات ({bookings.length})</h2>
             <div className="flex gap-2">
               <Button onClick={() => router.push(`/trips/${trip.id}/bookings`)} variant="outline" size="sm">
@@ -356,33 +324,7 @@ export default function TripDetailsPage() {
               </Button>
             </div>
           </div>
-          {bookings.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">لا توجد حجوزات</p>
-          ) : (
-            <div className="space-y-3">
-              {bookings.map((booking) => (
-                <div 
-                  key={booking.id} 
-                  onClick={() => router.push(`/trips/${trip.id}/bookings/${booking.id}`)}
-                  className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">#{booking.id} <span className="text-sm text-gray-500">({booking.from_stop?.city?.city || 'N/A'} → {booking.to_stop?.city?.city || 'N/A'})</span></p>
-                      <p className="text-sm text-gray-600">{booking.passengers?.length || 0} راكب</p>
-                    </div>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {booking.status}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <BookingsList bookings={bookings} />
         </div>
       </div>
     </DashboardLayout>

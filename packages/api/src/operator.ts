@@ -42,6 +42,7 @@ export interface CreateTripWithStopsPayload {
   trip_type: 'scheduled' | 'flexible';
   selected_waypoints: number[];
   custom_prices?: Record<number, number>;
+  auto_publish?: boolean;
 }
 
 export const operatorApi = {

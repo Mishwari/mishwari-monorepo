@@ -11,6 +11,16 @@ export default function VerifyBusPage() {
   const router = useRouter();
   const { id } = router.query;
   const [documents, setDocuments] = useState<File[]>([]);
+
+  const handleFileChange = (files: File | File[] | null) => {
+    if (Array.isArray(files)) {
+      setDocuments(files);
+    } else if (files) {
+      setDocuments([files]);
+    } else {
+      setDocuments([]);
+    }
+  };
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,7 +55,7 @@ export default function VerifyBusPage() {
             <div>
               <FileUpload
                 label="مستندات الحافلة"
-                onChange={setDocuments}
+                onChange={handleFileChange}
               />
               <p className="text-sm text-gray-500 mt-2">
                 يرجى رفع: رخصة السير، شهادة الفحص الفني، تأمين المركبة

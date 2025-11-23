@@ -1,12 +1,12 @@
 import { addTripDetails, setTripsDetails, updateTripStatus as updateTripStatusSlice, setLoading } from '../slices/tripsSlice';
-import { operatorApi } from '@mishwari/api';
+import { tripsApi, operatorApi } from '@mishwari/api';
 import { toast } from 'react-toastify';
 
 export const fetchTripsDetails = (token: string) => async (dispatch: any) => {
   try {
     dispatch(setLoading(true));
-    const response = await operatorApi.getTrips();
-    dispatch(setTripsDetails(response.data));
+    const trips = await tripsApi.list();
+    dispatch(setTripsDetails(trips));
   } catch (error: any) {
     console.error('Error fetching trips:', error.message);
     dispatch(setLoading(false));
@@ -21,12 +21,12 @@ export const createTrip = (tripData: object, token: string) => async (dispatch: 
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   try {
-    const [response] = await Promise.all([
-      operatorApi.createTrip(tripData),
+    const [trip] = await Promise.all([
+      tripsApi.create(tripData as any),
       delay(1000)
     ]);
 
-    dispatch(addTripDetails(response.data));
+    dispatch(addTripDetails(trip));
     
     toast.dismiss(waitingCreateTrip);
     toast.success('تم انشاء الرحلة بنجاح', {
@@ -61,7 +61,7 @@ export const changeTripStatus = (id: number, newStatus: string, token: string) =
 
   try {
     await Promise.all([
-      operatorApi.updateTripStatus(id, newStatus),
+      tripsApi.update(id, { status: newStatus } as any),
       delay(1000)
     ]);
 

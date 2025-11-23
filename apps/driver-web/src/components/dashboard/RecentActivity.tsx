@@ -27,7 +27,7 @@ export default function RecentActivity() {
           activityItems.push({
             id: `trip-${trip.id}`,
             type: 'trip',
-            message: `رحلة ${trip.from_city?.city || trip.from_city_name} → ${trip.to_city?.city || trip.to_city_name}`,
+            message: `رحلة ${trip.from_city.city} ← ${trip.to_city.city}`,
             time: new Date(trip.journey_date).toLocaleDateString('en-GB'),
             status: trip.status,
             tripId: trip.id,

@@ -7,16 +7,15 @@ import BusCard from '@/components/fleet/BusCard';
 import { Button } from '@mishwari/ui-web';
 import { fleetApi } from '@mishwari/api';
 import { Bus } from '@mishwari/types';
-import { PlusIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 export default function FleetPage() {
   const { isAuthenticated, canManageDrivers, profile } = useSelector((state: AppState) => state.auth);
   const router = useRouter();
   const [buses, setBuses] = useState<Bus[]>([]);
   const [loading, setLoading] = useState(true);
-  const isVerified = profile?.is_verified;
-  const isDriver = profile?.role === 'driver';
-  const hasReachedBusLimit = isDriver && buses.length >= 1;
+  const role = (profile as any)?.profile?.role || profile?.role;
+  const isDriver = !canManageDrivers;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -35,6 +34,11 @@ export default function FleetPage() {
         const data = await fleetApi.list();
         if (mounted) {
           setBuses(data);
+          // Redirect driver directly to their bus detail page
+          if (!canManageDrivers && data.length > 0) {
+            router.push(`/fleet/${data[0].id}`);
+            return;
+          }
         }
       } catch (error: any) {
         if (mounted) {
@@ -53,55 +57,53 @@ export default function FleetPage() {
     return () => {
       mounted = false;
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isDriver, router]);
 
   if (!isAuthenticated) return null;
 
+  // Show loading while redirecting driver to their bus
+  if (loading && isDriver) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12">
+          <p className="text-gray-600">جاري التحميل...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Driver with no bus - show add button
+  if (isDriver && buses.length === 0) {
+    return (
+      <DashboardLayout>
+        <div className="text-center py-12 bg-white rounded-lg shadow">
+          <p className="text-gray-600 mb-4">لا توجد حافلة بعد</p>
+          <Button onClick={() => router.push('/fleet/add')} variant="default">
+            إضافة حافلة
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Operator view - full fleet management
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {canManageDrivers ? 'أسطول الحافلات' : 'حافلتي'}
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900">أسطول الحافلات</h1>
             <p className="text-gray-600 mt-1">إدارة حافلاتك وتوثيقها</p>
           </div>
           <Button 
-            onClick={() => {
-              if (hasReachedBusLimit) {
-                return;
-              }
-              router.push('/fleet/add');
-            }} 
+            onClick={() => router.push('/fleet/add')} 
             variant="default" 
             size="lg"
-            disabled={hasReachedBusLimit}
-            title={hasReachedBusLimit ? 'وصلت للحد الأقصى من الحافلات' : ''}
           >
             <PlusIcon className="h-5 w-5 ml-2" />
             إضافة حافلة
           </Button>
         </div>
-
-        {hasReachedBusLimit && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
-            <ExclamationTriangleIcon className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-yellow-900">وصلت للحد الأقصى من الحافلات</h3>
-              <p className="text-sm text-yellow-800 mt-1">
-                السائقون الأفراد يمكنهم تسجيل حافلة واحدة فقط. 
-                <button 
-                  onClick={() => router.push('/upgrade')} 
-                  className="underline font-semibold hover:text-yellow-900"
-                >
-                  قم بترقية حسابك
-                </button>
-                {' '}لإضافة المزيد من الحافلات.
-              </p>
-            </div>
-          </div>
-        )}
 
         {loading ? (
           <div className="text-center py-12">
@@ -110,9 +112,6 @@ export default function FleetPage() {
         ) : buses.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
             <p className="text-gray-600 mb-4">لا توجد حافلات بعد</p>
-            {!isVerified && (
-              <p className="text-sm text-gray-500 mb-4">يمكنك إضافة حافلات، وستحتاج لتوثيقها لاحقاً</p>
-            )}
             <Button onClick={() => router.push('/fleet/add')} variant="default">
               إضافة أول حافلة
             </Button>

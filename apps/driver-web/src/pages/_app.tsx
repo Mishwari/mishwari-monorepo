@@ -7,21 +7,12 @@ import { useStore, useSelector } from 'react-redux';
 import { createWrapper } from 'next-redux-wrapper';
 import useAuth from '@/hooks/useAuth';
 import { useRevalidate } from '@/hooks/useRevalidate';
-import { apiClient } from '@mishwari/api';
-import { useEffect } from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 import { Slide, ToastContainer, toast } from 'react-toastify';
 
 function App({ Component, pageProps }: AppProps) {
   useAuth(false);
   const store: any = useStore();
-  const { token } = useSelector((state: AppState) => state.auth);
-
-  useEffect(() => {
-    if (apiClient && typeof apiClient.setTokenGetter === 'function') {
-      apiClient.setTokenGetter(() => token);
-    }
-  }, [token]);
 
   useRevalidate();
 

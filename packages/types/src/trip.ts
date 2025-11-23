@@ -1,5 +1,6 @@
 import { Driver } from './driver';
 import { Bus } from './bus';
+import { Operator } from './operator';
 
 export interface City {
   id: number;
@@ -18,6 +19,7 @@ export interface TripStop {
 
 export interface Trip {
   id: number;
+  operator: Operator | null;
   driver: Driver | null;
   bus: Bus | null;
   from_city: City;

@@ -21,7 +21,11 @@ import TripSkeleton from '@/components/Skeletons/TripSkeleton';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 import { QuickDaySelector, UserDropdownMenu } from '@mishwari/ui-web';
 import { format } from 'date-fns';
-import { useTripsFilter, useTripsSort, SortOption } from '@mishwari/features-trips';
+import {
+  useTripsFilter,
+  useTripsSort,
+  SortOption,
+} from '@mishwari/features-trips';
 import useAuth from '@/hooks/useAuth';
 import useLogout from '@/hooks/useLogout';
 import { passengerNavConfig } from '@/config/navigation';
@@ -69,7 +73,7 @@ function index() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const { filteredTrips, filters, setFilters } = useTripsFilter(trips);
   const { sortedTrips, sortBy, setSortBy } = useTripsSort(filteredTrips);
-  
+
   const [filterBuses, setFilterBuses] = useState<any>({
     BusType: [],
     Departure: [],
@@ -101,7 +105,7 @@ function index() {
         const data = await tripsApi.search({
           pickup: router.query.pickup as string,
           destination: router.query.destination as string,
-          date: router.query.date as string
+          date: router.query.date as string,
         });
         setTrips(data);
         setIsLoading(false);
@@ -111,7 +115,12 @@ function index() {
       }
     };
     fetchTrips();
-  }, [router.isReady, router.query.pickup, router.query.destination, router.query.date]);
+  }, [
+    router.isReady,
+    router.query.pickup,
+    router.query.destination,
+    router.query.date,
+  ]);
 
   useEffect(() => {
     setFilters({
@@ -123,7 +132,8 @@ function index() {
   }, [filterBuses, setFilters]);
 
   // For minPrice only
-  const minimumTrip = sortedTrips.length > 0 ? Math.min(...sortedTrips.map(t => t.price)) : 0;
+  const minimumTrip =
+    sortedTrips.length > 0 ? Math.min(...sortedTrips.map((t) => t.price)) : 0;
 
   useEffect(() => {
     setSortBy(selectedSort.value);
@@ -131,14 +141,13 @@ function index() {
 
   return (
     <div className='flex flex-col items-center bg-gray-50 bg-scroll h-screen'>
-      <section className='fixed top-0 w-full z-10 bg-brand-primary overflow-y-hidden'>
+      <section className='fixed top-0 w-full z-10 bg-brand-primary '>
         <div className='my-2'>
           <div className='flex justify-between items-center w-full'>
             <div className='flex items-center gap-4 pt-1 mr-2'>
               <button
                 onClick={() => router.push('/')}
-                className='text-white hover:bg-white/10 rounded-full p-2 transition-colors'
-              >
+                className='text-white hover:bg-white/10 rounded-full p-2 transition-colors'>
                 <ChevronRightIcon className='w-6 h-6' />
               </button>
 
@@ -149,9 +158,11 @@ function index() {
               </div>
               <button
                 onClick={() => setIsEditFromTo(true)}
-                className='text-white hover:bg-white/10 rounded-full p-2 transition-colors'
-              >
-                <EditIcon width={20} height={20} />
+                className='text-white hover:bg-white/10 rounded-full p-2 transition-colors'>
+                <EditIcon
+                  width={20}
+                  height={20}
+                />
               </button>
               <EditFromTo
                 isEditFromTo={isEditFromTo}
@@ -164,23 +175,30 @@ function index() {
             </div>
             <div className='flex items-center gap-2 ml-2'>
               {isAuthenticated && (
-                <UserDropdownMenu items={passengerNavConfig.desktop.items} onLogout={logout} />
+                <UserDropdownMenu
+                  items={passengerNavConfig.desktop.items}
+                  onLogout={logout}
+                />
               )}
             </div>
-
           </div>
         </div>
         <div className='md:hidden m-3 mt-5 pb-4'>
           <QuickDaySelector
             selectedDate={new Date(selectedDate || new Date())}
-            onDateSelect={(date) => handleDateChange(format(date, 'yyyy-MM-dd'))}
+            onDateSelect={(date) =>
+              handleDateChange(format(date, 'yyyy-MM-dd'))
+            }
           />
           <div className=' flex gap-2 mt-3'>
             <div
               className='flex items-center bg-blue-100 justify-center rounded-full px-6  gap-1.5 w-[90px] h-[30px] hover:bg-blue-200 transition-colors'
               onClick={() => setIsFilterOpen(true)}>
               <span className='font-semibold'>فلترة</span>
-              <FilterIcon width={22} height={22} />
+              <FilterIcon
+                width={22}
+                height={22}
+              />
             </div>
 
             {/* Filter Panel hidden by default its state: isOpen */}
@@ -220,13 +238,19 @@ function index() {
                 <SwiperSlide style={{ width: 'auto' }}>
                   <div className='rounded-full px-3 flex items-center justify-center h-[30px] bg-blue-100'>
                     <h2 className='m-0 mr-1'>نوع الباص </h2>
-                    <DownArrowIcon width={25} height={25} />
+                    <DownArrowIcon
+                      width={25}
+                      height={25}
+                    />
                   </div>
                 </SwiperSlide>
                 <SwiperSlide style={{ width: 'auto' }}>
                   <div className='rounded-full px-3 flex items-center justify-center h-[30px] bg-blue-100'>
                     <h2 className='m-0 mr-1'>وقت المغادرة (1)</h2>
-                    <DownArrowIcon width={25} height={25} />
+                    <DownArrowIcon
+                      width={25}
+                      height={25}
+                    />
                   </div>
                 </SwiperSlide>
               </Swiper>
@@ -239,7 +263,9 @@ function index() {
         <div className='hidden md:block sticky md:w-[35%] pb-8 overflow-y-auto scrollbar-hide'>
           <QuickDaySelector
             selectedDate={new Date(selectedDate || new Date())}
-            onDateSelect={(date) => handleDateChange(format(date, 'yyyy-MM-dd'))}
+            onDateSelect={(date) =>
+              handleDateChange(format(date, 'yyyy-MM-dd'))
+            }
           />
           <div className=' '>
             <div className='flex flex-col gap-3 mt-4'>
@@ -279,7 +305,10 @@ function index() {
         ) : sortedTrips.length !== 0 ? (
           <div className='w-full pb-8 md:w-[65%] overflow-y-auto scrollbar-hide'>
             <div className='flex items-center rounded-xl border border-gray-300 p-2 mb-3 gap-2 bg-blue-50'>
-              <BusFrontViewIcon width={20} height={20} />
+              <BusFrontViewIcon
+                width={20}
+                height={20}
+              />
               <h2 className='m-0 text-xs  text-gray-500 font-light '>
                 تم العثور على{' '}
                 <strong className='font-semibold text-black'>

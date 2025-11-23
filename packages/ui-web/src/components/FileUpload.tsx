@@ -7,11 +7,12 @@ interface FileUploadProps {
   label: string;
   accept?: string;
   maxFiles?: number;
-  onChange: (files: File[]) => void;
+  onChange: (files: File[] | File | null) => void;
   className?: string;
+  required?: boolean;
 }
 
-export const FileUpload = ({ label, accept = '.pdf,.jpg,.jpeg,.png', maxFiles = 5, onChange, className }: FileUploadProps) => {
+export const FileUpload = ({ label, accept = '.pdf,.jpg,.jpeg,.png', maxFiles = 5, onChange, className, required }: FileUploadProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string>('');
 
@@ -40,13 +41,13 @@ export const FileUpload = ({ label, accept = '.pdf,.jpg,.jpeg,.png', maxFiles = 
 
     const newFiles = [...files, ...selectedFiles];
     setFiles(newFiles);
-    onChange(newFiles);
+    onChange(maxFiles === 1 ? newFiles[0] || null : newFiles);
   };
 
   const removeFile = (index: number) => {
     const newFiles = files.filter((_, i) => i !== index);
     setFiles(newFiles);
-    onChange(newFiles);
+    onChange(maxFiles === 1 ? null : newFiles);
   };
 
   return (
@@ -57,10 +58,11 @@ export const FileUpload = ({ label, accept = '.pdf,.jpg,.jpeg,.png', maxFiles = 
         <input
           type="file"
           accept={accept}
-          multiple
+          multiple={maxFiles > 1}
           onChange={handleFileChange}
           className="hidden"
           id={`file-upload-${label}`}
+          required={required}
         />
         <label htmlFor={`file-upload-${label}`} className="cursor-pointer">
           <CloudArrowUpIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />

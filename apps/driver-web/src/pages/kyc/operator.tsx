@@ -21,6 +21,26 @@ export default function OperatorKYC() {
   });
   const [loading, setLoading] = useState(false);
 
+  const handlePersonalDocsChange = (files: File | File[] | null) => {
+    if (Array.isArray(files)) {
+      setPersonalDocs(files);
+    } else if (files) {
+      setPersonalDocs([files]);
+    } else {
+      setPersonalDocs([]);
+    }
+  };
+
+  const handleCompanyDocsChange = (files: File | File[] | null) => {
+    if (Array.isArray(files)) {
+      setCompanyDocs(files);
+    } else if (files) {
+      setCompanyDocs([files]);
+    } else {
+      setCompanyDocs([]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -62,7 +82,7 @@ export default function OperatorKYC() {
               <h2 className="text-lg font-semibold text-gray-900 mb-4">المستندات الشخصية</h2>
               <FileUpload
                 label="الهوية الوطنية / جواز السفر"
-                onChange={setPersonalDocs}
+                onChange={handlePersonalDocsChange}
               />
               <p className="text-sm text-gray-500 mt-2">
                 يرجى رفع صورة واضحة من الهوية الوطنية أو جواز السفر
@@ -75,7 +95,7 @@ export default function OperatorKYC() {
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">مستندات الشركة</h2>
                   <FileUpload
                     label="السجل التجاري / الترخيص"
-                    onChange={setCompanyDocs}
+                    onChange={handleCompanyDocsChange}
                   />
                   <p className="text-sm text-gray-500 mt-2">
                     يرجى رفع السجل التجاري أو ترخيص النقل

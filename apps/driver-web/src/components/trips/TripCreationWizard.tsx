@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
-import { operatorApi } from '@mishwari/api';
+import { useSelector } from 'react-redux';
+import { operatorApi, fleetApi } from '@mishwari/api';
 import type { RouteDetectionResult, WaypointDetectionResult } from '@mishwari/api';
+import type { Bus, Driver } from '@mishwari/types';
+import type { AppState } from '@/store/store';
+import { useCanPublishTrip } from '@/hooks/useCanPublishTrip';
 import Step1BasicInfo from './wizard/Step1BasicInfo';
 import Step2RouteSelection from './wizard/Step2RouteSelection';
 import Step3WaypointSelection from './wizard/Step3WaypointSelection';
@@ -12,7 +16,11 @@ interface TripCreationWizardProps {
 }
 
 export default function TripCreationWizard({ onSuccess }: TripCreationWizardProps) {
+  const { canManageDrivers } = useSelector((state: AppState) => state.auth);
+  const isDriver = !canManageDrivers;
   const [step, setStep] = useState(1);
+  const [buses, setBuses] = useState<Bus[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
   const [formData, setFormData] = useState({
     bus: 0,
     from_city_id: 0,
@@ -36,6 +44,22 @@ export default function TripCreationWizard({ onSuccess }: TripCreationWizardProp
   const [waypointsLoading, setWaypointsLoading] = useState(false);
   
   const [creating, setCreating] = useState(false);
+
+  const selectedBus = buses.find(b => b.id === formData.bus);
+  const selectedDriver = drivers.find(d => d.id === formData.driver);
+  const { canPublish, message } = useCanPublishTrip(selectedBus, selectedDriver);
+  
+  const showBanner = isDriver || step === 4;
+
+  useEffect(() => {
+    Promise.all([
+      fleetApi.list().catch(() => []),
+      fleetApi.getDrivers().catch(() => [])
+    ]).then(([b, d]) => {
+      setBuses(b);
+      setDrivers(d);
+    });
+  }, []);
 
   useEffect(() => {
     if (step === 2 && formData.from_city_id > 0 && formData.to_city_id > 0) {
@@ -71,7 +95,8 @@ export default function TripCreationWizard({ onSuccess }: TripCreationWizardProp
         route_index: selectedRoute!,
         ...formData,
         selected_waypoints: selectedWaypoints,
-        custom_prices: customPrices
+        custom_prices: customPrices,
+        auto_publish: canPublish
       });
       onSuccess(trip.id);
     } catch (error: any) {
@@ -82,54 +107,65 @@ export default function TripCreationWizard({ onSuccess }: TripCreationWizardProp
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <WizardProgress currentStep={step} totalSteps={4} />
-
-      {step === 1 && (
-        <Step1BasicInfo
-          data={formData}
-          onChange={setFormData}
-          onNext={() => setStep(2)}
-        />
+    <div className="space-y-4">
+      {!canPublish && message && showBanner && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <p className="text-amber-800">
+            💡 {message} - يمكنك حفظ الرحلة كمسودة ونشرها لاحقاً بعد التوثيق.
+          </p>
+        </div>
       )}
+      
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <WizardProgress currentStep={step} totalSteps={4} />
 
-      {step === 2 && (
-        <Step2RouteSelection
-          routes={routesData?.routes || []}
-          loading={routesLoading}
-          selected={selectedRoute}
-          onSelect={setSelectedRoute}
-          onBack={() => setStep(1)}
-          onNext={() => setStep(3)}
-        />
-      )}
+        {step === 1 && (
+          <Step1BasicInfo
+            data={formData}
+            onChange={setFormData}
+            onNext={() => setStep(2)}
+          />
+        )}
 
-      {step === 3 && (
-        <Step3WaypointSelection
-          waypoints={waypointsData?.waypoints || []}
-          totalDistance={waypointsData?.total_distance_km || 0}
-          totalPrice={formData.total_price}
-          loading={waypointsLoading}
-          selected={selectedWaypoints}
-          customPrices={customPrices}
-          onChange={setSelectedWaypoints}
-          onPriceChange={(cityId, price) => setCustomPrices(prev => ({ ...prev, [cityId]: price }))}
-          onResetPrices={() => setCustomPrices({})}
-          onBack={() => setStep(2)}
-          onNext={() => setStep(4)}
-        />
-      )}
+        {step === 2 && (
+          <Step2RouteSelection
+            routes={routesData?.routes || []}
+            loading={routesLoading}
+            selected={selectedRoute}
+            onSelect={setSelectedRoute}
+            onBack={() => setStep(1)}
+            onNext={() => setStep(3)}
+          />
+        )}
 
-      {step === 4 && (
-        <Step4Review
-          formData={formData}
-          routeSummary={waypointsData?.route_summary}
-          waypoints={selectedWaypoints}
-          onBack={() => setStep(3)}
-          onCreate={handleCreate}
-          loading={creating}
-        />
-      )}
+        {step === 3 && (
+          <Step3WaypointSelection
+            waypoints={waypointsData?.waypoints || []}
+            totalDistance={waypointsData?.total_distance_km || 0}
+            totalPrice={formData.total_price}
+            loading={waypointsLoading}
+            selected={selectedWaypoints}
+            customPrices={customPrices}
+            onChange={setSelectedWaypoints}
+            onPriceChange={(cityId, price) => setCustomPrices(prev => ({ ...prev, [cityId]: price }))}
+            onResetPrices={() => setCustomPrices({})}
+            onBack={() => setStep(2)}
+            onNext={() => setStep(4)}
+          />
+        )}
+
+        {step === 4 && (
+          <Step4Review
+            formData={formData}
+            routeSummary={waypointsData?.route_summary}
+            waypoints={selectedWaypoints}
+            onBack={() => setStep(3)}
+            onCreate={handleCreate}
+            loading={creating}
+            canPublish={canPublish}
+          />
+        )}
+      </div>
     </div>
   );
 }

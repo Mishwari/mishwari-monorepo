@@ -17,6 +17,17 @@ export default function UpgradePage() {
     tax_number: '',
   });
   const [documents, setDocuments] = useState<Record<string, string>>({});
+
+  const handleFileChange = (key: string) => (files: File | File[] | null) => {
+    // In a real implementation, you would upload the file and get a URL
+    // For now, we'll just store a placeholder
+    if (files) {
+      const file = Array.isArray(files) ? files[0] : files;
+      if (file) {
+        setDocuments({ ...documents, [key]: file.name });
+      }
+    }
+  };
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -126,15 +137,18 @@ export default function UpgradePage() {
             <div className="space-y-4">
               <FileUpload
                 label="السجل التجاري"
-                onUpload={(url) => setDocuments({ ...documents, commercial_registration: url })}
+                maxFiles={1}
+                onChange={handleFileChange('commercial_registration')}
               />
               <FileUpload
                 label="الشهادة الضريبية"
-                onUpload={(url) => setDocuments({ ...documents, tax_certificate: url })}
+                maxFiles={1}
+                onChange={handleFileChange('tax_certificate')}
               />
               <FileUpload
                 label="رخصة النقل"
-                onUpload={(url) => setDocuments({ ...documents, transport_license: url })}
+                maxFiles={1}
+                onChange={handleFileChange('transport_license')}
               />
             </div>
           </div>

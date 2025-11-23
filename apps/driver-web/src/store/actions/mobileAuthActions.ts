@@ -47,7 +47,7 @@ export const performVerifyLogin = (mobileNumber: string, otpCode: string, router
       if (response.data.user_status === 'complete') {
         try {
           const profile = await authApi.getMe();
-          dispatch(setProfile(profile));
+          dispatch(setProfile(profile.data));
         } catch (error: any) {
           console.error('Failed to fetch profile after login:', error?.response?.data || error);
         }
@@ -112,7 +112,7 @@ export const performRegister = (profileData: any, router: any) => async (dispatc
     // Fetch profile before navigation
     try {
       const profile = await authApi.getMe();
-      dispatch(setProfile(profile));
+      dispatch(setProfile(profile.data));
       router.push('/');
     } catch (error: any) {
       console.error('Failed to fetch profile after register:', error?.response?.data || error);

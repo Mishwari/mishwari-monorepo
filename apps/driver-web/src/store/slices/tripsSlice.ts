@@ -26,7 +26,7 @@ export const tripsSlice = createSlice({
       const { id, newStatus } = action.payload;
       const index = state.tripsDetails!.findIndex(trip => trip.id === id);
       if (index !== -1) {
-        state.tripsDetails![index].trip_status = newStatus;
+        state.tripsDetails![index].status = newStatus as any;
       }
     },
     setLoading(state, action: PayloadAction<boolean>) {

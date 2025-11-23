@@ -23,7 +23,7 @@ export default function VerifyDriverPage() {
     setLoading(true);
 
     try {
-      const formData = createFormData({ documents });
+      const formData = createFormData(documents);
       await driversApi.uploadDocuments(Number(id), formData);
       alert('تم رفع المستندات بنجاح');
       router.push(`/drivers/${id}`);
@@ -47,35 +47,40 @@ export default function VerifyDriverPage() {
             <FileUpload
               label="الهوية الوطنية (الوجه الأمامي)"
               accept="image/*,.pdf"
-              onChange={(file) => setDocuments({ ...documents, national_id_front: file })}
+              maxFiles={1}
+              onChange={(file) => setDocuments({ ...documents, national_id_front: file as File | null })}
               required
             />
 
             <FileUpload
               label="الهوية الوطنية (الوجه الخلفي)"
               accept="image/*,.pdf"
-              onChange={(file) => setDocuments({ ...documents, national_id_back: file })}
+              maxFiles={1}
+              onChange={(file) => setDocuments({ ...documents, national_id_back: file as File | null })}
               required
             />
 
             <FileUpload
               label="رخصة القيادة (الوجه الأمامي)"
               accept="image/*,.pdf"
-              onChange={(file) => setDocuments({ ...documents, driver_license_front: file })}
+              maxFiles={1}
+              onChange={(file) => setDocuments({ ...documents, driver_license_front: file as File | null })}
               required
             />
 
             <FileUpload
               label="رخصة القيادة (الوجه الخلفي)"
               accept="image/*,.pdf"
-              onChange={(file) => setDocuments({ ...documents, driver_license_back: file })}
+              maxFiles={1}
+              onChange={(file) => setDocuments({ ...documents, driver_license_back: file as File | null })}
               required
             />
 
             <FileUpload
               label="صورة شخصية مع الهوية"
               accept="image/*"
-              onChange={(file) => setDocuments({ ...documents, selfie: file })}
+              maxFiles={1}
+              onChange={(file) => setDocuments({ ...documents, selfie: file as File | null })}
               required
             />
 

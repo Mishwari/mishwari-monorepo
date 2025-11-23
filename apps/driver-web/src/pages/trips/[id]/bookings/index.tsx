@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import BookingsList from '@/components/bookings/BookingsList';
 import { Button } from '@mishwari/ui-web';
 import { operatorApi } from '@mishwari/api';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
@@ -59,60 +60,13 @@ export default function TripBookingsPage() {
           </Button>
         </div>
 
-        {bookings.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-600">لا توجد حجوزات لهذه الرحلة</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">رقم الحجز</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">من - إلى</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الركاب</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الحالة</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المصدر</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التاريخ</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {bookings.map((booking) => (
-                  <tr 
-                    key={booking.id} 
-                    onClick={() => router.push(`/trips/${id}/bookings/${booking.id}`)}
-                    className="hover:bg-gray-50 cursor-pointer"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{booking.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {booking.from_stop?.city?.city || 'N/A'} → {booking.to_stop?.city?.city || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {booking.passengers?.length || 0} راكب
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                        booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {booking.booking_source === 'physical' ? 'يدوي' : 'أونلاين'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(booking.booking_time).toLocaleDateString('en-GB')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <div className="bg-white rounded-lg shadow">
+          <BookingsList 
+            bookings={bookings} 
+            loading={loading}
+            emptyMessage="لا توجد حجوزات لهذه الرحلة" 
+          />
+        </div>
       </div>
     </DashboardLayout>
   );

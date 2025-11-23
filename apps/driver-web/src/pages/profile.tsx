@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import { UserIcon, PencilSquareIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import useAuth from '@/hooks/useAuth';
 import { useProfileManager } from '@/hooks/useProfileManager';
 import { Button } from '@mishwari/ui-web';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ProfileForm from '@/components/ProfileForm';
 
 export default function Profile() {
-  const { profile: authProfile } = useAuth(true);
   const { profile, loading, error, fetchProfile, updateProfile } = useProfileManager();
   const [isEditing, setIsEditing] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -160,7 +157,7 @@ export default function Profile() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-600">رقم الجوال:</span>
-              <span className="font-medium mr-2">{profile.mobile_number}</span>
+              <span className="font-medium mr-2" dir="ltr">+{profile.mobile_number}</span>
             </div>
             <div>
               <span className="text-gray-600">الدور:</span>

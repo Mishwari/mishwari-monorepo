@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mishwari/ui-web';
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mishwari/ui-web';
 import { operatorApi } from '@mishwari/api';
 import { Trip } from '@mishwari/types';
 import PassengerForm from './PassengerForm';

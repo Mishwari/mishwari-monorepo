@@ -7,9 +7,10 @@ interface Step4Props {
   onBack: () => void;
   onCreate: () => void;
   loading: boolean;
+  canPublish: boolean;
 }
 
-export default function Step4Review({ formData, routeSummary, waypoints, onBack, onCreate, loading }: Step4Props) {
+export default function Step4Review({ formData, routeSummary, waypoints, onBack, onCreate, loading, canPublish }: Step4Props) {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">مراجعة الرحلة</h2>
@@ -51,7 +52,7 @@ export default function Step4Review({ formData, routeSummary, waypoints, onBack,
           disabled={loading}
           className="flex-1"
         >
-          {loading ? 'جاري الإنشاء...' : 'إنشاء الرحلة'}
+          {loading ? 'جاري الإنشاء...' : canPublish ? 'نشر الرحلة' : 'حفظ كمسودة'}
         </Button>
       </div>
     </div>

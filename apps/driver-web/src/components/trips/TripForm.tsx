@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { AppState } from '@/store/store';
 import { Button, Input } from '@mishwari/ui-web';
 import { tripsApi, fleetApi, CreateTripPayload } from '@mishwari/api';
 import { Bus, Driver, City } from '@mishwari/types';
+import { useCanPublishTrip } from '@/hooks/useCanPublishTrip';
 
 interface TripFormProps {
   onSubmit: (data: CreateTripPayload, publish: boolean) => void;
@@ -12,7 +11,6 @@ interface TripFormProps {
 }
 
 export default function TripForm({ onSubmit, initialData, loading }: TripFormProps) {
-  const { profile, canPublish } = useSelector((state: AppState) => state.auth);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [formData, setFormData] = useState<CreateTripPayload>({
@@ -45,7 +43,7 @@ export default function TripForm({ onSubmit, initialData, loading }: TripFormPro
   }, []);
 
   const selectedBus = buses.find(b => b.id === formData.bus);
-  const canPublishTrip = canPublish && selectedBus?.is_verified;
+  const { canPublish: canPublishTrip, message } = useCanPublishTrip(selectedBus);
 
   const handleSubmit = (publish: boolean) => {
     onSubmit(formData, publish);
@@ -194,7 +192,7 @@ export default function TripForm({ onSubmit, initialData, loading }: TripFormPro
           variant="default"
           disabled={loading || !canPublishTrip}
           className="flex-1"
-          title={!canPublishTrip ? 'يجب توثيق الحساب والحافلة للنشر' : ''}
+          title={message}
         >
           نشر الرحلة
         </Button>
