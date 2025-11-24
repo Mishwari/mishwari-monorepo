@@ -7,6 +7,7 @@ interface CollapsibleSectionProps {
   count?: number;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  showBottomToggle?: boolean;
 }
 
 export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
@@ -14,6 +15,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   count,
   children,
   defaultOpen = false,
+  showBottomToggle = false,
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
@@ -53,6 +55,15 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
             className="overflow-hidden"
           >
             <div className="px-4 pb-4">{children}</div>
+            {showBottomToggle && count && count > 5 && (
+              <button
+                onClick={() => setIsOpen(false)}
+                className="flex justify-center items-center w-full p-3 hover:bg-gray-50 transition-colors border-t"
+                type="button"
+              >
+                <ChevronDownIcon className="w-5 h-5 rotate-180" />
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -7,6 +7,34 @@ export const brandColors = {
   secondary: '#F5F5F5',
 };
 
+// NextUI theme colors - derived from brandColors
+export const nextuiTheme = {
+  light: {
+    colors: {
+      background: '#FFFFFF',
+      foreground: '#11181C',
+      primary: {
+        foreground: '#FFFFFF',
+        DEFAULT: brandColors.primary,
+      },
+      secondary: {
+        foreground: '#FFFFFF',
+        DEFAULT: '#006FEE',
+      },
+    },
+  },
+  dark: {
+    colors: {
+      background: '#000000',
+      foreground: '#ECEDEE',
+      primary: {
+        foreground: '#000',
+        DEFAULT: '#FFF',
+      },
+    },
+  },
+};
+
 // Gray scale - from passenger-web
 export const grayScale = {
   50: '#F9FAFB',

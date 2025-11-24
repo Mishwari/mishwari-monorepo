@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 const { nextui } = require("@nextui-org/react");
 const sharedConfig = require('@mishwari/ui-web/tailwind.config');
+const { nextuiTheme } = require('@mishwari/ui-web/theme/tokens');
 
 const config: Config = {
   presets: [sharedConfig],
@@ -13,34 +14,7 @@ const config: Config = {
     "../../packages/ui-web/src/**/*.{js,ts,jsx,tsx}",
   ],
   plugins: [
-    nextui({
-      themes: {
-        light: {
-          colors: {
-            background: "#FFFFFF",
-            foreground: "#11181C",
-            primary: {
-              foreground: "#FFFFFF",
-              DEFAULT: "#005687",
-            },
-            secondary: {
-              foreground: "#FFFFFF",
-              DEFAULT: "#006FEE",
-            }
-          },
-        },
-        dark: {
-          colors: {
-            background: "#000000",
-            foreground: "#ECEDEE",
-            primary: {
-              foreground: "#000",
-              DEFAULT: "#FFF",
-            },
-          },
-        }
-      }
-    })
+    nextui({ themes: nextuiTheme })
   ],
 }
 export default config

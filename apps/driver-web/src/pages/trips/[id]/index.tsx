@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import BookingsList from '@/components/bookings/BookingsList';
-import { Button, ConfirmDialog } from '@mishwari/ui-web';
+import { Button, ConfirmDialog, CollapsibleSection } from '@mishwari/ui-web';
 import { tripsApi, operatorApi } from '@mishwari/api';
 import { Trip } from '@mishwari/types';
 import { convertToReadableTime } from '@mishwari/utils';
@@ -309,6 +309,32 @@ export default function TripDetailsPage() {
             <p className="text-amber-800">
               💡 {publishMessage}
             </p>
+          </div>
+        )}
+
+        {trip.stops && trip.stops.length > 2 && (
+          <div className="bg-white rounded-lg shadow">
+            <CollapsibleSection title="نقاط التوقف" count={trip.stops.length - 2} defaultOpen={false} showBottomToggle={true}>
+              <div className="divide-y">
+                {trip.stops.slice(1, -1).map((stop, index) => (
+                  <div key={stop.id} className="py-3 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0 w-8 h-8 bg-brand-primary text-white rounded-full flex items-center justify-center font-semibold text-sm">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900">{stop.city.name}</p>
+                        <p className="text-sm text-gray-500">{stop.distance_from_start_km.toFixed(1)} كم</p>
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-brand-primary">{stop.price_from_start} ر.ي</p>
+                        <p className="text-xs text-gray-500">{new Date(stop.planned_arrival).toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' })}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CollapsibleSection>
           </div>
         )}
 
