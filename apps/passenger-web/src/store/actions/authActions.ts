@@ -56,7 +56,12 @@ export const performLogin = (username: string, password: string) => async (dispa
 };
 
 
-export const fetchUserDetails = () => async (dispatch: any) => {
+export const fetchUserDetails = () => async (dispatch: any, getState: any) => {
+  const { auth } = getState();
+  if (auth.status === 'partial') {
+    console.log('Skipping user fetch for partial status');
+    return;
+  }
   try {
     const response = await apiClient.get('user/');
     dispatch(setUserDetails(response.data[0]));
@@ -68,7 +73,12 @@ export const fetchUserDetails = () => async (dispatch: any) => {
 
 
 
-export const fetchProfileDetails = () => async (dispatch: any) => {
+export const fetchProfileDetails = () => async (dispatch: any, getState: any) => {
+  const { auth } = getState();
+  if (auth.status === 'partial') {
+    console.log('Skipping profile fetch for partial status');
+    return;
+  }
   try {
     const response = await apiClient.get('profile/');
     dispatch(setProfileDetails(response.data));

@@ -8,13 +8,9 @@ import { setPaymentMethod, setTrip, addPassenger } from '@/store/slices/bookingC
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { createBooking } from '@/store/actions/bookingActions';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import PageHeader from '@/layouts/PageHeader';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { UserDropdownMenu } from '@mishwari/ui-web';
-import useAuth from '@/hooks/useAuth';
-import useLogout from '@/hooks/useLogout';
-import { passengerNavConfig } from '@/config/navigation';
+import MainHeader from '@/components/MainHeader';
 import { CollapsibleSection } from '@mishwari/ui-web';
 
 interface CardHolderObject {
@@ -29,8 +25,6 @@ function Payment() {
   const token = useSelector((state: AppState) => state.auth.token);
   const router = useRouter();
   const stripe = useStripe();
-  const { isAuthenticated } = useAuth();
-  const logout = useLogout();
   const dispatch = useDispatch();
   const booking_details = useSelector(
     (state: AppState) => state.bookingCreation
@@ -191,16 +185,18 @@ function Payment() {
     },
   ];
 
+  const profile = useSelector((state: AppState) => state.profile);
+
+  const { tripId, from_stop_id, to_stop_id, pickup, destination, date } = router.query;
+  const backTo = tripId && from_stop_id && to_stop_id
+    ? `/bus_list/${tripId}?from_stop_id=${from_stop_id}&to_stop_id=${to_stop_id}${pickup ? `&pickup=${pickup}` : ''}${destination ? `&destination=${destination}` : ''}${date ? `&date=${date}` : ''}`
+    : '/';
+
   return (
-    <main className='flex flex-col m-0 mb-0 bg-[#F4FAFE] bg-scroll h-screen'>
-      <PageHeader title='الدفع'>
-        {isAuthenticated && (
-          <div className='absolute left-4 top-4'>
-            <UserDropdownMenu items={passengerNavConfig.desktop.items} onLogout={logout} />
-          </div>
-        )}
-      </PageHeader>
-      <section className='mx-3 mt-4 p-6 bg-white shadow-lg text-[#042F40] rounded-xl space-y-4'>
+    <main className='flex flex-col m-0 mb-0 bg-light bg-scroll min-h-screen'>
+      <MainHeader showBackButton title='الدفع' backTo={backTo} />
+      <div className='max-w-4xl mx-auto w-full px-4 py-6'>
+      <section className='p-6 bg-white shadow-sm border border-slate-100 rounded-2xl space-y-4'>
         <div>
           <h2 className='text-lg font-bold mb-3'>ملخص الرحلة</h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -259,15 +255,15 @@ function Payment() {
           </div>
         </div>
       </section>
-      <div className='flex justify-start items-center gap-2 mx-4 mt-4 py-4'>
+      <div className='flex justify-start items-center gap-2 mt-6 py-4'>
         <h1 className='text-lg font-bold'>الدفع عبر</h1>
       </div>
 
-      <div className='flex flex-col gap-2 mx-4'>
+      <div className='flex flex-col gap-2'>
         {paymentOptions.map((option, index) => (
           <div
             key={index}
-            className={`overflow-hidden shadow-lg bg-white text-[#042F40] rounded-xl ${option.disabled ? 'opacity-50' : ''}`}>
+            className={`overflow-hidden shadow-sm border border-slate-100 bg-white rounded-2xl ${option.disabled ? 'opacity-50' : ''}`}>
             <div
               className={`flex justify-between items-center w-full p-4 rounded-xl bg-inherit ${option.disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
               onClick={() => !option.disabled && dispatch(setPaymentMethod(option.name))}>
@@ -288,7 +284,7 @@ function Payment() {
                     <Button
                       disabled={option.disabled}
                       loading={isLoading}
-                      className='mt-4 px-6 mx-auto bg-[#005687] hover:bg-[#004570]'
+                      className='mt-4 px-6 mx-auto bg-brand-primary hover:bg-brand-primary-dark'
                       onClick={handleSubmitBooking}>
                       {option.button_label}
                     </Button>
@@ -298,6 +294,7 @@ function Payment() {
             </AnimatePresence>
           </div>
         ))}
+      </div>
       </div>
     </main>
   );

@@ -47,7 +47,7 @@ function App({ Component, pageProps }: AppProps) {
   const showBottomNavBar = ['/', '/my_trips', '/profile'];
 
   return (
-    <div className='m-auto max-w-[100rem] '>
+    <div className='w-full'>
       <NextUIProvider className='light'>
         <PersistGate
           persistor={store.__persistor}

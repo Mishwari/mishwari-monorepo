@@ -16,6 +16,14 @@ module.exports = {
         gray: grayScale,
         ...shadcnColors,
       },
+      textColor: {
+        DEFAULT: brandColors.DEFAULT,
+        primary: brandColors.primary,
+      },
+      backgroundColor: {
+        light: brandColors.light,
+        hover: brandColors.hover,
+      },
       ...typography,
       borderRadius,
       backgroundImage,

@@ -88,11 +88,11 @@ export const QuickDaySelector: React.FC<QuickDaySelectorProps> = ({
             {isCalendarOpen && (
               <>
                 <div 
-                  className="fixed inset-0 z-40" 
+                  className="fixed inset-0 z-[500] bg-black/40 backdrop-blur-sm" 
                   onClick={() => setIsCalendarOpen(false)}
                 />
                 <div 
-                  className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50"
+                  className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[500]"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <DatePicker

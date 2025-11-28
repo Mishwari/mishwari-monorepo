@@ -237,7 +237,7 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Step1Props) {
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div>
           <label className='block text-sm font-medium mb-2'>من *</label>
-          <div className='px-4 py-2 border rounded-lg'>
+          <div className='relative px-4 py-2 border rounded-lg'>
             <CityDropdown
               options={cities}
               value={cities.find((c) => c.id === data.from_city_id)?.city || ''}
@@ -251,7 +251,7 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Step1Props) {
         </div>
         <div>
           <label className='block text-sm font-medium mb-2'>إلى *</label>
-          <div className='px-4 py-2 border rounded-lg'>
+          <div className='relative px-4 py-2 border rounded-lg'>
             <CityDropdown
               options={cities}
               value={cities.find((c) => c.id === data.to_city_id)?.city || ''}

@@ -72,8 +72,9 @@ export default function PassengersPage() {
 
   return (
     <MainLayout title="إدارة الركاب">
-      <div className="max-w-4xl mx-auto w-full px-4 py-6">
-        <section className="bg-white shadow-lg rounded-xl p-6">
+      <div className="min-h-screen bg-light">
+        <div className="max-w-4xl mx-auto w-full px-4 py-6">
+          <section className="bg-white shadow-sm border border-slate-100 rounded-2xl p-6">
           {error && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
               {error}
@@ -92,7 +93,8 @@ export default function PassengersPage() {
               emptyMessage="لا يوجد ركاب محفوظين"
             />
           )}
-        </section>
+          </section>
+        </div>
       </div>
 
       <Transition appear show={isModalOpen} as={Fragment}>

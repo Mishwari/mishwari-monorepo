@@ -11,9 +11,9 @@ export const NavItem = ({ item, isActive, onClick }: NavItemProps) => {
   );
 
   const className = clsx(
-    'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-gray-100 hover:text-brand-primary md:flex-none md:justify-start md:p-2 md:px-3',
+    'flex h-[48px] grow items-center justify-center gap-2 rounded-lg bg-slate-50 p-3 text-sm font-bold hover:bg-hover hover:text-primary transition-all md:flex-none md:justify-start md:p-2 md:px-3',
     isActive
-      ? 'bg-gray-100 text-brand-primary font-bold'
+      ? 'bg-brand-primary-light text-primary'
       : ''
   );
 

@@ -65,25 +65,25 @@ function index() {
   ];
 
   return (
-    <main className="flex flex-col w-full bg-gray-50">
+    <main className="min-h-screen bg-light">
       <MainLayout>
         <section className="relative">
-          <div className="sticky z-10 top-16 bg-white px-4 md:px-6 flex justify-between gap-1.5 md:gap-2 w-full py-4 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+          <div className="sticky z-10 top-16 bg-white/90 backdrop-blur-md px-4 md:px-6 flex justify-between gap-1.5 md:gap-2 w-full py-4 border-b border-slate-200/60">
             {bookingOptions.map((option) => (
               <button
                 key={option.id}
                 onClick={() => setFilter(option.value)}
-                className={`py-2 px-1.5 md:px-2 flex-1 rounded-full text-center font-semibold transition-colors text-xs md:text-sm whitespace-nowrap ${
+                className={`py-2 px-1.5 md:px-2 flex-1 rounded-lg text-center font-bold transition-all text-xs md:text-sm whitespace-nowrap ${
                   filter === option.value
-                    ? 'bg-brand-primary text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-brand-primary text-white shadow-sm'
+                    : 'bg-slate-50 text-slate-600 hover:bg-hover'
                 }`}
               >
                 {option.label}
               </button>
             ))}
           </div>
-          <div className="flex flex-col gap-4 px-4 md:px-6 py-6 mb-24">
+          <div className="max-w-4xl mx-auto flex flex-col gap-4 px-4 md:px-6 py-6 mb-24">
             {loading ? (
               Array.from({ length: 5 }).map((_, index) => (
                 <MiniTicketSkeleton key={index} />

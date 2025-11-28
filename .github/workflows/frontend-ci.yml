@@ -40,5 +40,5 @@ jobs:
       
       - name: Build apps
         run: |
-          pnpm --filter @mishwari/passenger-web-v2 build
+          pnpm --filter @mishwari/passenger-web build
           pnpm --filter @mishwari/driver-web build

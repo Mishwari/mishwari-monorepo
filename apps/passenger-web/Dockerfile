@@ -25,7 +25,7 @@ RUN cd packages/features/profile && (pnpm build || npx tsc --noEmitOnError false
 RUN cd packages/features/trips && (pnpm build || npx tsc --noEmitOnError false || true)
 
 # Build passenger web
-RUN pnpm --filter @mishwari/passenger-web-v2 build
+RUN pnpm --filter @mishwari/passenger-web build
 
 FROM node:18-alpine AS runner
 RUN npm install -g pnpm

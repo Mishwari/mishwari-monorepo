@@ -1,10 +1,13 @@
 // Brand colors - shared across both apps
 export const brandColors = {
+  DEFAULT: '#042f40',
   primary: '#005687',
   'primary-dark': '#004a73',
   'primary-light': '#e6f2f7',
-  'text-dark': '#042f40',
   secondary: '#F5F5F5',
+  light: '#F8FAFC',
+  hover: '#F0F7FA',
+  gradient: '#0088cc',
 };
 
 // NextUI theme colors - derived from brandColors
@@ -46,6 +49,14 @@ export const grayScale = {
   600: '#4B5563',
   700: '#374151',
   900: '#111827',
+};
+
+// Status colors
+export const statusColors = {
+  success: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
 };
 
 // Shadcn HSL variables - for UI components

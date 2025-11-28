@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { resetAuthState } from '@/store/slices/authSlice';
 import { resetUserState } from '@/store/slices/profileSlice';
+import { resetMobileAuth } from '@/store/slices/mobileAuthSlice';
 
 const useLogout = () => {
   const dispatch = useDispatch();
@@ -26,9 +27,7 @@ const useLogout = () => {
       // Reset auth and profile state
       dispatch(resetAuthState());
       dispatch(resetUserState());
-
-      // Redirect to the login page
-      await router.push('/login');
+      dispatch(resetMobileAuth());
 
       // Dismiss the loading toast and show success message
       toast.dismiss(waitingLogout);

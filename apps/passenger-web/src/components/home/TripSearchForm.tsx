@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { format, addDays, isToday, isTomorrow } from 'date-fns';
+import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { CalendarDaysIcon } from '@heroicons/react/24/outline';
-import { CalendarDaysIcon as CalendarDaysIconSolid } from '@heroicons/react/24/solid';
-import PickIcon from '@mishwari/ui-web/public/icons/navigation/pickIcon.svg';
-import DestIcon from '@mishwari/ui-web/public/icons/navigation/destIcon.svg';
-import SwitchArrowsIcon from '@mishwari/ui-web/public/icons/common/SwitchArrows.svg';
+import { createPortal } from 'react-dom';
+import {
+  MapPinIcon,
+  CalendarIcon,
+  MagnifyingGlassIcon,
+  ArrowsRightLeftIcon,
+} from '@heroicons/react/24/outline';
 import { tripsApi } from '@mishwari/api';
-import { Button, DatePicker, QuickDateButtons } from '@mishwari/ui-web';
+import { DatePicker } from '@mishwari/ui-web';
 import { CityDropdown } from '@mishwari/ui-web';
 import type { CityOption } from '@mishwari/ui-web';
 import type { CityWithTripCount } from '@mishwari/api';
@@ -33,14 +35,14 @@ export default function TripSearchForm() {
         const cities = await tripsApi.getDepartureCities(dateStr);
         console.log('Departure cities:', cities);
         setDepartureCities(cities);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching departure cities:', err);
         setDepartureCities([]);
       } finally {
         setLoadingFrom(false);
       }
     };
-    fetchDepartureCities();
+    fetchDepartureCities().catch(() => {});
   }, [selectedDate]);
 
   useEffect(() => {
@@ -58,21 +60,27 @@ export default function TripSearchForm() {
         const cities = await tripsApi.getDestinationCities(fromCity, dateStr);
         console.log('Destination cities:', cities);
         setDestinationCities(cities);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching destination cities:', err);
         setDestinationCities([]);
       } finally {
         setLoadingTo(false);
       }
     };
-    fetchDestinationCities();
+    fetchDestinationCities().catch(() => {});
   }, [fromCity, selectedDate]);
 
+  const [isSwapping, setIsSwapping] = useState(false);
+
   const handleSwitchCities = () => {
-    if (toCity && destinationCities.some(c => c.city === toCity)) {
-      const temp = fromCity;
-      setFromCity(toCity);
-      setToCity(temp);
+    if (toCity) {
+      setIsSwapping(true);
+      setTimeout(() => {
+        const temp = fromCity;
+        setFromCity(toCity);
+        setToCity(temp);
+        setIsSwapping(false);
+      }, 150);
     }
   };
 
@@ -95,86 +103,162 @@ export default function TripSearchForm() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mt-8 w-full flex flex-wrap gap-4 lg:gap-0 lg:rounded-md lg:bg-white lg:shadow-md"
-    >
-      <div className="w-full lg:w-5/12 relative flex flex-wrap sm:flex-nowrap shadow-lg lg:shadow-none border border-gray-200 bg-gray-200 rounded-lg lg:rounded-l-none lg:border-l-0">
-        <div className="flex justify-start items-center px-3 gap-4 w-full h-14">
-          <PickIcon className="sm:hidden object-contain w-[18px] h-auto" />
-          <div className="flex flex-col w-full">
-            <span className="text-xs font-medium text-gray-600">الانطلاق</span>
-            <CityDropdown
-              options={departureCities}
-              value={fromCity}
-              onChange={setFromCity}
-              placeholder="حدد اليوم واختر مدينة الانطلاق"
-              emptyMessage="لا توجد رحلات متاحة"
-              loading={loadingFrom}
-              showTripCount={true}
-            />
-          </div>
-        </div>
-
-        <div onClick={handleSwitchCities} className="absolute z-10 left-4 bg-inherit flex items-center justify-center self-center h-max w-max sm:w-28 sm:static sm:justify-center sm:items-center rounded-full sm:rotate-90 overflow-hidden">
-          <div className="border-2 border-white hover:bg-brand-primary/10 active:bg-brand-primary/20 cursor-pointer sm:border-0 p-2.5 sm:p-2 rounded-full bg-inherit flex items-center justify-center">
-            <SwitchArrowsIcon style={{ width: '20px', height: '20px', display: 'block' }} />
-          </div>
-        </div>
-
-        <div className="sm:hidden w-full h-[2px] bg-white" />
-
-        <div className="flex justify-start items-center px-3 gap-4 w-full h-14">
-          <DestIcon className="sm:hidden object-contain w-[15px] h-auto" />
-          <div className="flex flex-col w-full">
-            <span className="text-xs font-medium text-gray-600">الوجهة</span>
-            <CityDropdown
-              options={destinationCities}
-              value={toCity}
-              onChange={setToCity}
-              placeholder={fromCity ? "اختر مدينة الوجهة" : "اختر مدينة الانطلاق أولاً"}
-              emptyMessage="لا توجد وجهات متاحة"
-              loading={loadingTo}
-              showTripCount={true}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="w-full lg:w-7/12 flex flex-wrap gap-4 sm:gap-0 sm:rounded-lg sm:shadow-lg lg:shadow-none overflow-hidden sm:border border-gray-200 lg:rounded-l-lg lg:rounded-r-none lg:border-r-0">
-        <div className="w-full h-14 sm:w-10/12 md:w-9/12 lg:w-8/12 flex justify-start items-center gap-3 px-4 bg-gray-200 shadow-lg sm:shadow-none rounded-lg sm:rounded-none relative">
-          <div className="flex items-center gap-3 flex-1">
-            {!isToday(selectedDate) && !isTomorrow(selectedDate) ? (
-              <CalendarDaysIconSolid className="w-5 h-5 text-brand-primary cursor-pointer" onClick={() => setShowCalendar(!showCalendar)} />
-            ) : (
-              <CalendarDaysIcon className="w-5 h-5 text-brand-primary cursor-pointer" onClick={() => setShowCalendar(!showCalendar)} />
-            )}
-            <span className="text-sm font-medium text-brand-text-dark">
-              {format(selectedDate, 'd MMMM', { locale: ar })}
-            </span>
-            <QuickDateButtons
-              options={[
-                { date: new Date(), label: 'اليوم' },
-                { date: addDays(new Date(), 1), label: 'غداً' },
-              ]}
+    <>
+      {showCalendar && createPortal(
+        <>
+          <div
+            className='fixed inset-0 bg-black/40 backdrop-blur-sm z-[10000] animate-in fade-in duration-200'
+            onClick={() => setShowCalendar(false)}
+          />
+          <div className='fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[10000]'>
+            <DatePicker
               selectedDate={selectedDate}
-              onDateSelect={setSelectedDate}
+              onDateSelect={(date) => {
+                setSelectedDate(date);
+                setShowCalendar(false);
+              }}
             />
           </div>
-          {showCalendar && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowCalendar(false)} />
-              <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
-                <DatePicker selectedDate={selectedDate} onDateSelect={(date) => { setSelectedDate(date); setShowCalendar(false); }} />
-              </div>
-            </>
-          )}
+        </>,
+        document.body
+      )}
+
+      <div className='w-full max-w-4xl relative space-y-8 animate-in fade-in zoom-in duration-500'>
+        <div className='text-center space-y-4'>
+          <h1 className='text-4xl md:text-7xl font-black tracking-tight leading-tight'>
+            إلى أين تريد <br className='md:hidden' />
+            <span className='bg-clip-text text-transparent bg-gradient-to-l from-brand-gradient to-brand-primary'>
+              الذهاب؟
+            </span>
+          </h1>
+          <p className='text-lg text-slate-500 font-medium max-w-lg mx-auto leading-relaxed'>
+            احجز تذكرة الحافلة في ثوانٍ. بدون طوابير، تأكيد فوري.
+          </p>
         </div>
 
-        <Button type="submit" variant="default" size="lg" className="w-full h-12 sm:h-14 sm:w-2/12 md:w-3/12 lg:w-4/12 rounded-md sm:rounded-none text-base font-semibold">
-          بحث
-        </Button>
+        <div className='bg-white/70 backdrop-blur-xl p-2 rounded-[2rem] shadow-2xl shadow-blue-900/5 border border-white'>
+          <form
+            onSubmit={handleSubmit}
+            className='bg-white rounded-[1.5rem] p-4 flex flex-col md:flex-row gap-2 border border-slate-100'>
+            {/* Mobile: Stacked with swap button */}
+            <div className='md:hidden relative grid grid-rows-2 gap-2'>
+              <div className='h-full'>
+                <CityDropdown
+                  options={departureCities}
+                  value={fromCity}
+                  onChange={setFromCity}
+                  placeholder='اختر مدينة'
+                  emptyMessage='لا توجد رحلات متاحة'
+                  loading={loadingFrom}
+                  showTripCount={true}
+                  label='من'
+                  icon={MapPinIcon}
+                />
+              </div>
+              {toCity && (
+                <div className='absolute left-4 top-1/2 -translate-y-1/2 z-10 animate-in zoom-in duration-200'>
+                  <button
+                    type='button'
+                    onClick={handleSwitchCities}
+                    className='w-10 h-10 bg-white rounded-full border border-slate-200 shadow-lg flex items-center justify-center text-slate-500 hover:text-[#005687] hover:border-blue-100 active:scale-95 transition-all'>
+                    <ArrowsRightLeftIcon
+                      className={`w-4 h-4 rotate-90 transition-transform ${
+                        isSwapping ? 'scale-110' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
+              <div className='h-full'>
+                <CityDropdown
+                  options={destinationCities}
+                  value={toCity}
+                  onChange={setToCity}
+                  placeholder='اختر مدينة'
+                  emptyMessage='لا توجد وجهات متاحة'
+                  loading={loadingTo}
+                  showTripCount={true}
+                  disabled={!fromCity}
+                  label='إلى'
+                  icon={MapPinIcon}
+                />
+              </div>
+            </div>
+
+            {/* Desktop: Horizontal layout */}
+            <div className='hidden md:flex flex-1 gap-2'>
+              <div className='relative flex-1 transition-all duration-300'>
+                <CityDropdown
+                  options={departureCities}
+                  value={fromCity}
+                  onChange={setFromCity}
+                  placeholder='اختر مدينة'
+                  emptyMessage='لا توجد رحلات متاحة'
+                  loading={loadingFrom}
+                  showTripCount={true}
+                  label='من'
+                  icon={MapPinIcon}
+                />
+              </div>
+
+              {toCity && (
+                <div className='flex items-end justify-center pb-1 animate-in zoom-in duration-200'>
+                  <button
+                    type='button'
+                    onClick={handleSwitchCities}
+                    className='p-3 bg-slate-50 hover:bg-hover rounded-full text-primary transition-all active:scale-95 group'>
+                    <ArrowsRightLeftIcon
+                      className={`w-5 h-5 group-hover:scale-110 transition-transform ${
+                        isSwapping ? 'scale-110' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
+
+              <div className='relative flex-1 transition-all duration-300'>
+                <CityDropdown
+                  options={destinationCities}
+                  value={toCity}
+                  onChange={setToCity}
+                  placeholder='اختر مدينة'
+                  emptyMessage='لا توجد وجهات متاحة'
+                  loading={loadingTo}
+                  showTripCount={true}
+                  disabled={!fromCity}
+                  label='إلى'
+                  icon={MapPinIcon}
+                />
+              </div>
+            </div>
+
+            <div className='md:flex-none md:w-auto border-t border-slate-100 pt-2 md:border-t-0 md:pt-0'>
+              <div
+                className='flex items-center gap-2 p-2 sm:p-3 rounded-xl transition-all cursor-pointer border bg-slate-50 hover:bg-hover border-transparent hover:border-blue-100 h-full'
+                onClick={() => setShowCalendar(!showCalendar)}>
+                <CalendarIcon className='text-primary w-5 h-5 shrink-0' />
+                <div className='flex-1 min-w-0 flex flex-col justify-center text-right pl-1'>
+                  <span className='text-[10px] text-slate-400 font-bold mb-0.5 leading-none'>
+                    متى
+                  </span>
+                  <div className='truncate text-sm sm:text-base font-bold text-[#042f40] w-full leading-tight'>
+                    {format(selectedDate, 'd MMMM', { locale: ar })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className='md:w-auto'>
+              <button
+                type='submit'
+                className='w-full h-full min-h-[56px] px-8 bg-brand-primary hover:bg-brand-primary-dark text-white text-lg font-bold rounded-xl shadow-lg shadow-blue-900/20 transition-all active:scale-95 flex items-center justify-center gap-2 group'>
+                <MagnifyingGlassIcon className='w-5 h-5 group-hover:scale-110 transition-transform' />
+                <span className='md:hidden'>بحث عن رحلات</span>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </form>
+    </>
   );
 }

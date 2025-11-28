@@ -18,6 +18,10 @@ import {
   TruckIcon,
   UserIcon,
   ChevronDownIcon,
+  TicketIcon,
+  UsersIcon,
+  UserCircleIcon,
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import DoubleSlider from './DoubleSlider';
@@ -262,6 +266,76 @@ const POPULAR_DESTINATIONS = [
   { name: 'الحديدة', image: 'bg-cyan-100', price: 4200 },
   { name: 'مأرب', image: 'bg-yellow-100', price: 5000 },
 ];
+
+// User Menu Component (Dropdown)
+const UserMenu = ({ onLogout }: { onLogout: () => void }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const menuItems = [
+    { icon: TicketIcon, label: 'رحلاتي', desc: 'القادمة والسابقة' },
+    { icon: UsersIcon, label: 'الركاب', desc: 'إدارة المرافقين' },
+    { icon: UserCircleIcon, label: 'الملف الشخصي', desc: 'إعدادات الحساب' },
+  ];
+
+  return (
+    <div className='relative' ref={menuRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className='h-9 w-9 bg-[#005687] rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white/50 shadow-lg hover:bg-[#004a73] transition-all active:scale-95'>
+        MK
+      </button>
+
+      {isOpen && (
+        <div className='absolute left-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[60]'>
+          <div className='p-4 border-b border-slate-50 bg-slate-50/50'>
+            <div className='text-sm font-black text-[#042f40]'>Mustafa Khaled</div>
+            <div className='text-xs text-slate-500 font-medium truncate'>mustafa.khaled@example.com</div>
+          </div>
+
+          <div className='p-2 space-y-1'>
+            {menuItems.map((item) => (
+              <button
+                key={item.label}
+                onClick={() => setIsOpen(false)}
+                className='w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#e6f2f7] text-left group transition-colors'>
+                <div className='w-8 h-8 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-white group-hover:text-[#005687] transition-colors'>
+                  <item.icon className='w-4 h-4' />
+                </div>
+                <div>
+                  <div className='text-xs font-bold text-[#042f40]'>{item.label}</div>
+                  <div className='text-[10px] text-slate-400'>{item.desc}</div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className='p-2 border-t border-slate-50'>
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                onLogout();
+              }}
+              className='w-full flex items-center gap-2 p-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors justify-center'>
+              <ArrowRightOnRectangleIcon className='w-3.5 h-3.5' />
+              تسجيل الخروج
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const CityCombobox = ({
   label,
@@ -572,12 +646,7 @@ export default function ModernBusBooking() {
             </div>
             <div>
               {user ? (
-                <button
-                  onClick={handleLogout}
-                  className='h-9 w-9 bg-[#005687] rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white shadow-lg hover:bg-[#004a73] transition-colors'
-                  title={user.email}>
-                  {user.name.substring(0, 1).toUpperCase()}
-                </button>
+                <UserMenu onLogout={handleLogout} />
               ) : (
                 <button
                   onClick={() => setAuthModalOpen(true)}
@@ -930,12 +999,7 @@ export default function ModernBusBooking() {
             {/* Actions */}
             <div className='flex items-center gap-2'>
               {user ? (
-                <button
-                  onClick={handleLogout}
-                  className='h-9 w-9 bg-[#005687] rounded-full flex items-center justify-center text-white text-xs font-bold ring-2 ring-white shadow-md hover:bg-[#004a73] transition-colors'
-                  title={user.email}>
-                  {user.name.substring(0, 1).toUpperCase()}
-                </button>
+                <UserMenu onLogout={handleLogout} />
               ) : (
                 <button
                   onClick={() => setAuthModalOpen(true)}

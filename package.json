@@ -7,8 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --filter=@mishwari/passenger-web-v2 --filter=@mishwari/driver-web --concurrency=5",
-    "dev:passenger": "turbo run dev --filter=@mishwari/passenger-web-v2",
+    "dev": "turbo run dev --filter=@mishwari/passenger-web --filter=@mishwari/driver-web --concurrency=5",
+    "dev:passenger": "turbo run dev --filter=@mishwari/passenger-web",
     "dev:driver": "turbo run dev --filter=@mishwari/driver-web",
     "build:packages": "pnpm --filter @mishwari/types build && pnpm --filter @mishwari/utils build && pnpm --filter @mishwari/api build && pnpm --filter @mishwari/ui-primitives build && pnpm --filter @mishwari/ui-web build && pnpm --filter '@mishwari/features-*' build",
     "build:apps": "turbo run build --filter='./apps/*'",

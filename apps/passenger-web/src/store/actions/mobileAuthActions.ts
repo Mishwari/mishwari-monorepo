@@ -1,6 +1,7 @@
 import { setAuthState,resetAuthState } from '../slices/authSlice';
 import { setUserDetails,resetUserState } from '../slices/userSlice';
 import { setMobileAuth, resetMobileAuth } from '../slices/mobileAuthSlice';
+import { setProfileDetails } from '../slices/profileSlice';
 import { useSelector } from 'react-redux';
 
 // import { resetDriverState } from '@/slices/driverSlice';
@@ -23,120 +24,8 @@ interface LoginResponse {
 }
 
 
-// performLogin is an asynchronous Redux thunk that calls the login
-export const performMobileLogin = (mobileNumber: string, router: any) => async (dispatch:any) => {
-
-  const waitingLogin = toast.info('جاري تسجيل الدخول...',{
-    autoClose: false
-  })
-  const delay = (ms:any) => new Promise(resolve => setTimeout(resolve , ms));
-
-  try {
-    const response: [AxiosResponse<LoginResponse>, any]  = await Promise.all([
-      authApi.requestOtp({ phone: mobileNumber }),
-      delay(1000),
-    ])
-
-    console.log('mobile', mobileNumber)
-    dispatch(setMobileAuth(mobileNumber));
-
-    toast.dismiss(waitingLogin);
-    toast.success('تم ارسال رمز التحقق',{
-      autoClose:2000,
-      hideProgressBar: true,
-    })
-    router.push('/login/confirm')
-    // window.location.href = '/login/confirm'
-
-  } catch (error:any) {
-
-    toast.dismiss(waitingLogin);
-    toast.error('فشل تسجيل الدخول ',{
-      autoClose:2000,
-      hideProgressBar: true,
-    })
-    setTimeout(() => {
-
-      toast.error(error.message,{
-        autoClose:1500,
-        hideProgressBar: true,
-      })
-    },2800)
-
-    console.error('Login failed:', error.message);
-  }
-};
 
 
-export const performVerifyLogin = (mobileNumber: string, otpCode: string, router:any) => async (dispatch:any) => {
-
-    const waitingLogin = toast.info('جاري تسجيل الدخول...',{
-      autoClose: false
-    })
-    const delay = (ms:any) => new Promise(resolve => setTimeout(resolve , ms));
-    console.log('mobile', mobileNumber,'otp', otpCode)
-  
-    try {
-      const response: [AxiosResponse<LoginResponse>, any]  = await Promise.all([
-        authApi.verifyOtp({ phone: mobileNumber, otp: otpCode }),
-        delay(1000),
-      ])
-  
-      const responseData = response[0].data;
-      const tokens = responseData.tokens || responseData;
-      const access = tokens.access || responseData.access;
-      const refresh = tokens.refresh || responseData.refresh;
-      const userStatus = responseData.user_status || responseData.status;
-      
-      if (access){
-        dispatch(setAuthState({
-          isAuthenticated: true,
-          token: encryptToken(access),
-          refreshToken: encryptToken(refresh),
-          status: userStatus,
-        }));
-      }
-
-    console.log("response: ",response)
-  
-      toast.dismiss(waitingLogin);
-      toast.success('تم تسجيل الدخول بنجاح',{
-        autoClose:2000,
-        hideProgressBar: true,
-      })
-      
-      if (userStatus === 'partial'){
-        router.push('/login/complete_profile')
-      }else {
-        dispatch(resetMobileAuth())
-        router.push('/')
-      }
-      
-  
-    } catch (error:any) {
-  
-      toast.dismiss(waitingLogin);
-      
-      const errorMessage = error.response?.data?.message || 
-                          error.response?.data?.error || 
-                          error.response?.data?.detail ||
-                          'رمز التحقق غير صحيح أو منتهي الصلاحية';
-      
-      toast.error('فشل تسجيل الدخول',{
-        autoClose:2000,
-        hideProgressBar: true,
-      })
-      
-      setTimeout(() => {
-        toast.error(errorMessage,{
-          autoClose:3000,
-          hideProgressBar: true,
-        })
-      },2200)
-  
-      console.error('Login failed:', error.response?.data || error);
-    }
-  };
 
 
 export const performRegister = (profileData: Profile, router: any) => async (dispatch:any,  getState: () => AppStore) => {
@@ -180,11 +69,24 @@ export const performRegister = (profileData: Profile, router: any) => async (dis
       status: response[0].data.user_status,
     }));
     
-    // Fetch profile before navigation
-    await dispatch(fetchProfileDetails() as any);
+    // Update profile state immediately with submitted data
+    dispatch(setProfileDetails({
+      user: {
+        id: response[0].data.user?.id || null,
+        username: data.username,
+        email: data.email,
+        first_name: '',
+        last_name: '',
+      },
+      full_name: data.full_name,
+      birth_date: data.birth_date,
+      gender: data.gender,
+      address: '',
+    }));
     
-    if (response[0].data.purpose == 'create'){
-      router.push('/')
+    // Fetch full profile if status is not partial
+    if (response[0].data.user_status !== 'partial') {
+      await dispatch(fetchProfileDetails() as any);
     }
     
   } catch (error:any) {

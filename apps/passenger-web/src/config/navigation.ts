@@ -17,13 +17,4 @@ export const passengerNavConfig = {
       { name: 'قائمة الركاب', href: '/passengers', icon: UserGroupIcon },
     ],
   },
-  mobile: {
-    items: [
-      { name: 'الرئيسية', href: '/', icon: HomeIconSolid },
-      { name: 'بروفايل', href: '/profile', icon: UserIconSolid },
-      { name: 'رحلاتي', href: '/my_trips', icon: TicketIconSolid },
-      { name: 'المحفظة', href: '/profile/wallet', icon: BanknotesIcon },
-      { name: 'قائمة الركاب', href: '/passengers', icon: UserGroupIcon },
-    ],
-  },
 };
