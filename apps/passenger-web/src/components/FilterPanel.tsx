@@ -11,11 +11,24 @@ const DEPARTURE_TIMES = [
 interface FilterPanelProps {
   filterBuses: any;
   setFilterBuses: (filters: any) => void;
+  trips?: any[];
   isMobile?: boolean;
 }
 
-export default function FilterPanel({ filterBuses, setFilterBuses, isMobile = false }: FilterPanelProps) {
-  const priceRange = { min: filterBuses.Min || 0, max: filterBuses.Max || 6000 };
+export default function FilterPanel({ filterBuses, setFilterBuses, trips = [], isMobile = false }: FilterPanelProps) {
+  const rawMinPrice = trips.length > 0 ? Math.min(...trips.map(t => t.price)) : 0;
+  const rawMaxPrice = trips.length > 0 ? Math.max(...trips.map(t => t.price)) : 6000;
+  
+  // Dynamic step based on price range magnitude using Math
+  const priceRange_raw = rawMaxPrice - rawMinPrice;
+  const step = priceRange_raw > 0 ? Math.pow(10, Math.floor(Math.log10(priceRange_raw)) - 1) : 1;
+  
+  const actualMinPrice = Math.floor(rawMinPrice / step) * step;
+  const actualMaxPrice = Math.ceil(rawMaxPrice / step) * step;
+  const priceRange = { 
+    min: (filterBuses.Min === 0 || !filterBuses.Min) ? actualMinPrice : filterBuses.Min, 
+    max: (filterBuses.Max === Infinity || filterBuses.Max === 0) ? actualMaxPrice : filterBuses.Max 
+  };
 
   const toggleBusType = (type: string) => {
     setFilterBuses({
@@ -56,11 +69,11 @@ export default function FilterPanel({ filterBuses, setFilterBuses, isMobile = fa
         </div>
         <div className='px-1'>
           <DoubleSlider
-            min={0}
-            max={6000}
+            min={actualMinPrice}
+            max={actualMaxPrice}
             value={priceRange}
             onChange={handlePriceChange}
-            step={100}
+            step={step}
           />
         </div>
       </div>

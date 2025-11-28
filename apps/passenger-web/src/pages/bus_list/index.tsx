@@ -382,6 +382,7 @@ function index() {
               <FilterPanel
                 filterBuses={filterBuses}
                 setFilterBuses={setFilterBuses}
+                trips={trips}
               />
             </aside>
 
@@ -463,6 +464,7 @@ function index() {
               <FilterPanel
                 filterBuses={filterBuses}
                 setFilterBuses={setFilterBuses}
+                trips={trips}
                 isMobile={true}
               />
             </div>
