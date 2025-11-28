@@ -394,7 +394,8 @@ function index() {
                 sortedTrips.map((trip: Trip, index) => (
                   <Link
                     href={`/bus_list/${trip.id}?from_stop_id=${trip.from_stop_id}&to_stop_id=${trip.to_stop_id}&pickup=${pickup}&destination=${destination}&date=${selectedDate}`}
-                    key={index}>
+                    key={index}
+                    className='block'>
                     <ModernTripCard trip={trip} />
                   </Link>
                 ))
