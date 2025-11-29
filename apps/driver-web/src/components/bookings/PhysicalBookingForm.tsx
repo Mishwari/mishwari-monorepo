@@ -8,8 +8,6 @@ import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface Passenger {
   name: string;
-  email: string;
-  phone: string;
   age?: number;
   gender?: string;
 }
@@ -31,7 +29,8 @@ export default function PhysicalBookingForm() {
   useEffect(() => {
     setToStop(null);
   }, [fromStop]);
-  const [passengers, setPassengers] = useState<Passenger[]>([{ name: '', email: '', phone: '' }]);
+  const [passengers, setPassengers] = useState<Passenger[]>([{ name: '' }]);
+  const [contactDetails, setContactDetails] = useState({ name: '', phone: '', email: '' });
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'wallet'>('cash');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -74,7 +73,7 @@ export default function PhysicalBookingForm() {
   };
 
   const handleAddPassenger = () => {
-    setPassengers([...passengers, { name: '', email: '', phone: '' }]);
+    setPassengers([...passengers, { name: '' }]);
   };
 
   const handleRemovePassenger = (index: number) => {
@@ -98,9 +97,14 @@ export default function PhysicalBookingForm() {
       return;
     }
 
-    const invalidPassenger = passengers.find(p => !p.name || !p.phone);
+    const invalidPassenger = passengers.find(p => !p.name);
     if (invalidPassenger) {
       setError('يرجى إكمال بيانات جميع الركاب');
+      return;
+    }
+
+    if (!contactDetails.name || !contactDetails.phone) {
+      setError('يرجى إدخال معلومات التواصل');
       return;
     }
 
@@ -114,11 +118,12 @@ export default function PhysicalBookingForm() {
         to_stop: toStop,
         passengers: passengers.map(p => ({
           name: p.name,
-          email: p.email || '',
-          phone: p.phone,
           age: p.age,
           gender: p.gender,
         })),
+        contact_name: contactDetails.name,
+        contact_phone: contactDetails.phone,
+        contact_email: contactDetails.email,
         payment_method: paymentMethod,
         total_fare: totalFare,
       });
@@ -232,6 +237,44 @@ export default function PhysicalBookingForm() {
               />
             </div>
           ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-4">معلومات التواصل</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">الاسم *</label>
+            <input
+              type="text"
+              value={contactDetails.name}
+              onChange={(e) => setContactDetails(prev => ({ ...prev, name: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+              placeholder="اسم جهة الاتصال"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">رقم الجوال *</label>
+            <input
+              type="tel"
+              value={contactDetails.phone}
+              onChange={(e) => setContactDetails(prev => ({ ...prev, phone: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+              placeholder="05xxxxxxxx"
+              required
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-600 mb-1">البريد الإلكتروني</label>
+            <input
+              type="email"
+              value={contactDetails.email}
+              onChange={(e) => setContactDetails(prev => ({ ...prev, email: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+              placeholder="example@email.com"
+            />
+          </div>
         </div>
       </div>
 

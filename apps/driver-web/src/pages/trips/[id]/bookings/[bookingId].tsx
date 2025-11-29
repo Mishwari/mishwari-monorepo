@@ -143,6 +143,34 @@ export default function BookingDetailsPage() {
               </div>
             </div>
 
+            {(booking.contact_name || booking.contact_phone || booking.contact_email) && (
+              <div>
+                <h3 className='text-lg font-bold mb-4'>معلومات الاتصال</h3>
+                <div className='border border-gray-200 rounded-lg p-4'>
+                  <div className='grid grid-cols-2 gap-4'>
+                    {booking.contact_name && (
+                      <div>
+                        <p className='text-sm text-gray-500'>الاسم</p>
+                        <p className='font-medium'>{booking.contact_name}</p>
+                      </div>
+                    )}
+                    {booking.contact_phone && (
+                      <div>
+                        <p className='text-sm text-gray-500'>الهاتف</p>
+                        <p className='font-medium'>{booking.contact_phone}</p>
+                      </div>
+                    )}
+                    {booking.contact_email && (
+                      <div>
+                        <p className='text-sm text-gray-500'>البريد الإلكتروني</p>
+                        <p className='font-medium'>{booking.contact_email}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div>
               <h3 className='text-lg font-bold mb-4'>
                 الركاب ({booking.passengers?.length || 0})
@@ -157,22 +185,22 @@ export default function BookingDetailsPage() {
                         <p className='text-sm text-gray-500'>الاسم</p>
                         <p className='font-medium'>{passenger.name}</p>
                       </div>
-                      <div>
-                        <p className='text-sm text-gray-500'>الهاتف</p>
-                        <p className='font-medium'>{passenger.phone}</p>
-                      </div>
-                      {passenger.email && (
-                        <div>
-                          <p className='text-sm text-gray-500'>
-                            البريد الإلكتروني
-                          </p>
-                          <p className='font-medium'>{passenger.email}</p>
-                        </div>
-                      )}
                       {passenger.age && (
                         <div>
                           <p className='text-sm text-gray-500'>العمر</p>
                           <p className='font-medium'>{passenger.age}</p>
+                        </div>
+                      )}
+                      {passenger.gender && (
+                        <div>
+                          <p className='text-sm text-gray-500'>الجنس</p>
+                          <p className='font-medium'>{passenger.gender === 'male' ? 'ذكر' : 'أنثى'}</p>
+                        </div>
+                      )}
+                      {passenger.seat_number && (
+                        <div>
+                          <p className='text-sm text-gray-500'>رقم المقعد</p>
+                          <p className='font-medium'>{passenger.seat_number}</p>
                         </div>
                       )}
                     </div>

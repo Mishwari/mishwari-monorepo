@@ -30,7 +30,7 @@ function CompleteProfile() {
     user: {
       id: null,
       email: '',
-      username: '',
+      username: '', // Auto-populated from backend
       first_name: '',
       last_name: '',
     },
@@ -41,12 +41,12 @@ function CompleteProfile() {
   });
 
   useEffect(() => {
-    if (profile) {
+    if (profile && profile.user) {
       setProfileData({
         user: {
           id: profile.user.id,
           email: profile.user.email,
-          username: profile.user.username,
+          username: profile.user.username, // Already set from backend
           first_name: profile.user.first_name,
           last_name: profile.user.last_name,
         },
@@ -56,7 +56,7 @@ function CompleteProfile() {
         address: profile.address,
       });
     }
-  }, []);
+  }, [profile]);
 
   // useEffect(() => {
   //     if (authState.status !== 'partial', !authState.isAuthenticated ) {

@@ -30,9 +30,6 @@ export const PassengerItem: React.FC<PassengerItemProps> = ({
       <div className="flex-1 min-w-0">
         <h1 className="font-bold text-gray-900 truncate group-hover:text-brand-primary transition-colors">{passenger.name}</h1>
         <div className="flex items-center gap-2 mt-1">
-          {passenger.phone && (
-            <p className="text-sm text-gray-600 truncate">{passenger.phone}</p>
-          )}
           {passenger.age && (
             <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{passenger.age} سنة</span>
           )}

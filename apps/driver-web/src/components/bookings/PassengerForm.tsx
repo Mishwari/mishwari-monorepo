@@ -2,8 +2,6 @@ import { Input, ToggleSwitch } from '@mishwari/ui-web';
 
 interface Passenger {
   name: string;
-  email: string;
-  phone: string;
   age?: number;
   gender?: string;
 }
@@ -24,27 +22,6 @@ export default function PassengerForm({ passenger, onChange }: PassengerFormProp
           onChange={(e) => onChange('name', e.target.value)}
           placeholder="اسم الراكب"
           required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف *</label>
-        <Input
-          type="tel"
-          value={passenger.phone}
-          onChange={(e) => onChange('phone', e.target.value)}
-          placeholder="05xxxxxxxx"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
-        <Input
-          type="email"
-          value={passenger.email}
-          onChange={(e) => onChange('email', e.target.value)}
-          placeholder="example@email.com"
         />
       </div>
 

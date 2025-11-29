@@ -147,59 +147,40 @@ export default function TripDetailsPage() {
   }, [profile]);
 
   useEffect(() => {
-    if (profile && savedPassengers.length > 0) {
-      const localWithoutIds = localPassengers.filter((p) => !p.id);
-      const passengersWithCheck = savedPassengers.map((p) => {
-        const existingLocal = localPassengers.find((lp) => lp.id === p.id);
-        return {
-          ...p,
-          is_checked:
-            p.name === profile.full_name
-              ? true
-              : existingLocal?.is_checked ?? p.is_checked,
-        };
-      });
+    if (!isFullyAuthenticated || !profile?.full_name) return;
+    
+    const passengersWithCheck = savedPassengers.map((p) => {
+      const existingLocal = localPassengers.find((lp) => lp.id === p.id);
+      return {
+        ...p,
+        is_checked: p.name === profile.full_name ? true : (existingLocal?.is_checked ?? p.is_checked),
+      };
+    });
 
-      const merged = [...passengersWithCheck, ...localWithoutIds];
-      const sorted = merged.sort((a, b) => {
-        const aIsOwner = a.name === profile.full_name;
-        const bIsOwner = b.name === profile.full_name;
-        if (aIsOwner) return -1;
-        if (bIsOwner) return 1;
-        if (a.is_checked && !b.is_checked) return -1;
-        if (!a.is_checked && b.is_checked) return 1;
-        return 0;
-      });
+    const sorted = passengersWithCheck.sort((a, b) => {
+      const aIsOwner = a.name === profile.full_name;
+      const bIsOwner = b.name === profile.full_name;
+      if (aIsOwner) return -1;
+      if (bIsOwner) return 1;
+      if (a.is_checked && !b.is_checked) return -1;
+      if (!a.is_checked && b.is_checked) return 1;
+      return 0;
+    });
 
-      const userExists = sorted.some((p) => p.name === profile.full_name);
-
-      if (!userExists && profile.full_name) {
-        const userPassenger = {
-          id: null,
-          name: profile.full_name,
-          email: profile.user.email || '',
-          phone: profile.phone || '',
-          age: profile.age || null,
-          is_checked: true,
-          gender: profile.gender || 'male',
-        };
-        setLocalPassengers([userPassenger, ...sorted]);
-      } else {
-        setLocalPassengers(sorted);
-      }
-    } else if (profile && profile.full_name && localPassengers.length === 0) {
+    const userExists = sorted.some((p) => p.name === profile.full_name);
+    if (!userExists) {
       const userPassenger = {
         id: null,
         name: profile.full_name,
-        email: profile.user.email || '',
-        phone: profile.phone || '',
         age: profile.age || null,
         is_checked: true,
         gender: profile.gender || 'male',
       };
-      setLocalPassengers([userPassenger]);
+      setLocalPassengers([userPassenger, ...sorted]);
+    } else {
+      setLocalPassengers(sorted);
     }
-  }, [profile, savedPassengers]);
+  }, [profile, savedPassengers, isFullyAuthenticated]);
 
   // Fetch Trip Logic (Preserved)
   useEffect(() => {
@@ -251,6 +232,8 @@ export default function TripDetailsPage() {
   }, [router.isReady, tripId, from_stop_id, to_stop_id]);
 
   useEffect(() => {
+    if (isFullyAuthenticated) return;
+    
     const timer = setTimeout(() => {
       if (contactDetails.name && contactDetails.phone && localPassengers.length === 0) {
         const autoId = `auto-${Date.now()}`;
@@ -258,8 +241,6 @@ export default function TripDetailsPage() {
           id: null,
           autoId,
           name: contactDetails.name,
-          email: contactDetails.email || '',
-          phone: contactDetails.phone,
           age: null,
           is_checked: true,
           gender: 'male',
@@ -270,14 +251,14 @@ export default function TripDetailsPage() {
         setLocalPassengers((prev) =>
           prev.map((p) =>
             p.autoId === autoAddedPassengerId
-              ? { ...p, name: contactDetails.name, phone: contactDetails.phone, email: contactDetails.email || '' }
+              ? { ...p, name: contactDetails.name }
               : p
           )
         );
       }
     }, 5000);
     return () => clearTimeout(timer);
-  }, [contactDetails, localPassengers.length, autoAddedPassengerId]);
+  }, [contactDetails, localPassengers.length, autoAddedPassengerId, isFullyAuthenticated]);
 
   const handleContactDetailsInput = (name, value) => {
     setContactDetails((prev) => ({ ...prev, [name]: value }));
@@ -293,7 +274,7 @@ export default function TripDetailsPage() {
     const index = localPassengers.findIndex((p) =>
       p.id
         ? p.id === passenger.id
-        : p.name === passenger.name && p.phone === passenger.phone
+        : p.name === passenger.name
     );
     setEditingPassenger(passenger);
     setEditingIndex(index);
@@ -320,10 +301,7 @@ export default function TripDetailsPage() {
         prev.filter((p) =>
           p.id
             ? p.id !== passengerToDelete.id
-            : !(
-                p.name === passengerToDelete.name &&
-                p.phone === passengerToDelete.phone
-              )
+            : p.name !== passengerToDelete.name
         )
       );
       setDeleteConfirmOpen(false);
@@ -338,7 +316,7 @@ export default function TripDetailsPage() {
         if (
           p.id
             ? p.id === passenger.id
-            : p.name === passenger.name && p.phone === passenger.phone
+            : p.name === passenger.name
         ) {
           return { ...p, is_checked: newCheckedState };
         }
@@ -800,11 +778,11 @@ export default function TripDetailsPage() {
                           }`}>
                           {p.name}
                         </div>
-                        <div className='text-xs text-slate-400 mt-0.5 flex items-center gap-2'>
-                          <span>{p.age} سنة</span>
-                          <span className='w-1 h-1 rounded-full bg-slate-300' />
-                          <span className='font-mono dir-ltr'>{p.phone}</span>
-                        </div>
+                        {p.age && (
+                          <div className='text-xs text-slate-400 mt-0.5'>
+                            <span>{p.age} سنة</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className='flex items-center gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity'>

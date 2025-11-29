@@ -41,12 +41,23 @@ export const createBooking = (stripe: Stripe | null, fromStopId?: number, toStop
     const segmentPrice = toStop && fromStop ? toStop.price_from_start - fromStop.price_from_start : Number(bookingCreation.trip.price);
     const passengerCount = bookingCreation.passengers.filter((p:Passenger) => p.is_checked).length;
 
+    // Get contact details from session storage
+    const draft = sessionStorage.getItem('bookingDraft');
+    let contactDetails = { name: '', phone: '', email: '' };
+    if (draft) {
+        const draftData = JSON.parse(draft);
+        contactDetails = draftData.contactDetails || contactDetails;
+    }
+
     const bookingData = {
         user: user.userDetails.id,
         trip: bookingCreation.trip.id,
         from_stop: fromStopId,
         to_stop: toStopId,
         passengers: bookingCreation.passengers.filter((p:Passenger) => p.is_checked),
+        contact_name: contactDetails.name,
+        contact_phone: contactDetails.phone,
+        contact_email: contactDetails.email,
         total_fare: passengerCount * segmentPrice,
         is_paid: bookingCreation.isPaid,
         payment_method: bookingCreation.paymentMethod,

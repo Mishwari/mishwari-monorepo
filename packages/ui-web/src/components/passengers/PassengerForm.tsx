@@ -19,8 +19,6 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<Omit<Passenger, 'id'>>({
     name: '',
-    email: '',
-    phone: '',
     age: null,
     gender: 'male',
     is_checked: true,
@@ -30,8 +28,6 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
     if (passenger) {
       setFormData({
         name: passenger.name,
-        email: passenger.email,
-        phone: passenger.phone,
         age: passenger.age,
         gender: passenger.gender || 'male',
         is_checked: passenger.is_checked ?? true,
@@ -83,27 +79,6 @@ export const PassengerForm: React.FC<PassengerFormProps> = ({
             activeColor="bg-[#005687]"
           />
         </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">رقم الجوال</label>
-        <Input
-          value={formData.phone}
-          onChange={(e) => handleChange('phone', e.target.value)}
-          placeholder="رقم الجوال"
-          type="tel"
-          className="text-right"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">الايميل</label>
-        <Input
-          value={formData.email}
-          onChange={(e) => handleChange('email', e.target.value)}
-          placeholder="الايميل"
-          type="email"
-          className="text-right"
-        />
       </div>
       <div className="flex gap-2">
         <Button type="submit" className="flex-1 bg-[#005687] hover:bg-[#005687]/90">

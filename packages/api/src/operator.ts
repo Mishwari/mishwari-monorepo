@@ -77,7 +77,10 @@ export const operatorApi = {
     trip: number;
     from_stop: number;
     to_stop: number;
-    passengers: Array<{ name: string; email: string; phone: string; age?: number; gender?: string }>;
+    passengers: Array<{ name: string; age?: number; gender?: string }>;
+    contact_name?: string;
+    contact_phone?: string;
+    contact_email?: string;
     payment_method: 'cash' | 'wallet';
     total_fare: number;
   }) => apiClient.post('/operator/physical-bookings/', data),

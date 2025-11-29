@@ -24,17 +24,6 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
       onSubmit={handleSubmit}>
       <div className='space-y-5'>
         <div>
-          <label className='text-sm font-medium text-gray-700 block mb-2'>اسم المستخدم</label>
-          <Input
-            value={profileData.user.username}
-            onChange={(e) => updateProfileData('user.username', e.target.value)}
-            placeholder={isDisabled ? '(لا يوجد)' : 'ادخل اسم المستخدم'}
-            readOnly={isDisabled}
-            className='w-full'
-          />
-        </div>
-
-        <div>
           <label className='text-sm font-medium text-gray-700 block mb-2'>الاسم الكامل</label>
           <Input
             value={profileData.full_name}

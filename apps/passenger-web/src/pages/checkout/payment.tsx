@@ -234,7 +234,6 @@ function Payment() {
                 </div>
                 <div className='flex-1'>
                   <p className='font-semibold'>{passenger.name}</p>
-                  {passenger.phone && <p className='text-sm text-gray-600'>{passenger.phone}</p>}
                 </div>
                 {passenger.age && <span className='text-xs bg-gray-200 px-2 py-1 rounded'>{passenger.age} سنة</span>}
               </div>

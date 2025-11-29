@@ -196,6 +196,32 @@ export default function BookingDetails() {
           </section>
         )}
 
+        {(booking.contact_name || booking.contact_phone || booking.contact_email) && (
+          <section className="bg-white shadow-lg rounded-xl p-6 mb-4">
+            <h2 className="text-lg font-bold mb-4">معلومات الاتصال</h2>
+            <div className="space-y-2">
+              {booking.contact_name && (
+                <div className="flex gap-2">
+                  <strong>الاسم:</strong>
+                  <p>{booking.contact_name}</p>
+                </div>
+              )}
+              {booking.contact_phone && (
+                <div className="flex gap-2">
+                  <strong>الهاتف:</strong>
+                  <p>{booking.contact_phone}</p>
+                </div>
+              )}
+              {booking.contact_email && (
+                <div className="flex gap-2">
+                  <strong>البريد الإلكتروني:</strong>
+                  <p>{booking.contact_email}</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         <section className="bg-white shadow-lg rounded-xl p-6">
           <h2 className="text-lg font-bold mb-4">معلومات الدفع</h2>
           <div className="space-y-3">

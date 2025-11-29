@@ -29,14 +29,14 @@ interface LoginResponse {
 
 
 export const performRegister = (profileData: Profile, router: any) => async (dispatch:any,  getState: () => AppStore) => {
+  const {auth} = getState()
   const data = {
-      username : profileData.user.username,
+      // username not sent - backend extracts mobile from token and uses it as username
       full_name: profileData.full_name,
       gender : profileData.gender,
       email : profileData.user.email,
       birth_date : profileData.birth_date
   }
-  const {auth} = getState()
   if(!auth.isAuthenticated ) {
       // dispatch(setError('User is not authenticated'))
       return;
@@ -73,7 +73,7 @@ export const performRegister = (profileData: Profile, router: any) => async (dis
     dispatch(setProfileDetails({
       user: {
         id: response[0].data.user?.id || null,
-        username: data.username,
+        username: response[0].data.user?.username || '',
         email: data.email,
         first_name: '',
         last_name: '',

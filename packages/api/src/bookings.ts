@@ -7,11 +7,13 @@ export interface CreateBookingPayload {
   to_stop: number;
   passengers: Array<{
     name: string;
-    email?: string;
-    phone?: string;
     age?: number;
     gender?: 'male' | 'female';
+    is_checked?: boolean;
   }>;
+  contact_name?: string;
+  contact_phone?: string;
+  contact_email?: string;
   total_fare: number;
   payment_method: 'cash' | 'wallet' | 'stripe';
 }

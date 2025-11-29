@@ -20,7 +20,7 @@ export default function ProfileFormModal({ isOpen, onClose, initialData }: Profi
     user: {
       id: null,
       email: initialData?.email || '',
-      username: initialData?.name || '',
+      username: '', // Will be auto-set from mobile number
       first_name: '',
       last_name: '',
     },
@@ -38,7 +38,6 @@ export default function ProfileFormModal({ isOpen, onClose, initialData }: Profi
         user: {
           ...prev.user,
           email: initialData.email || prev.user.email,
-          username: initialData.name || prev.user.username,
         },
         full_name: initialData.name || prev.full_name,
         phone: initialData.phone || prev.phone,
