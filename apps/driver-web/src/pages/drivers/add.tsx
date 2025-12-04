@@ -17,7 +17,8 @@ export default function AddDriverPage() {
     setLoading(true);
     try {
       const response = await driversApi.generateInvite(mobileNumber);
-      setInviteLink(response.invite_link);
+      const link = `${window.location.origin}/join/${response.invite_code}`;
+      setInviteLink(link);
       setShowInviteModal(true);
       toast.success('تم إنشاء دعوة السائق!');
     } catch (error: any) {
