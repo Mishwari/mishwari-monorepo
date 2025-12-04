@@ -74,7 +74,7 @@ export default function DriversPage() {
           </div>
           <Button onClick={() => router.push('/drivers/add')} variant="default" size="lg">
             <PlusIcon className="h-5 w-5 ml-2" />
-            إضافة سائق
+            دعوة سائق
           </Button>
         </div>
 
@@ -86,7 +86,7 @@ export default function DriversPage() {
           <div className="text-center py-12 bg-white rounded-lg shadow">
             <p className="text-gray-600 mb-4">لا يوجد سائقين بعد</p>
             <Button onClick={() => router.push('/drivers/add')} variant="default">
-              إضافة أول سائق
+              دعوة أول سائق
             </Button>
           </div>
         ) : (

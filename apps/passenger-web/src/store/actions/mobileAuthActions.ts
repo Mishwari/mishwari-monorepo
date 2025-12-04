@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 // import { resetTripsState } from '@/slices/tripsSlice';
 import { toast } from 'react-toastify';
 import axios, { AxiosResponse } from 'axios';
-import { authApi } from '@mishwari/api';
+import { authApi, apiClient } from '@mishwari/api';
 import { AppStore } from '../store';
 import { Profile } from '@/types/profileDetails';
 import { fetchProfileDetails } from './authActions';
@@ -20,7 +20,6 @@ import { encryptToken, decryptToken } from '@/utils/tokenUtils';
 interface LoginResponse {
   tokens: any;
   access: string;
-  user_status :string
 }
 
 
@@ -31,63 +30,47 @@ interface LoginResponse {
 export const performRegister = (profileData: Profile, router: any) => async (dispatch:any,  getState: () => AppStore) => {
   const {auth} = getState()
   const data = {
-      // username not sent - backend extracts mobile from token and uses it as username
       full_name: profileData.full_name,
       gender : profileData.gender,
       email : profileData.user.email,
       birth_date : profileData.birth_date
   }
   if(!auth.isAuthenticated ) {
-      // dispatch(setError('User is not authenticated'))
       return;
   }
   
   const waitingRegister = toast.info('جاري التسجيل...',{
     autoClose: false
   })
-  const delay = (ms:any) => new Promise(resolve => setTimeout(resolve, ms));
 
   try {
-    const response: [AxiosResponse<any>, any]  = await Promise.all([
-      axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}mobile-login/complete-profile/`, data, {
-        headers: {
-          Authorization: `Bearer ${decryptToken(auth.token)}`,
-        },
-      }),
-      delay(1000),
-    ])
+    await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}mobile-login/complete-profile/`, data, {
+      headers: {
+        Authorization: `Bearer ${decryptToken(auth.token)}`,
+      },
+    });
+
+    // Fetch updated profile - getMe returns nested structure
+    const response = await authApi.getMe();
+    console.log('Updated profile response:', response.data);
+    // Reconstruct profile with user data from top level
+    const profileData = {
+      ...response.data.profile,
+      user: {
+        id: response.data.id,
+        username: response.data.username,
+        email: response.data.email,
+        first_name: '',
+        last_name: ''
+      }
+    };
+    dispatch(setProfileDetails(profileData));
+
     toast.dismiss(waitingRegister);
     toast.success('تم التسجيل بنجاح',{
       autoClose:2000,
       hideProgressBar: true,
     })
-    console.log('respone',response);
-    dispatch(setAuthState({
-      isAuthenticated: true,
-      token: encryptToken(response[0].data.tokens.access),
-      refreshToken: encryptToken(response[0].data.tokens.refresh),
-      status: response[0].data.user_status,
-    }));
-    
-    // Update profile state immediately with submitted data
-    dispatch(setProfileDetails({
-      user: {
-        id: response[0].data.user?.id || null,
-        username: response[0].data.user?.username || '',
-        email: data.email,
-        first_name: '',
-        last_name: '',
-      },
-      full_name: data.full_name,
-      birth_date: data.birth_date,
-      gender: data.gender,
-      address: '',
-    }));
-    
-    // Fetch full profile if status is not partial
-    if (response[0].data.user_status !== 'partial') {
-      await dispatch(fetchProfileDetails() as any);
-    }
     
   } catch (error:any) {
       toast.dismiss(waitingRegister);
@@ -96,13 +79,12 @@ export const performRegister = (profileData: Profile, router: any) => async (dis
       hideProgressBar: true,
       })
       setTimeout(() => {
-          toast.error(error.response?.data?.message || error.message,{
+          toast.error(error.response?.data?.message || error.response?.data?.error || error.message,{
           autoClose:1500,
           hideProgressBar: true,
           })
       },2800)
       console.error('Register failed:', error.response?.data || error);
-
   }
 }
   

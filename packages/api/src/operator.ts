@@ -112,4 +112,7 @@ export const operatorApi = {
 
   cancelTrip: (tripId: number) =>
     apiClient.patch<Trip>(`/operator/trips/${tripId}/`, { status: 'cancelled' }).then(res => res.data),
+
+  completeTrip: (tripId: number) =>
+    apiClient.post(`/operator/trips/${tripId}/complete/`).then(res => res.data),
 };

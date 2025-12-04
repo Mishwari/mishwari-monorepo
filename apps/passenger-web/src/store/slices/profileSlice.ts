@@ -10,6 +10,7 @@ const initialState: Profile = {
         first_name: "",
         last_name: "",
     },
+    mobile_number: "",
     full_name: "" ,
     birth_date: "",
     gender: "male" ,
@@ -21,7 +22,7 @@ export const profileSlice = createSlice({
     initialState,
     reducers: {
         setProfileDetails(state, action:PayloadAction<Profile>) {
-            console.log("hello from profile slice")
+            console.log("Profile slice - received data:", action.payload);
             return { ...state, ...action.payload };
         },
         resetUserState: () => initialState

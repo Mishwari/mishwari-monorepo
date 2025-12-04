@@ -84,9 +84,7 @@ export default function TripDetailsPage() {
   const router = useRouter();
   const profile = useSelector((state) => state.profile);
   const auth = useSelector((state) => state.auth);
-  const isPartialAuth = auth?.status === 'partial';
-  const isFullyAuthenticated =
-    isAuthenticated && !isPartialAuth && auth?.token && profile?.full_name;
+  const isFullyAuthenticated = isAuthenticated && !!profile?.full_name;
 
   const {
     passengers: savedPassengers,
@@ -368,7 +366,7 @@ export default function TripDetailsPage() {
   };
 
   const handleGoToPayment = () => {
-    if (isPartialAuth) {
+    if (!profile?.full_name) {
       setShowProfileModal(true);
       return;
     }

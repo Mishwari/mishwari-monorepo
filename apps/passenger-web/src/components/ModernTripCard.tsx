@@ -27,9 +27,8 @@ export default function ModernTripCard({ trip }: ModernTripCardProps) {
       border: 'border-yellow-100',
     };
   };
-  // Default rating since API doesn't provide it yet
-  const defaultRating = 4.5;
-  const ratingStyle = getRatingColor(defaultRating);
+  const operatorRating = trip.operator?.avg_rating || 0;
+  const ratingStyle = getRatingColor(operatorRating);
 
   // Extract time only from datetime string
   const getTimeOnly = (datetime: string) => {
@@ -145,16 +144,19 @@ export default function ModernTripCard({ trip }: ModernTripCardProps) {
           <div
             className={`flex items-center gap-1 px-2 py-0.5 rounded-md border shadow-sm ${ratingStyle.bg} ${ratingStyle.text} ${ratingStyle.border}`}>
             <StarIcon className={`w-3 h-3 fill-current`} />
-            <span className='text-[10px] font-bold'>{defaultRating}</span>
+            <span className='text-[10px] font-bold'>{operatorRating.toFixed(1)}</span>
+            {trip.operator?.total_reviews > 0 && (
+              <span className='text-[9px] opacity-70'>({trip.operator.total_reviews})</span>
+            )}
           </div>
           <div className='hidden sm:flex gap-2'>
-            {trip.bus?.amenities?.wifi === 'true' && (
+            {trip.bus?.has_wifi && (
               <Wifi className='w-3 h-3 text-slate-400' />
             )}
-            {trip.bus?.amenities?.ac === 'true' && (
+            {trip.bus?.has_ac && (
               <Wind className='w-3 h-3 text-slate-400' />
             )}
-            {trip.bus?.amenities?.charging === 'true' && (
+            {trip.bus?.has_usb_charging && (
               <Zap className='w-3 h-3 text-slate-400' />
             )}
           </div>

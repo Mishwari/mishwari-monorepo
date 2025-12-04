@@ -33,4 +33,10 @@ export const bookingsApi = {
 
   cancel: (id: number) =>
     apiClient.post(`/booking/${id}/cancel/`).then(res => res.data),
+
+  complete: (id: number) =>
+    apiClient.post(`/booking/${id}/complete/`).then(res => res.data),
+
+  confirm: (id: number) =>
+    apiClient.post(`/booking/${id}/confirm/`).then(res => res.data),
 };

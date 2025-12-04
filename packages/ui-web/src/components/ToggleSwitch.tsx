@@ -23,16 +23,18 @@ export function ToggleSwitch({
   return (
     <div
       dir="ltr"
-      className={`relative inline-flex w-full rounded-lg p-1 ${inactiveColor} ${
+      className={`relative inline-flex w-full max-w-full rounded-lg p-1 overflow-hidden ${inactiveColor} ${
         disabled ? 'cursor-not-allowed opacity-50' : ''
       }`}>
-      <div
-        className={`absolute top-1 bottom-1 left-1 right-1 rounded-md transition-all duration-300 ease-in-out ${activeColor} z-0`}
-        style={{
-          width: `calc(${itemWidth}% - 0.5rem)`,
-          transform: `translateX(calc(${activeIndex * 100}% + ${activeIndex * 0.25}rem))`,
-        }}
-      />
+      {activeIndex >= 0 && (
+        <div
+          className={`absolute top-1 bottom-1 left-1 right-1 rounded-md transition-all duration-300 ease-in-out ${activeColor} z-0`}
+          style={{
+            width: `calc(${itemWidth}% - 0.5rem)`,
+            transform: `translateX(calc(${activeIndex * 100}% + ${activeIndex * 0.25}rem))`,
+          }}
+        />
+      )}
       {options.map((option) => (
         <button
           key={option.value}

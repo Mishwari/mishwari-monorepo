@@ -7,27 +7,21 @@ export interface AuthState {
   isAuthenticated: boolean| undefined;
   token: string | null| undefined;
   refreshToken: string|null| undefined;
-  status: string | null| undefined;
 }
 
 const initialState: AuthState = {
   isAuthenticated: false,
   token: null,
   refreshToken: null,
-  status: null,
-  
 };
 
 export const authSlice = createSlice({
    name: "auth",
    initialState,
    reducers: {
-    setAuthState(state, action: PayloadAction<{ isAuthenticated?: boolean | undefined; token?: string | null| undefined; refreshToken?:string|null| undefined; status?: string | null | undefined; }>) {
-      state.isAuthenticated = action.payload.isAuthenticated;
-      state.token = action.payload.token;
-      state.refreshToken = action.payload.refreshToken;
-      state.status = action.payload.status;
-      },
+    setAuthState(state, action: PayloadAction<Partial<AuthState>>) {
+      return { ...state, ...action.payload };
+    },
     resetAuthState: () => initialState,
    },
 

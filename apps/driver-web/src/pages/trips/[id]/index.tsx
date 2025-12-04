@@ -7,7 +7,18 @@ import { tripsApi, operatorApi } from '@mishwari/api';
 import { Trip } from '@mishwari/types';
 import { convertToReadableTime } from '@mishwari/utils';
 import { useCanPublishTrip } from '@/hooks/useCanPublishTrip';
-import { CalendarIcon, ClockIcon, MapPinIcon, TruckIcon, ArrowRightIcon, PlayIcon, XMarkIcon, UserIcon, TableCellsIcon, ArrowsRightLeftIcon } from '@heroicons/react/24/outline';
+import {
+  CalendarIcon,
+  ClockIcon,
+  MapPinIcon,
+  TruckIcon,
+  ArrowRightIcon,
+  PlayIcon,
+  XMarkIcon,
+  UserIcon,
+  TableCellsIcon,
+  ArrowsRightLeftIcon,
+} from '@heroicons/react/24/outline';
 
 export default function TripDetailsPage() {
   const router = useRouter();
@@ -17,12 +28,16 @@ export default function TripDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  
-  const { message: publishMessage } = useCanPublishTrip(trip?.bus || undefined, trip?.driver || undefined);
-  
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+
+  const { message: publishMessage } = useCanPublishTrip(
+    trip?.bus || undefined,
+    trip?.driver || undefined
+  );
+
   useEffect(() => {
     if (!id) return;
-    
+
     const fetchTrip = async () => {
       try {
         const data = await operatorApi.getTripById(Number(id));
@@ -39,7 +54,7 @@ export default function TripDetailsPage() {
 
   useEffect(() => {
     if (!id) return;
-    
+
     const fetchBookings = async () => {
       try {
         const data = await operatorApi.getTripBookings(Number(id));
@@ -94,11 +109,26 @@ export default function TripDetailsPage() {
     }
   };
 
+  const handleComplete = async () => {
+    if (!trip) return;
+    setActionLoading(true);
+    try {
+      const result = await operatorApi.completeTrip(trip.id);
+      alert(`تم إكمال الرحلة بنجاح. تم إكمال ${result.bookings_completed} حجز`);
+      const updated = await operatorApi.getTripById(Number(id));
+      setTrip(updated);
+    } catch (error: any) {
+      alert(error?.response?.data?.error || 'فشل إكمال الرحلة');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="text-center py-12">
-          <p className="text-gray-600">جاري التحميل...</p>
+        <div className='text-center py-12'>
+          <p className='text-gray-600'>جاري التحميل...</p>
         </div>
       </DashboardLayout>
     );
@@ -107,8 +137,8 @@ export default function TripDetailsPage() {
   if (!trip) {
     return (
       <DashboardLayout>
-        <div className="text-center py-12">
-          <p className="text-gray-600">الرحلة غير موجودة</p>
+        <div className='text-center py-12'>
+          <p className='text-gray-600'>الرحلة غير موجودة</p>
         </div>
       </DashboardLayout>
     );
@@ -130,8 +160,9 @@ export default function TripDetailsPage() {
     cancelled: 'ملغاة',
   };
 
-  const canStartFlexibleTrip = trip?.trip_type === 'flexible' && 
-    trip.departure_window_start && 
+  const canStartFlexibleTrip =
+    trip?.trip_type === 'flexible' &&
+    trip.departure_window_start &&
     trip.departure_window_end &&
     new Date() >= new Date(trip.departure_window_start) &&
     new Date() <= new Date(trip.departure_window_end);
@@ -142,46 +173,60 @@ export default function TripDetailsPage() {
         open={showCancelDialog}
         onOpenChange={setShowCancelDialog}
         onConfirm={handleCancel}
-        title="إلغاء الرحلة"
-        description="هل أنت متأكد من إلغاء هذه الرحلة؟ لن تتمكن من التراجع عن هذا الإجراء."
-        confirmText="نعم، إلغاء"
-        cancelText="تراجع"
-        variant="destructive"
+        title='إلغاء الرحلة'
+        description='هل أنت متأكد من إلغاء هذه الرحلة؟ لن تتمكن من التراجع عن هذا الإجراء.'
+        confirmText='نعم، إلغاء'
+        cancelText='تراجع'
+        variant='destructive'
       />
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button onClick={() => router.push('/trips')} variant="outline" size="sm">
-              <ArrowRightIcon className="h-5 w-5" />
+      <ConfirmDialog
+        open={showCompleteDialog}
+        onOpenChange={setShowCompleteDialog}
+        onConfirm={handleComplete}
+        title='إكمال الرحلة'
+        description='هل أنت متأكد من إكمال هذه الرحلة؟ سيتم تلقائياً إكمال جميع الحجوزات المرتبطة بها وسيتمكن الركاب من تقييم الرحلة.'
+        confirmText='نعم، إكمال'
+        cancelText='تراجع'
+        variant='default'
+      />
+      <div className='max-w-4xl mx-auto space-y-6'>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-4'>
+            <Button
+              onClick={() => router.push('/trips')}
+              variant='outline'
+              size='sm'>
+              <ArrowRightIcon className='h-5 w-5' />
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className='text-3xl font-bold text-gray-900'>
                 {trip.from_city.city} ← {trip.to_city.city}
               </h1>
-              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-2 ${statusColors[trip.status]}`}>
+              <span
+                className={`inline-block px-3 py-1 rounded-full text-sm font-medium mt-2 ${
+                  statusColors[trip.status]
+                }`}>
                 {statusLabels[trip.status]}
               </span>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             {trip.status === 'draft' && (
               <>
                 <Button
                   onClick={() => setShowCancelDialog(true)}
-                  variant="outline"
+                  variant='outline'
                   disabled={actionLoading}
-                  className="flex gap-2 items-center"
-                >
-                  <XMarkIcon className="h-4 w-4" />
+                  className='flex gap-2 items-center'>
+                  <XMarkIcon className='h-4 w-4' />
                   إلغاء
                 </Button>
                 <Button
                   onClick={handlePublish}
-                  variant="default"
+                  variant='default'
                   disabled={!trip.can_publish}
                   loading={actionLoading}
-                  title={publishMessage}
-                >
+                  title={publishMessage}>
                   نشر
                 </Button>
               </>
@@ -190,145 +235,174 @@ export default function TripDetailsPage() {
               <>
                 <Button
                   onClick={() => setShowCancelDialog(true)}
-                  variant="outline"
+                  variant='outline'
                   disabled={actionLoading}
-                  className="flex gap-2 items-center"
-                >
-                  <XMarkIcon className="h-4 w-4" />
+                  className='flex gap-2 items-center'>
+                  <XMarkIcon className='h-4 w-4' />
                   إلغاء
                 </Button>
-                {canStartFlexibleTrip && (
-                  <Button
-                    onClick={handleDepartNow}
-                    variant="default"
-                    disabled={actionLoading}
-                    className="flex gap-2 items-center"
-                  >
-                    <PlayIcon className="h-4 w-4" />
-                    بدء الرحلة
-                  </Button>
-                )}
+                <Button
+                  onClick={handleDepartNow}
+                  variant='default'
+                  disabled={actionLoading}
+                  className='flex gap-2 items-center'>
+                  <PlayIcon className='h-4 w-4' />
+                  بدء الرحلة
+                </Button>
               </>
+            )}
+            {trip.status === 'active' && (
+              <Button
+                onClick={() => setShowCompleteDialog(true)}
+                variant='default'
+                disabled={actionLoading}>
+                إكمال الرحلة
+              </Button>
             )}
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h2 className="text-xl font-semibold mb-4">تفاصيل الرحلة</h2>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-gray-400" />
+        <div className='bg-white rounded-lg shadow p-6 space-y-4'>
+          <h2 className='text-xl font-semibold mb-4'>تفاصيل الرحلة</h2>
+
+          <div className='grid grid-cols-2 gap-4'>
+            <div className='flex items-center gap-2'>
+              <CalendarIcon className='h-5 w-5 text-gray-400' />
               <div>
-                <p className="text-sm text-gray-500">التاريخ</p>
-                <p className="font-medium">{new Date(trip.journey_date).toLocaleDateString('en-GB')}</p>
+                <p className='text-sm text-gray-500'>التاريخ</p>
+                <p className='font-medium'>
+                  {new Date(trip.journey_date).toLocaleDateString('en-GB')}
+                </p>
               </div>
             </div>
 
             {trip.trip_type === 'scheduled' && trip.planned_departure && (
-              <div className="flex items-center gap-2">
-                <ClockIcon className="h-5 w-5 text-gray-400" />
+              <div className='flex items-center gap-2'>
+                <ClockIcon className='h-5 w-5 text-gray-400' />
                 <div>
-                  <p className="text-sm text-gray-500">وقت المغادرة</p>
-                  <p className="font-medium">{convertToReadableTime(trip.planned_departure)}</p>
-                </div>
-              </div>
-            )}
-
-            {trip.trip_type === 'flexible' && trip.departure_window_start && trip.departure_window_end && (
-              <div className="flex items-center gap-2">
-                <ClockIcon className="h-5 w-5 text-gray-400" />
-                <div>
-                  <p className="text-sm text-gray-500">نافذة المغادرة</p>
-                  <p className="font-medium">
-                    {convertToReadableTime(trip.departure_window_start)}
-                    {' - '}
-                    {convertToReadableTime(trip.departure_window_end)}
+                  <p className='text-sm text-gray-500'>وقت المغادرة</p>
+                  <p className='font-medium'>
+                    {convertToReadableTime(trip.planned_departure)}
                   </p>
                 </div>
               </div>
             )}
 
-            <div className="flex items-center gap-2">
-              <TruckIcon className="h-5 w-5 text-gray-400" />
+            {trip.trip_type === 'flexible' &&
+              trip.departure_window_start &&
+              trip.departure_window_end && (
+                <div className='flex items-center gap-2'>
+                  <ClockIcon className='h-5 w-5 text-gray-400' />
+                  <div>
+                    <p className='text-sm text-gray-500'>نافذة المغادرة</p>
+                    <p className='font-medium'>
+                      {convertToReadableTime(trip.departure_window_start)}
+                      {' - '}
+                      {convertToReadableTime(trip.departure_window_end)}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+            <div className='flex items-center gap-2'>
+              <TruckIcon className='h-5 w-5 text-gray-400' />
               <div>
-                <p className="text-sm text-gray-500">الحافلة</p>
-                <p className="font-medium">{trip.bus?.bus_number || 'غير محدد'}</p>
+                <p className='text-sm text-gray-500'>الحافلة</p>
+                <p className='font-medium'>
+                  {trip.bus?.bus_number || 'غير محدد'}
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <ArrowsRightLeftIcon className="h-5 w-5 text-gray-400" />
+            <div className='flex items-center gap-2'>
+              <ArrowsRightLeftIcon className='h-5 w-5 text-gray-400' />
               <div>
-                <p className="text-sm text-gray-500">النوع</p>
-                <p className="font-medium">{trip.trip_type === 'scheduled' ? 'مجدولة' : 'مرنة'}</p>
+                <p className='text-sm text-gray-500'>النوع</p>
+                <p className='font-medium'>
+                  {trip.trip_type === 'scheduled' ? 'مجدولة' : 'مرنة'}
+                </p>
               </div>
             </div>
 
-             {trip.driver && (
-              <div className="flex items-center gap-2">
-                <UserIcon className="h-5 w-5 text-gray-400" />
+            {trip.driver && (
+              <div className='flex items-center gap-2'>
+                <UserIcon className='h-5 w-5 text-gray-400' />
                 <div>
-                  <p className="text-sm text-gray-500">السائق</p>
-                  <p className="font-medium">{trip.driver.driver_name}</p>
+                  <p className='text-sm text-gray-500'>السائق</p>
+                  <p className='font-medium'>{trip.driver.driver_name}</p>
                 </div>
               </div>
             )}
 
             {trip.planned_route_name && (
-              <div className="flex items-center gap-2">
-                <MapPinIcon className="h-5 w-5 text-gray-400" />
+              <div className='flex items-center gap-2'>
+                <MapPinIcon className='h-5 w-5 text-gray-400' />
                 <div>
-                  <p className="text-sm text-gray-500">المسار</p>
-                  <p className="font-medium">{trip.planned_route_name}</p>
+                  <p className='text-sm text-gray-500'>المسار</p>
+                  <p className='font-medium'>{trip.planned_route_name}</p>
                 </div>
               </div>
             )}
 
             {trip.available_seats !== undefined && (
-              <div className="flex items-center gap-2">
-                <TableCellsIcon className="h-5 w-5 text-gray-400" />
+              <div className='flex items-center gap-2'>
+                <TableCellsIcon className='h-5 w-5 text-gray-400' />
                 <div>
-                  <p className="text-sm text-gray-500">المقاعد المتاحة</p>
-                  <p className="font-medium">{trip.available_seats} مقعد</p>
+                  <p className='text-sm text-gray-500'>المقاعد المتاحة</p>
+                  <p className='font-medium'>{trip.available_seats} مقعد</p>
                 </div>
               </div>
             )}
           </div>
 
           {trip.price && (
-            <div className="pt-4 border-t">
-              <p className="text-sm text-gray-500">السعر</p>
-              <p className="text-2xl font-bold ">{trip.price} ر.ي</p>
+            <div className='pt-4 border-t'>
+              <p className='text-sm text-gray-500'>السعر</p>
+              <p className='text-2xl font-bold '>{trip.price} ر.ي</p>
             </div>
           )}
         </div>
 
         {!trip.can_publish && trip.status === 'draft' && publishMessage && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <p className="text-amber-800">
-              💡 {publishMessage}
-            </p>
+          <div className='bg-amber-50 border border-amber-200 rounded-lg p-4'>
+            <p className='text-amber-800'>💡 {publishMessage}</p>
           </div>
         )}
 
         {trip.stops && trip.stops.length > 2 && (
-          <div className="bg-white rounded-lg shadow">
-            <CollapsibleSection title="نقاط التوقف" count={trip.stops.length - 2} defaultOpen={false} showBottomToggle={true}>
-              <div className="divide-y">
+          <div className='bg-white rounded-lg shadow'>
+            <CollapsibleSection
+              title='نقاط التوقف'
+              count={trip.stops.length - 2}
+              defaultOpen={false}
+              showBottomToggle={true}>
+              <div className='divide-y'>
                 {trip.stops.slice(1, -1).map((stop, index) => (
-                  <div key={stop.id} className="py-3 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="flex-shrink-0 w-8 h-8 bg-brand-primary text-white rounded-full flex items-center justify-center font-semibold text-sm">
+                  <div
+                    key={stop.id}
+                    className='py-3 hover:bg-gray-50 transition-colors'>
+                    <div className='flex items-center gap-4'>
+                      <div className='flex-shrink-0 w-8 h-8 bg-brand-primary text-white rounded-full flex items-center justify-center font-semibold text-sm'>
                         {index + 1}
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{stop.city.name}</p>
-                        <p className="text-sm text-gray-500">{stop.distance_from_start_km.toFixed(1)} كم</p>
+                      <div className='flex-1'>
+                        <p className='font-medium text-gray-900'>
+                          {stop.city.name}
+                        </p>
+                        <p className='text-sm text-gray-500'>
+                          {stop.distance_from_start_km.toFixed(1)} كم
+                        </p>
                       </div>
-                      <div className="text-left">
-                        <p className="font-semibold text-brand-primary">{stop.price_from_start} ر.ي</p>
-                        <p className="text-xs text-gray-500">{new Date(stop.planned_arrival).toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' })}</p>
+                      <div className='text-left'>
+                        <p className='font-semibold text-brand-primary'>
+                          {stop.price_from_start} ر.ي
+                        </p>
+                        <p className='text-xs text-gray-500'>
+                          {new Date(stop.planned_arrival).toLocaleTimeString(
+                            'ar-YE',
+                            { hour: '2-digit', minute: '2-digit' }
+                          )}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -338,14 +412,22 @@ export default function TripDetailsPage() {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">الحجوزات ({bookings.length})</h2>
-            <div className="flex gap-2">
-              <Button onClick={() => router.push(`/trips/${trip.id}/bookings`)} variant="outline" size="sm">
+        <div className='bg-white rounded-lg shadow'>
+          <div className='px-6 py-4 border-b border-gray-200 flex items-center justify-between'>
+            <h2 className='text-xl font-semibold'>
+              الحجوزات ({bookings.length})
+            </h2>
+            <div className='flex gap-2'>
+              <Button
+                onClick={() => router.push(`/trips/${trip.id}/bookings`)}
+                variant='outline'
+                size='sm'>
                 عرض الكل
               </Button>
-              <Button onClick={() => router.push(`/trips/${trip.id}/bookings/create`)} variant="default" size="sm">
+              <Button
+                onClick={() => router.push(`/trips/${trip.id}/bookings/create`)}
+                variant='default'
+                size='sm'>
                 إضافة حجز
               </Button>
             </div>

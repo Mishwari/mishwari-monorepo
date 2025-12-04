@@ -8,11 +8,14 @@ export const driversApi = {
   getById: (id: number) =>
     apiClient.get<Driver>(`/operator/drivers/${id}/`).then(res => res.data),
 
-  create: (data: { mobile_number: string; full_name: string; national_id?: string; driver_license?: string; email?: string }) =>
-    apiClient.post<Driver>('/operator/drivers/', data).then(res => res.data),
+  generateInvite: (mobile_number: string) =>
+    apiClient.post('/operator/drivers/generate-invite/', { mobile_number }).then(res => res.data),
 
-  invite: (phone: string) =>
-    apiClient.post('/operator/drivers/invite/', { phone }).then(res => res.data),
+  listInvitations: () =>
+    apiClient.get('/operator/drivers/invitations/').then(res => res.data),
+
+  cancelInvitation: (id: number) =>
+    apiClient.post(`/operator/drivers/${id}/cancel-invite/`).then(res => res.data),
 
   uploadDocuments: (driverId: number, files: FormData) =>
     apiClient.post<Driver>(`/operator/drivers/${driverId}/verify/`, files, {

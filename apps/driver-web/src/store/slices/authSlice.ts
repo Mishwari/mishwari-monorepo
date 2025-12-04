@@ -7,7 +7,6 @@ export interface AuthState {
   isAuthenticated: boolean| undefined;
   token: string | null| undefined;
   refreshToken: string|null| undefined;
-  status: string | null| undefined;
   profile: Profile | null;
   canManageDrivers: boolean;
   canUpgrade: boolean;
@@ -18,7 +17,6 @@ const initialState: AuthState = {
   isAuthenticated: false,
   token: null,
   refreshToken: null,
-  status: null,
   profile: null,
   canManageDrivers: false,
   canUpgrade: false,

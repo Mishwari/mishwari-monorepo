@@ -9,3 +9,4 @@ export * from './profile';
 export * from './profileDetails';
 export * from './userDetails';
 export * from './main_trip';
+export * from './review';

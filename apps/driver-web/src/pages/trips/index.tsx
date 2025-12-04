@@ -17,7 +17,8 @@ export default function TripsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const isVerified = profile?.is_verified;
-  const isDriver = profile?.role === 'driver';
+  const role = (profile as any)?.profile?.role || profile?.role;
+  const isOperatorAdmin = role === 'operator_admin';
   
   // Calculate active trips for limit warning
   const activeTripsCount = useMemo(() => {
@@ -83,18 +84,19 @@ export default function TripsPage() {
             <h1 className="text-3xl font-bold text-gray-900">الرحلات</h1>
             <p className="text-gray-600 mt-1">إدارة رحلاتك</p>
           </div>
-          <Button 
-            onClick={() => router.push('/trips/create')} 
-            variant="default" 
-            size="lg"
-            disabled={isDriver && activeTripsCount >= tripLimit}
-          >
-            <PlusIcon className="h-5 w-5 ml-2" />
-            إنشاء رحلة
-          </Button>
+          {isOperatorAdmin && (
+            <Button 
+              onClick={() => router.push('/trips/create')} 
+              variant="default" 
+              size="lg"
+            >
+              <PlusIcon className="h-5 w-5 ml-2" />
+              إنشاء رحلة
+            </Button>
+          )}
         </div>
 
-        {isDriver && <TripLimitBanner currentTrips={activeTripsCount} limit={tripLimit} />}
+
 
         {/* Mobile: Dropdown */}
         <div className="md:hidden">
@@ -139,9 +141,11 @@ export default function TripsPage() {
             {!isVerified && (
               <p className="text-sm text-gray-500 mb-4">يمكنك إنشاء رحلات كمسودات، وستتمكن من نشرها بعد إكمال التوثيق</p>
             )}
-            <Button onClick={() => router.push('/trips/create')} variant="default">
+            {isOperatorAdmin && (
+              <Button onClick={() => router.push('/trips/create')} variant="default">
               إنشاء أول رحلة
-            </Button>
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

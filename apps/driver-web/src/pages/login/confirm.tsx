@@ -11,17 +11,26 @@ export default function Confirm() {
   const router = useRouter();
   const mobileNumber = useSelector((state: AppState) => state.mobileAuth.number);
   const [otpCode, setOtpCode] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [requiresPassword, setRequiresPassword] = useState<boolean>(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (!mobileNumber) {
       router.push('/login');
     }
+    if (router.query.requiresPassword === 'true') {
+      setRequiresPassword(true);
+    }
   }, [mobileNumber, router]);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    dispatch(performVerifyLogin(mobileNumber!, otpCode, router) as any);
+    try {
+      await dispatch(performVerifyLogin(mobileNumber!, otpCode, router, requiresPassword ? password : undefined) as any);
+    } catch (error) {
+      // Error handled in action
+    }
   };
 
   return (
@@ -51,6 +60,22 @@ export default function Confirm() {
               length={4}
             />
           </div>
+
+          {requiresPassword && (
+            <div>
+              <label className='block text-sm font-medium text-gray-700 text-right mb-2'>
+                كلمة المرور
+              </label>
+              <input
+                type='password'
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder='أدخل كلمة المرور'
+                className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary'
+              />
+            </div>
+          )}
 
           <div className='flex justify-center'>
             <Button type='submit' variant='default' size='lg'>

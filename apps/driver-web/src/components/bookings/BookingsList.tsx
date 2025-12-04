@@ -1,25 +1,55 @@
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import {
   UserIcon,
   CreditCardIcon,
   DevicePhoneMobileIcon,
+  XCircleIcon,
 } from '@heroicons/react/24/outline';
+import { Button, ConfirmDialog } from '@mishwari/ui-web';
+import { useCancelBooking } from '@mishwari/ui-primitives';
+import { bookingsApi } from '@mishwari/api';
 
 interface BookingsListProps {
   bookings: any[];
   loading?: boolean;
   emptyMessage?: string;
   showTripInfo?: boolean;
+  onBookingCancelled?: (bookingId: number) => void;
 }
 
 export default function BookingsList({ 
   bookings, 
   loading = false, 
   emptyMessage = 'لا توجد حجوزات',
-  showTripInfo = false 
+  showTripInfo = false,
+  onBookingCancelled
 }: BookingsListProps) {
   const router = useRouter();
   const { id: tripIdFromRoute } = router.query;
+  const [localBookings, setLocalBookings] = useState(bookings);
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const { requestCancel, confirmCancel, cancelRequest, cancelling, showConfirm } = useCancelBooking({
+    onSuccess: () => {
+      if (cancellingId) {
+        setLocalBookings(prev => 
+          prev.map(b => b.id === cancellingId ? { ...b, status: 'cancelled' } : b)
+        );
+        if (onBookingCancelled) onBookingCancelled(cancellingId);
+        setCancellingId(null);
+      }
+    }
+  });
+
+  useEffect(() => {
+    setLocalBookings(bookings);
+  }, [bookings]);
+
+  const handleCancel = (e: React.MouseEvent, bookingId: number) => {
+    e.stopPropagation();
+    setCancellingId(bookingId);
+    requestCancel(bookingId);
+  };
 
   if (loading) {
     return (
@@ -39,7 +69,7 @@ export default function BookingsList({
 
   return (
     <div className="divide-y divide-gray-200">
-      {bookings.map((booking) => (
+      {localBookings.map((booking) => (
         <div
           key={booking.id}
           className="px-6 py-4 cursor-pointer hover:bg-gray-50"
@@ -50,22 +80,20 @@ export default function BookingsList({
             router.push(`/trips/${tripId}/bookings/${booking.id}`);
           }}
         >
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3 flex-1">
               <div className="p-2 bg-blue-100 rounded-full">
                 <UserIcon className="h-5 w-5 text-blue-600" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">
                   {booking.passengers?.[0]?.name || 'راكب'}
                   {booking.passengers?.length > 1 &&
                     ` +${booking.passengers.length - 1}`}
                 </p>
-                {showTripInfo && booking.trip_info && (
-                  <p className="text-xs text-gray-600 mt-1">
-                    {booking.trip_info.from_city} ← {booking.trip_info.to_city}
-                  </p>
-                )}
+                <p className="text-xs text-gray-600 mt-1">
+                  {booking.from_stop?.city?.city || 'N/A'} ← {booking.to_stop?.city?.city || 'N/A'}
+                </p>
                 <div className="flex items-center gap-2 mt-1">
                   <p className="text-xs text-gray-500">
                     {new Date(booking.booking_time).toLocaleString('en-GB')}
@@ -84,16 +112,18 @@ export default function BookingsList({
                 </div>
               </div>
             </div>
-            <div className="text-left">
+            <div className="text-left flex flex-col items-end gap-2">
               <p className="text-sm font-bold text-gray-900">
                 {booking.total_fare} ريال
               </p>
               <span
-                className={`inline-block px-2 py-1 rounded text-xs mt-1 ${
+                className={`inline-block px-2 py-1 rounded text-xs ${
                   booking.status === 'confirmed'
                     ? 'bg-green-100 text-green-800'
                     : booking.status === 'pending'
                     ? 'bg-yellow-100 text-yellow-800'
+                    : booking.status === 'cancelled'
+                    ? 'bg-red-100 text-red-800'
                     : 'bg-gray-100 text-gray-800'
                 }`}
               >
@@ -101,12 +131,56 @@ export default function BookingsList({
                   ? 'مؤكد'
                   : booking.status === 'pending'
                   ? 'معلق'
+                  : booking.status === 'cancelled'
+                  ? 'ملغي'
                   : booking.status}
               </span>
+              <div className="flex gap-2">
+                {booking.status === 'pending' && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      bookingsApi.confirm(booking.id).then(() => {
+                        setLocalBookings(prev => 
+                          prev.map(b => b.id === booking.id ? { ...b, status: 'confirmed' } : b)
+                        );
+                      });
+                    }}
+                    className="text-xs"
+                  >
+                    تأكيد
+                  </Button>
+                )}
+                {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => handleCancel(e, booking.id)}
+                    disabled={cancelling}
+                    className="text-xs"
+                  >
+                    <XCircleIcon className="h-4 w-4 ml-1" />
+                    {cancelling ? 'جاري الإلغاء...' : 'إلغاء'}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       ))}
+      
+      <ConfirmDialog
+        open={showConfirm}
+        onOpenChange={cancelRequest}
+        onConfirm={confirmCancel}
+        title="إلغاء الحجز"
+        description="هل أنت متأكد من إلغاء هذا الحجز؟"
+        confirmText="إلغاء"
+        cancelText="رجوع"
+        variant="destructive"
+      />
     </div>
   );
 }

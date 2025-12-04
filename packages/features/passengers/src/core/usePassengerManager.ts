@@ -11,10 +11,6 @@ export const usePassengerManager = (): UsePassengerManagerReturn => {
   const validatePassenger = useCallback((passenger: Partial<Passenger>) => {
     const errors: string[] = [];
     if (!passenger.name?.trim()) errors.push('Name is required');
-    if (!passenger.phone?.trim()) errors.push('Phone is required');
-    if (passenger.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(passenger.email)) {
-      errors.push('Invalid email format');
-    }
     return { valid: errors.length === 0, errors };
   }, []);
 

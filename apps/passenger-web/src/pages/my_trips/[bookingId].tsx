@@ -7,7 +7,10 @@ import { decryptToken } from '@/utils/tokenUtils';
 import { convertToReadableTime } from '@mishwari/utils';
 import MainLayout from '@/layouts/MainLayout';
 import GreenCheckIcon from '@mishwari/ui-web/public/icons/common/greenCheck.svg';
-import { RatingBadge } from '@mishwari/ui-web';
+import { RatingBadge, ConfirmDialog } from '@mishwari/ui-web';
+import { useCancelBooking } from '@mishwari/ui-primitives';
+import { XCircleIcon, StarIcon } from '@heroicons/react/24/outline';
+import ReviewModal from '@/components/ReviewModal';
 
 const statusConfig = {
   active: { label: 'نشط', bg: 'bg-green-100', text: 'text-green-700' },
@@ -28,6 +31,10 @@ export default function BookingDetails() {
   const token = useSelector((state: AppState) => state.auth.token);
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const { requestCancel, confirmCancel, cancelRequest, cancelling, showConfirm } = useCancelBooking({
+    onSuccess: () => setBooking({ ...booking, status: 'cancelled' })
+  });
 
   useEffect(() => {
     if (!bookingId || !token) return;
@@ -53,6 +60,15 @@ export default function BookingDetails() {
 
     fetchBooking();
   }, [bookingId, token]);
+
+  const handleCancelClick = () => {
+    if (booking) requestCancel(booking.id);
+  };
+
+  const handleReviewSuccess = () => {
+    setBooking({ ...booking, review: { id: 0 } });
+    setReviewModalOpen(false);
+  };
 
   if (loading) {
     return (
@@ -97,10 +113,33 @@ export default function BookingDetails() {
       <div className="max-w-4xl mx-auto px-4 py-6 mb-20">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">تفاصيل الحجز</h1>
-          <span className={`px-4 py-2 rounded-full text-sm font-semibold ${status.bg} ${status.text}`}>
-            {status.label}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className={`px-4 py-2 rounded-full text-sm font-semibold ${status.bg} ${status.text}`}>
+              {status.label}
+            </span>
+            {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+              <button
+                onClick={handleCancelClick}
+                disabled={cancelling}
+                className="px-4 py-2 rounded-full text-sm font-semibold bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 flex items-center gap-2"
+              >
+                <XCircleIcon className="h-5 w-5" />
+                {cancelling ? 'جاري الإلغاء...' : 'إلغاء الحجز'}
+              </button>
+            )}
+          </div>
         </div>
+        
+        <ConfirmDialog
+          open={showConfirm}
+          onOpenChange={cancelRequest}
+          onConfirm={confirmCancel}
+          title="إلغاء الحجز"
+          description="هل أنت متأكد من إلغاء هذا الحجز؟"
+          confirmText="إلغاء"
+          cancelText="رجوع"
+          variant="destructive"
+        />
 
         <section className="bg-white shadow-lg rounded-xl p-6 mb-4">
           <h2 className="text-lg font-bold mb-4">معلومات الرحلة</h2>
@@ -221,6 +260,36 @@ export default function BookingDetails() {
             </div>
           </section>
         )}
+
+        {booking.status === 'completed' && !booking.review && (
+          <section className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-6 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-yellow-400 rounded-full p-3">
+                  <StarIcon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">شارك تجربتك</h3>
+                  <p className="text-sm text-gray-600">ساعدنا في تحسين خدماتنا بتقييم هذه الرحلة</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setReviewModalOpen(true)}
+                className="px-6 py-3 bg-brand-primary text-white rounded-lg font-semibold hover:bg-brand-primary/90 transition-colors flex items-center gap-2"
+              >
+                <StarIcon className="h-5 w-5" />
+                قيّم الآن
+              </button>
+            </div>
+          </section>
+        )}
+
+        <ReviewModal
+          booking={booking}
+          isOpen={reviewModalOpen}
+          onClose={() => setReviewModalOpen(false)}
+          onSuccess={handleReviewSuccess}
+        />
 
         <section className="bg-white shadow-lg rounded-xl p-6">
           <h2 className="text-lg font-bold mb-4">معلومات الدفع</h2>

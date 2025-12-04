@@ -1,8 +1,7 @@
 import React from 'react';
-import { Input, Button, ToggleSwitch } from '@mishwari/ui-web';
+import { Input, Button, ToggleSwitch, DateInput } from '@mishwari/ui-web';
 import { Profile } from '@/types/profileDetails';
 import { CheckIcon } from '@heroicons/react/24/outline';
-import DateInput from './DateInput';
 
 interface ProfileDataProps {
   profileData: Profile;

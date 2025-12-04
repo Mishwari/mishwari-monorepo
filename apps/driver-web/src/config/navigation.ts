@@ -7,18 +7,13 @@ export const getNavigationItems = (profile: Profile | null) => {
   
   const baseItems = [
     { name: 'الرحلات', href: '/trips', icon: MapIcon },
-    { name: role === 'operator_admin' ? 'الأسطول' : 'حافلتي', href: '/fleet', icon: TruckIcon },
     { name: 'الملف الشخصي', href: '/profile', icon: UserIcon },
   ];
 
-  // Only operator_admin sees drivers menu
+  // operator_admin sees full menu
   if (role === 'operator_admin') {
-    console.log('[getNavigationItems] Adding drivers menu for operator_admin');
-    baseItems.splice(2, 0, { 
-      name: 'السائقين', 
-      href: '/drivers', 
-      icon: UsersIcon 
-    });
+    baseItems.splice(1, 0, { name: 'الأسطول', href: '/fleet', icon: TruckIcon });
+    baseItems.splice(2, 0, { name: 'السائقين', href: '/drivers', icon: UsersIcon });
   }
 
   return baseItems;

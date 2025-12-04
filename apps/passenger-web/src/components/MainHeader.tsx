@@ -36,17 +36,10 @@ export default function MainHeader({
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  const phoneNumber = useMemo(() => {
-    if (auth?.token) {
-      try {
-        const decoded: any = jwtDecode(decryptToken(auth.token));
-        return decoded?.mobile_number || decoded?.phone || decoded?.phone_number;
-      } catch (error) {
-        return undefined;
-      }
-    }
-    return undefined;
-  }, [auth?.token]);
+  const phoneNumber = profile?.mobile_number;
+  
+  console.log('MainHeader - profile:', profile);
+  console.log('MainHeader - phoneNumber:', phoneNumber);
 
   const handleBack = () => {
     router.push(backTo);
@@ -98,14 +91,13 @@ export default function MainHeader({
           {/* 3. FIXED RIGHT SIDE (User Dropdown) - Pushed to end */}
           <div className='shrink-0 mr-auto'>
             <UserDropdown
-              userName={profile?.full_name}
-              username={profile?.user?.username}
-              phoneNumber={phoneNumber}
+              userName={profile?.full_name || null}
+              username={profile?.user?.username || null}
+              phoneNumber={phoneNumber || null}
               onLogout={logout}
               onLogin={() => setShowLoginModal(true)}
-              isAuthenticated={isAuthenticated}
-              isPartial={auth?.status === 'partial'}
               onCompleteProfile={() => setShowProfileModal(true)}
+              isAuthenticated={isAuthenticated}
             />
           </div>
         </div>

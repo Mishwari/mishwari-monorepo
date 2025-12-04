@@ -9,6 +9,7 @@ export const DriverSchema = z.object({
     national_id: z.string().nullable().optional(),
     driver_license: z.string().nullable().optional(),
     driver_rating: z.string(),
+    total_reviews: z.number().default(0),
     operator: OperatorSchema.nullable(),
     buses: z.array(z.any()).optional(),
     is_verified: z.boolean(),

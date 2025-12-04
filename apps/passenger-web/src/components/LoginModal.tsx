@@ -3,10 +3,11 @@ import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMobileAuth } from '@/store/slices/mobileAuthSlice';
 import { setAuthState } from '@/store/slices/authSlice';
+import { setProfileDetails } from '@/store/slices/profileSlice';
 import { AppState } from '../store/store';
 import { PhoneInput, OtpInput, countries } from '@mishwari/ui-web';
 import { XMarkIcon, ArrowRightOnRectangleIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
-import { authApi } from '@mishwari/api';
+import { authApi, createAuthenticatedClient } from '@mishwari/api';
 import { toast } from 'react-toastify';
 import { encryptToken } from '@/utils/tokenUtils';
 import ProfileFormModal from './ProfileFormModal';
@@ -56,32 +57,36 @@ export default function LoginModal({ isOpen, onClose, onOpenProfileModal }: Logi
       const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
       try {
         const response = await authApi.verifyOtp({ phone: mobileNumber, otp: otpCode });
-        const responseData = response.data;
-        const tokens = responseData.tokens || responseData;
-        const access = tokens.access || responseData.access;
-        const refresh = tokens.refresh || responseData.refresh;
-        const userStatus = responseData.user_status || responseData.status;
+        const accessToken = response.data.tokens.access;
         
-        if (access) {
-          dispatch(setAuthState({
-            isAuthenticated: true,
-            token: encryptToken(access),
-            refreshToken: encryptToken(refresh),
-            status: userStatus,
-          }));
-        }
+        dispatch(setAuthState({
+          isAuthenticated: true,
+          token: encryptToken(accessToken),
+          refreshToken: encryptToken(response.data.tokens.refresh),
+        }));
+
+        // Fetch profile with token directly (bypass localStorage)
+        const authenticatedClient = createAuthenticatedClient(accessToken);
+        const profileResponse = await authenticatedClient.get('/profile/me/');
+        console.log('Profile response from API:', profileResponse.data);
+        
+        // Extract profile from nested structure
+        const profileData = profileResponse.data.profile;
+        console.log('Profile data extracted:', profileData);
+        dispatch(setProfileDetails(profileData));
+        
+        const profile = { data: profileData };
 
         toast.dismiss(waitingLogin);
         toast.success('تم تسجيل الدخول بنجاح', { autoClose: 2000, hideProgressBar: true });
         
-        // Reset form state and Redux
         setMobileNumber('');
         setOtpCode('');
         setShowOtp(false);
         dispatch(setMobileAuth(''));
         
-        onClose();
-        if (userStatus === 'partial') {
+        if (!profile.data.full_name) {
+          onClose();
           setTimeout(() => {
             if (onOpenProfileModal) {
               onOpenProfileModal();
@@ -89,6 +94,8 @@ export default function LoginModal({ isOpen, onClose, onOpenProfileModal }: Logi
               setShowProfileModal(true);
             }
           }, 100);
+        } else {
+          onClose();
         }
       } catch (error: any) {
         toast.dismiss(waitingLogin);

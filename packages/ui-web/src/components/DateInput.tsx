@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input } from '@mishwari/ui-web';
+import { Input } from './ui/input';
 
 interface DateInputProps {
   value: string;
@@ -8,7 +8,7 @@ interface DateInputProps {
   placeholder?: string;
 }
 
-export default function DateInput({ value, onChange, disabled = false, placeholder = 'DD/MM/YYYY' }: DateInputProps) {
+export function DateInput({ value, onChange, disabled = false, placeholder = 'DD/MM/YYYY' }: DateInputProps) {
   const [displayValue, setDisplayValue] = useState('');
 
   useEffect(() => {

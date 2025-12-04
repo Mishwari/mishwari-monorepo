@@ -13,7 +13,12 @@ import { setProfile } from '@/store/slices/authSlice';
 import { TruckIcon, UserIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 export default function Home() {
-  const { isAuthenticated, profile, canManageDrivers } = useSelector((state: AppState) => state.auth);
+  const { isAuthenticated, profile, canManageDrivers } = useSelector(
+    (state: AppState) => state.auth
+  );
+  const role = (profile as any)?.profile?.role || profile?.role;
+  const isStandalone = (profile as any)?.is_standalone;
+  const isInvitedDriver = role === 'driver' && !isStandalone;
   const dispatch = useDispatch();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -29,21 +34,19 @@ export default function Home() {
       return;
     }
 
-    // Fetch profile if not loaded
-    if (!profile) {
-      authApi.getMe()
-        .then(response => {
-          dispatch(setProfile(response.data));
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Failed to fetch profile:', error);
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-  }, [isAuthenticated, profile, router, dispatch]);
+    // Always fetch fresh profile data to get operator_name and is_standalone
+    authApi
+      .getMe()
+      .then((response) => {
+        console.log('[Dashboard] Profile refreshed:', response.data);
+        dispatch(setProfile(response.data));
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch profile:', error);
+        setLoading(false);
+      });
+  }, [isAuthenticated, router, dispatch]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -52,7 +55,9 @@ export default function Home() {
       try {
         const [buses, drivers] = await Promise.all([
           fleetApi.list().catch(() => []),
-          canManageDrivers ? fleetApi.getDrivers().catch(() => []) : Promise.resolve([{ id: 1 }])
+          canManageDrivers
+            ? fleetApi.getDrivers().catch(() => [])
+            : Promise.resolve([{ id: 1 }]),
         ]);
         setBusCount(buses.length);
         setDriverCount(drivers.length);
@@ -114,50 +119,77 @@ export default function Home() {
 
   return (
     <HomeLayout>
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+      <div className='max-w-7xl mx-auto px-4 py-8 space-y-6'>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">مرحباً، {profile.full_name}</h1>
-          <p className="text-gray-600 mt-1">إدارة رحلاتك وحجوزاتك</p>
+          <h1 className='text-3xl font-bold text-gray-900'>
+            مرحباً، {profile.full_name}
+          </h1>
+          <p className='text-gray-600 mt-1'>إدارة رحلاتك وحجوزاتك</p>
         </div>
 
-        <UpgradeBanner />
+        {isStandalone && <UpgradeBanner />}
 
-        {!setupLoading && (busCount === 0 || (canManageDrivers && driverCount === 0)) && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center">
-            <h3 className="text-lg font-semibold text-amber-900 mb-2">أكمل إعداد حسابك</h3>
-            <p className="text-sm text-amber-700 mb-4">
-              {busCount === 0 && canManageDrivers && driverCount === 0
-                ? 'لبدء تقديم الرحلات، يجب إضافة حافلة وسائق'
-                : busCount === 0
-                ? 'لبدء تقديم الرحلات، يجب إضافة حافلة على الأقل'
-                : 'لتشغيل الرحلات، يجب إضافة سائق على الأقل'}
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-3">
-              {busCount === 0 && (
-                <Button onClick={() => router.push('/fleet/add')} variant="default">
-                  <TruckIcon className="h-5 w-5 ml-2" />
-                  إضافة حافلة
-                </Button>
-              )}
-              {canManageDrivers && driverCount === 0 && (
-                <Button onClick={() => router.push('/drivers/create')} variant="default">
-                  <UserIcon className="h-5 w-5 ml-2" />
-                  إضافة سائق
-                </Button>
-              )}
+        {isInvitedDriver && (
+          <div className='bg-blue-50 border border-blue-200 rounded-lg p-6'>
+            <h3 className='text-lg font-semibold text-blue-900 mb-2'>معلومات الشركة</h3>
+            <div className='space-y-2 text-sm text-blue-800'>
+              <p><span className='font-medium'>الشركة:</span> {(profile as any)?.operator_name || 'غير متوفر'}</p>
+              <p><span className='font-medium'>الدور:</span> سائق</p>
             </div>
           </div>
         )}
+
+        {role === 'operator_admin' && <UpgradeBanner />}
+
+        {!setupLoading &&
+          (busCount === 0 || (canManageDrivers && driverCount === 0)) && (
+            <div className='bg-amber-50 border border-amber-200 rounded-lg p-6 text-center'>
+              <h3 className='text-lg font-semibold text-amber-900 mb-2'>
+                أكمل إعداد حسابك
+              </h3>
+              <p className='text-sm text-amber-700 mb-4'>
+                {busCount === 0 && canManageDrivers && driverCount === 0
+                  ? 'لبدء تقديم الرحلات، يجب إضافة حافلة وسائق'
+                  : busCount === 0
+                  ? 'لبدء تقديم الرحلات، يجب إضافة حافلة على الأقل'
+                  : 'لتشغيل الرحلات، يجب إضافة سائق على الأقل'}
+              </p>
+              <div className='flex flex-col sm:flex-row justify-center gap-3'>
+                {busCount === 0 && (
+                  <Button
+                    onClick={() => router.push('/fleet/add')}
+                    variant='default'>
+                    <TruckIcon className='h-5 w-5 ml-2' />
+                    إضافة حافلة
+                  </Button>
+                )}
+                {canManageDrivers && driverCount === 0 && (
+                  <Button
+                    onClick={() => router.push('/drivers/add')}
+                    variant='default'>
+                    <UserIcon className='h-5 w-5 ml-2' />
+                    إضافة سائق
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
 
         <StatsCards />
 
         <RecentActivity />
 
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">أحدث الحجوزات</h3>
+        <div className='bg-white rounded-lg shadow'>
+          <div className='px-6 py-4 border-b border-gray-200'>
+            <h3 className='text-lg font-semibold text-gray-900'>
+              أحدث الحجوزات
+            </h3>
           </div>
-          <BookingsList bookings={bookings} loading={bookingsLoading} showTripInfo={true} />
+          <BookingsList
+            bookings={bookings}
+            loading={bookingsLoading}
+            showTripInfo={true}
+          />
         </div>
       </div>
     </HomeLayout>

@@ -37,4 +37,16 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Helper to create client with direct token (bypasses localStorage)
+export const createAuthenticatedClient = (token: string) => {
+  const client = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+  });
+  return client;
+};
+
 export default apiClient;

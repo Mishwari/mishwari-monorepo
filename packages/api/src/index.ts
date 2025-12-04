@@ -7,3 +7,4 @@ export * from './wallet';
 export * from './operator';
 export * from './fleet';
 export * from './drivers';
+export * from './reviews';

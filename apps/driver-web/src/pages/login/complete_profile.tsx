@@ -2,18 +2,18 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { performRegister } from '@/store/actions/mobileAuthActions';
 import { useRouter } from 'next/router';
-import { Button } from '@mishwari/ui-web';
+import { Button, DateInput } from '@mishwari/ui-web';
 
 export default function CompleteProfile() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    username: '',
     full_name: '',
     email: '',
     role: 'driver',
     gender: 'male',
     birth_date: '',
+    password: '',
   });
 
   const handleSubmit = async (e: any) => {
@@ -70,19 +70,6 @@ export default function CompleteProfile() {
 
             <div>
               <label className='block text-sm font-medium text-gray-700 text-right'>
-                اسم المستخدم
-              </label>
-              <input
-                type='text'
-                required
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary'
-              />
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 text-right'>
                 {formData.role === 'driver' ? 'الاسم الكامل' : 'اسم الشركة'}
               </label>
               <input
@@ -125,14 +112,29 @@ export default function CompleteProfile() {
               <label className='block text-sm font-medium text-gray-700 text-right'>
                 تاريخ الميلاد
               </label>
-              <input
-                type='date'
-                required
+              <DateInput
                 value={formData.birth_date}
-                onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary'
+                onChange={(value) => setFormData({ ...formData, birth_date: value })}
+                placeholder='DD/MM/YYYY'
               />
             </div>
+
+            {formData.role === 'operator_admin' && (
+              <div>
+                <label className='block text-sm font-medium text-gray-700 text-right'>
+                  كلمة المرور
+                </label>
+                <input
+                  type='password'
+                  required
+                  minLength={8}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder='أدخل كلمة مرور قوية (8 أحرف على الأقل)'
+                  className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary'
+                />
+              </div>
+            )}
 
             <div className='flex justify-center pt-4'>
               <Button type='submit' variant='default' size='lg'>

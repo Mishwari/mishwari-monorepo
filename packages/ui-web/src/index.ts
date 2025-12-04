@@ -5,7 +5,9 @@ export { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 export { ConfirmDialog } from './components/ConfirmDialog';
 export { PhoneInput } from './components/PhoneInput';
 export { OtpInput } from './components/OtpInput';
+export { ChangeMobileModal } from './components/ChangeMobileModal';
 export { Combobox } from './components/Combobox';
+export { DateInput } from './components/DateInput';
 export { DatePicker } from './components/DatePicker';
 export { TimePicker } from './components/TimePicker';
 export { QuickDateButtons } from './components/QuickDateButtons';

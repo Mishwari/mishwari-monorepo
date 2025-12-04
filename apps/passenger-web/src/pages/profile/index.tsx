@@ -4,6 +4,7 @@ import {
   UserIcon,
   XMarkIcon,
   CheckIcon,
+  DevicePhoneMobileIcon,
 } from '@heroicons/react/24/outline';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
@@ -13,8 +14,10 @@ import { AppState } from '@/store/store';
 import ProfileForm from '@/components/ProfileForm';
 import { performRegister } from '@/store/actions/mobileAuthActions';
 import { Profile } from '@/types/profileDetails';
-import { Button } from '@mishwari/ui-web';
+import { Button, ChangeMobileModal } from '@mishwari/ui-web';
 import { useProfileManager } from '@/hooks/useProfileManager';
+import { authApi } from '@mishwari/api';
+import { toast } from 'react-toastify';
 
 function index() {
   useAuth(true);
@@ -24,6 +27,7 @@ function index() {
   const dispatch = useDispatch();
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [showChangeMobileModal, setShowChangeMobileModal] = useState(false);
   const [profileData, setProfileData] = useState<Profile>({
     user: {
       id: null,
@@ -158,7 +162,54 @@ function index() {
             handleSubmit={handleSubmit}
             isDisabled={!isEditing}
           />
+
+          <div className='pt-4 mt-6 border-t border-gray-200'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <span className='text-gray-600'>رقم الجوال:</span>
+                <span className='font-medium mr-2' dir='ltr'>+{profile.mobile_number}</span>
+              </div>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => setShowChangeMobileModal(true)}
+                className='flex gap-2 items-center text-[#005687] hover:text-[#004a73]'>
+                <DevicePhoneMobileIcon className='w-4 h-4' />
+                تغيير
+              </Button>
+            </div>
+          </div>
         </section>
+
+        <ChangeMobileModal
+          isOpen={showChangeMobileModal}
+          onClose={() => setShowChangeMobileModal(false)}
+          currentMobile={profile.mobile_number}
+          requirePassword={false}
+          onRequestOtp={async (mobile) => {
+            try {
+              await authApi.requestOtp({ phone: mobile });
+              toast.success('تم إرسال رمز التحقق');
+            } catch (error: any) {
+              toast.error(error.response?.data?.error || 'فشل إرسال رمز التحقق');
+              throw error;
+            }
+          }}
+          onSubmit={async (data) => {
+            try {
+              await authApi.changeMobile({
+                new_mobile: data.newMobile,
+                otp_code: data.otpCode,
+              });
+              toast.success('تم تحديث رقم الجوال بنجاح');
+              await fetchProfile();
+            } catch (error: any) {
+              toast.error(error.response?.data?.error || 'فشل تحديث رقم الجوال');
+              throw error;
+            }
+          }}
+        />
       </MainLayout>
     </main>
   );

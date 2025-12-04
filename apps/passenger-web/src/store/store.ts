@@ -49,7 +49,7 @@ import {
         whitelist: ["auth"],
         storage,
         transforms: [
-          createFilter('auth',['isAuthenticated','token','refreshToken','status']),
+          createFilter('auth',['isAuthenticated','token','refreshToken']),
         ]
       };
   

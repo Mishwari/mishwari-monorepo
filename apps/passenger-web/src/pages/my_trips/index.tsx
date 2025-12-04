@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { Booking } from '@/types/booking';
@@ -16,35 +16,36 @@ function index() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('all');
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (!token) {
-        console.log('No token available');
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        const decryptedToken = decryptToken(token);
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}booking/`,
-          {
-            headers: {
-              Authorization: `Bearer ${decryptedToken}`,
-            },
-          }
-        );
-        setBookings(response.data);
-        setFilteredBookings(response.data);
-      } catch (err: any) {
-        console.error('Error fetching bookings:', err);
-        setError('Error getting bookings');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBookings();
+  const fetchBookings = useCallback(async () => {
+    if (!token) {
+      console.log('No token available');
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const decryptedToken = decryptToken(token);
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}booking/`,
+        {
+          headers: {
+            Authorization: `Bearer ${decryptedToken}`,
+          },
+        }
+      );
+      setBookings(response.data);
+      setFilteredBookings(response.data);
+    } catch (err: any) {
+      console.error('Error fetching bookings:', err);
+      setError('Error getting bookings');
+    } finally {
+      setLoading(false);
+    }
   }, [token]);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
 
   useEffect(() => {
     if (filter === 'all') {
@@ -89,8 +90,8 @@ function index() {
                 <MiniTicketSkeleton key={index} />
               ))
             ) : filteredBookings.length > 0 ? (
-              filteredBookings.map((booking) => (
-                <MiniTicket key={booking.id} booking={booking} />
+              filteredBookings.sort((a, b) => new Date(b.booking_time).getTime() - new Date(a.booking_time).getTime()).map((booking) => (
+                <MiniTicket key={booking.id} booking={booking} onReviewSuccess={fetchBookings} />
               ))
             ) : (
               <div className="text-center py-12">

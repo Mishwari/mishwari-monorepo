@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Button } from '@mishwari/ui-web';
-import { operatorApi } from '@mishwari/api';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { Button, ConfirmDialog } from '@mishwari/ui-web';
+import { operatorApi, bookingsApi } from '@mishwari/api';
+import { ArrowRightIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { useCancelBooking } from '@mishwari/ui-primitives';
 
 export default function BookingDetailsPage() {
   const router = useRouter();
   const { id, bookingId } = router.query;
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { requestCancel, confirmCancel, cancelRequest, cancelling, showConfirm } = useCancelBooking({
+    onSuccess: () => setBooking({ ...booking, status: 'cancelled' })
+  });
 
   useEffect(() => {
     if (!id || !bookingId) return;
@@ -30,6 +34,10 @@ export default function BookingDetailsPage() {
 
     fetchBooking();
   }, [id, bookingId]);
+
+  const handleCancelClick = () => {
+    if (booking) requestCancel(booking.id);
+  };
 
   const statusColors: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -71,13 +79,48 @@ export default function BookingDetailsPage() {
           <div className='bg-white rounded-lg shadow-lg p-6 space-y-6'>
             <div className='flex items-center justify-between'>
               <h2 className='text-xl font-bold'>معلومات الحجز</h2>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  statusColors[booking.status]
-                }`}>
-                {statusLabels[booking.status]}
-              </span>
+              <div className='flex items-center gap-3'>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    statusColors[booking.status]
+                  }`}>
+                  {statusLabels[booking.status]}
+                </span>
+                {booking.status === 'pending' && (
+                  <Button
+                    variant='default'
+                    onClick={() => {
+                      bookingsApi.confirm(booking.id).then(() => {
+                        setBooking({ ...booking, status: 'confirmed' });
+                      });
+                    }}
+                  >
+                    تأكيد الحجز
+                  </Button>
+                )}
+                {booking.status !== 'cancelled' && booking.status !== 'completed' && (
+                  <Button
+                    variant='outline'
+                    onClick={handleCancelClick}
+                    disabled={cancelling}
+                  >
+                    <XCircleIcon className='h-5 w-5 ml-2' />
+                    {cancelling ? 'جاري الإلغاء...' : 'إلغاء الحجز'}
+                  </Button>
+                )}
+              </div>
             </div>
+            
+            <ConfirmDialog
+              open={showConfirm}
+              onOpenChange={cancelRequest}
+              onConfirm={confirmCancel}
+              title="إلغاء الحجز"
+              description="هل أنت متأكد من إلغاء هذا الحجز؟"
+              confirmText="إلغاء"
+              cancelText="رجوع"
+              variant="destructive"
+            />
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div>
