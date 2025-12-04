@@ -17,7 +17,12 @@ export default function TestAuthPage() {
   useEffect(() => {
     const setupRecaptcha = async () => {
       if (typeof window === 'undefined') return;
-      const { auth } = await import('@/lib/firebase');
+      const { getFirebaseAuth } = await import('@/lib/firebase');
+      const auth = getFirebaseAuth();
+      if (!auth) {
+        setError('Firebase not initialized. Check environment variables.');
+        return;
+      }
       if (!recaptchaVerifier.current && document.getElementById('recaptcha-container')) {
         try {
           recaptchaVerifier.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
@@ -44,7 +49,13 @@ export default function TestAuthPage() {
     setLoading(true);
     setError('');
     try {
-      const { auth } = await import('@/lib/firebase');
+      const { getFirebaseAuth } = await import('@/lib/firebase');
+      const auth = getFirebaseAuth();
+      if (!auth) {
+        setError('Firebase not initialized. Check environment variables.');
+        setLoading(false);
+        return;
+      }
       if (!recaptchaVerifier.current) {
         recaptchaVerifier.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'normal',
