@@ -51,7 +51,14 @@ function App({ Component, pageProps }: AppProps) {
       <NextUIProvider className='light'>
         <PersistGate
           persistor={store.__persistor}
-          loading={<div>loading</div>}>
+          loading={
+            <div className='min-h-screen bg-gradient-to-b from-primary-light to-white flex items-center justify-center'>
+              <div className='text-center'>
+                <div className='w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+                <p className='text-primary font-bold text-lg'>مشواري</p>
+              </div>
+            </div>
+          }>
           <Elements stripe={stripePromise}>
             <ToastContainer
               toastStyle={{ fontFamily: "'Cairo', sans-serif " }}

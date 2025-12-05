@@ -7,7 +7,8 @@ import axios from 'axios';
 import '@/config/firebase';
 import { sendFirebaseOtp, verifyFirebaseOtp, shouldUseFirebase } from '@mishwari/utils';
 
-export const performMobileLogin = (mobileNumber: string, router: any) => async (dispatch: any) => {
+
+export const performMobileLogin = (mobileNumber: string, onSuccess: () => void, onRequiresPassword?: (requiresPassword: boolean) => void) => async (dispatch: any) => {
   const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
   const useFirebase = shouldUseFirebase(mobileNumber);
@@ -24,10 +25,10 @@ export const performMobileLogin = (mobileNumber: string, router: any) => async (
             delay(1000),
           ]);
           dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
-          const requiresPassword = response.data.requires_password ? 'true' : 'false';
-          router.push(`/login/confirm?requiresPassword=${requiresPassword}`);
+          if (onRequiresPassword) onRequiresPassword(response.data.requires_password);
           toast.dismiss(waitingLogin);
           toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
+          onSuccess();
           return;
         }
         throw firebaseError;
@@ -38,20 +39,21 @@ export const performMobileLogin = (mobileNumber: string, router: any) => async (
         delay(1000),
       ]);
       dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
-      const requiresPassword = response.data.requires_password ? 'true' : 'false';
-      router.push(`/login/confirm?requiresPassword=${requiresPassword}`);
+      if (onRequiresPassword) onRequiresPassword(response.data.requires_password);
       toast.dismiss(waitingLogin);
       toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
+      onSuccess();
       return;
     }
 
     toast.dismiss(waitingLogin);
     toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
-    router.push('/login/confirm');
+    onSuccess();
   } catch (error: any) {
     toast.dismiss(waitingLogin);
     toast.error('فشل تسجيل الدخول', { autoClose: 2000, hideProgressBar: true });
     console.error('Login failed:', error.message);
+    throw error;
   }
 };
 
@@ -83,13 +85,13 @@ export const performVerifyLogin = (mobileNumber: string, otpCode: string, router
 
     const authenticatedClient = createAuthenticatedClient(accessToken);
     const profileResponse = await authenticatedClient.get('/profile/me/');
-    const profileData = profileResponse.data.profile;
-    dispatch(setProfile(profileData));
+    // Store the entire response (includes operator_name, is_standalone, etc.)
+    dispatch(setProfile(profileResponse.data));
 
     toast.dismiss(waitingLogin);
     toast.success('تم تسجيل الدخول بنجاح', { autoClose: 2000, hideProgressBar: true });
 
-    if (!profileData.full_name) {
+    if (!profileResponse.data.profile?.full_name) {
       router.push('/login/complete_profile');
     } else {
       dispatch(resetMobileAuth());
@@ -97,12 +99,16 @@ export const performVerifyLogin = (mobileNumber: string, otpCode: string, router
     }
   } catch (error: any) {
     toast.dismiss(waitingLogin);
+    console.error('Login failed:', error.response?.data || error);
+    
     if (error.response?.status === 401) {
       toast.error('كلمة المرور غير صحيحة', { autoClose: 2000, hideProgressBar: true });
+    } else if (error.response?.status === 400) {
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || 'رمز التحقق غير صحيح';
+      toast.error(errorMsg, { autoClose: 3000, hideProgressBar: true });
     } else {
       toast.error('فشل تسجيل الدخول', { autoClose: 2000, hideProgressBar: true });
     }
-    console.error('Login failed:', error);
     throw error;
   }
 };
@@ -117,7 +123,6 @@ export const performRegister = (profileData: any, router: any) => async (dispatc
     birth_date: profileData.birth_date,
   };
   
-  // Only include password if provided (operator_admin only)
   if (profileData.password) {
     data.password = profileData.password;
   }
@@ -131,13 +136,12 @@ export const performRegister = (profileData: any, router: any) => async (dispatc
       { headers: { Authorization: `Bearer ${decryptToken(auth.token)}` } }
     );
 
-    // Fetch updated profile and extract nested profile
     const response = await authApi.getMe();
-    const profileData = response.data.profile;
-    dispatch(setProfile(profileData));
+    dispatch(setProfile(response.data));
 
     toast.dismiss(waitingRegister);
     toast.success('تم التسجيل بنجاح', { autoClose: 2000, hideProgressBar: true });
+    
     router.push('/');
   } catch (error: any) {
     toast.dismiss(waitingRegister);

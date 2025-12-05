@@ -49,7 +49,7 @@ export default function Home() {
   }, [isAuthenticated, router, dispatch]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !profile?.full_name) return;
 
     const fetchSetupData = async () => {
       try {
@@ -72,7 +72,7 @@ export default function Home() {
   }, [isAuthenticated, canManageDrivers]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !profile?.full_name) return;
 
     const fetchBookings = async () => {
       try {

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { AppState } from '@/store/store';
 import { TruckIcon, CalendarIcon, CheckCircleIcon, TicketIcon } from '@heroicons/react/24/outline';
 import { tripsApi, operatorApi } from '@mishwari/api';
 
@@ -29,6 +31,7 @@ function StatCard({ title, value, icon, color, loading }: StatCardProps) {
 }
 
 export default function StatsCards() {
+  const { profile } = useSelector((state: AppState) => state.auth);
   const [stats, setStats] = useState({
     active: 0,
     upcoming: 0,
@@ -38,6 +41,11 @@ export default function StatsCards() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!profile?.full_name) {
+      setLoading(false);
+      return;
+    }
+
     const fetchStats = async () => {
       try {
         const trips = await tripsApi.list();
@@ -69,7 +77,7 @@ export default function StatsCards() {
     };
 
     fetchStats();
-  }, []);
+  }, [profile]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

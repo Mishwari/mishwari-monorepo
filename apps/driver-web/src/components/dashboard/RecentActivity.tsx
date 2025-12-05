@@ -1,14 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+import { AppState } from '@/store/store';
 import { tripsApi, operatorApi } from '@mishwari/api';
 import { ClockIcon, CalendarDaysIcon, TicketIcon } from '@heroicons/react/24/outline';
 
 export default function RecentActivity() {
   const router = useRouter();
+  const { profile } = useSelector((state: AppState) => state.auth);
   const [activities, setActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!profile?.full_name) {
+      setActivities([{ id: 1, type: 'info', message: 'مرحباً بك في منصة مشواري للسائقين', time: 'الآن' }]);
+      setLoading(false);
+      return;
+    }
+
     const fetchActivity = async () => {
       try {
         const trips = await tripsApi.list();
@@ -49,7 +58,7 @@ export default function RecentActivity() {
     };
 
     fetchActivity();
-  }, []);
+  }, [profile]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
