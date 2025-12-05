@@ -20,6 +20,7 @@ import {
   sendFirebaseOtp,
   verifyFirebaseOtp,
   cleanupRecaptcha,
+  shouldUseFirebase,
 } from '@mishwari/utils';
 
 interface LoginModalProps {
@@ -61,13 +62,22 @@ export default function LoginModal({
     const waitingLogin = toast.info('جاري تسجيل الدخول...', {
       autoClose: false,
     });
-    const isYemen = mobileNumber.startsWith('20');
+    const useFirebase = shouldUseFirebase(mobileNumber);
 
     (async () => {
       try {
-        if (isYemen) {
-          await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
-          dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
+        if (useFirebase) {
+          try {
+            await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
+            dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
+          } catch (firebaseError: any) {
+            if (firebaseError.code === 'auth/too-many-requests') {
+              await authApi.requestOtp({ phone: mobileNumber });
+              dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
+            } else {
+              throw firebaseError;
+            }
+          }
         } else {
           await authApi.requestOtp({ phone: mobileNumber });
           dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));

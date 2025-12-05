@@ -5,17 +5,33 @@ import { authApi, createAuthenticatedClient } from '@mishwari/api';
 import { encryptToken, decryptToken } from '@mishwari/utils';
 import axios from 'axios';
 import '@/config/firebase';
-import { sendFirebaseOtp, verifyFirebaseOtp } from '@mishwari/utils';
+import { sendFirebaseOtp, verifyFirebaseOtp, shouldUseFirebase } from '@mishwari/utils';
 
 export const performMobileLogin = (mobileNumber: string, router: any) => async (dispatch: any) => {
   const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-  const isYemen = mobileNumber.startsWith('967');
+  const useFirebase = shouldUseFirebase(mobileNumber);
 
   try {
-    if (isYemen) {
-      await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
-      dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
+    if (useFirebase) {
+      try {
+        await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
+        dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
+      } catch (firebaseError: any) {
+        if (firebaseError.code === 'auth/too-many-requests') {
+          const [response] = await Promise.all([
+            authApi.requestOtp({ phone: mobileNumber }),
+            delay(1000),
+          ]);
+          dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
+          const requiresPassword = response.data.requires_password ? 'true' : 'false';
+          router.push(`/login/confirm?requiresPassword=${requiresPassword}`);
+          toast.dismiss(waitingLogin);
+          toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
+          return;
+        }
+        throw firebaseError;
+      }
     } else {
       const [response] = await Promise.all([
         authApi.requestOtp({ phone: mobileNumber }),

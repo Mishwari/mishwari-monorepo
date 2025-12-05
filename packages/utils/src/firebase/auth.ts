@@ -35,7 +35,9 @@ export const sendFirebaseOtp = async (phoneNumber: string, recaptchaElementId: s
       throw new Error('Firebase credentials invalid. Please check configuration.');
     }
     if (error.code === 'auth/too-many-requests') {
-      throw new Error('Too many attempts. Please try again later or use SMS verification.');
+      const rateLimitError = new Error('TOO_MANY_REQUESTS');
+      (rateLimitError as any).code = 'auth/too-many-requests';
+      throw rateLimitError;
     }
     throw new Error(error.message || 'Failed to send OTP');
   }

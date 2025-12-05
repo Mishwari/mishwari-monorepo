@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Button, Input } from '@mishwari/ui-web';
+import { Button, Input, PhoneInput, countries } from '@mishwari/ui-web';
 import { driversApi } from '@mishwari/api';
 import { toast } from 'react-toastify';
 
@@ -51,14 +51,11 @@ export default function AddDriverPage() {
               <label className='block text-sm font-medium text-gray-700 mb-2'>
                 رقم جوال السائق *
               </label>
-              <Input
-                type='tel'
+              <PhoneInput
                 value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
-                placeholder='966xxxxxxxxx'
-                dir='ltr'
+                onChange={setMobileNumber}
+                countries={countries}
               />
-              <p className='text-xs text-gray-500 mt-1'>مثال: 966501234567</p>
             </div>
 
             <div className='flex gap-4 pt-4'>

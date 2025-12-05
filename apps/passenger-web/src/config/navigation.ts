@@ -1,7 +1,6 @@
 import {
   UserGroupIcon,
   TicketIcon,
-  BanknotesIcon,
   Cog6ToothIcon,
   HomeIcon,
   UserIcon,
@@ -13,7 +12,6 @@ export const passengerNavConfig = {
     items: [
       { name: 'معلومات المستخدم', href: '/profile', icon: UserIcon },
       { name: 'رحلاتي', href: '/my_trips', icon: TicketIcon },
-      { name: 'المحفظة', href: '/profile/wallet', icon: BanknotesIcon },
       { name: 'قائمة الركاب', href: '/passengers', icon: UserGroupIcon },
     ],
   },

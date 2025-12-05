@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { XMarkIcon, DevicePhoneMobileIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { PhoneInput } from './PhoneInput';
 import { OtpInput } from './OtpInput';
-import { countries } from '../data';
+import { countries } from '@mishwari/utils';
 
 interface ChangeMobileModalProps {
   isOpen: boolean;

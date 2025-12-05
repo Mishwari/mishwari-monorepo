@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { setAuthState, setProfile } from '@/store/slices/authSlice';
 import { encryptToken } from '@mishwari/utils';
 import '@/config/firebase';
-import { sendFirebaseOtp, verifyFirebaseOtp, cleanupRecaptcha } from '@mishwari/utils';
+import { sendFirebaseOtp, verifyFirebaseOtp, cleanupRecaptcha, shouldUseFirebase } from '@mishwari/utils';
 
 export default function JoinInvitationPage() {
   const router = useRouter();
@@ -39,7 +39,7 @@ export default function JoinInvitationPage() {
       setInvitation(response.data);
       const phone = response.data.mobile_number;
       setMobileNumber(phone);
-      setVerificationMethod(phone.startsWith('967') ? 'firebase' : 'sms');
+      setVerificationMethod(shouldUseFirebase(phone) ? 'firebase' : 'sms');
       setStep('otp');
     } catch (error: any) {
       toast.error(error?.response?.data?.error || 'رمز دعوة غير صالح');
@@ -51,7 +51,16 @@ export default function JoinInvitationPage() {
     setLoading(true);
     try {
       if (verificationMethod === 'firebase') {
-        await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
+        try {
+          await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
+        } catch (firebaseError: any) {
+          if (firebaseError.code === 'auth/too-many-requests') {
+            await authApi.requestOtp({ phone: mobileNumber });
+            setVerificationMethod('sms');
+          } else {
+            throw firebaseError;
+          }
+        }
       } else {
         await authApi.requestOtp({ phone: mobileNumber });
       }

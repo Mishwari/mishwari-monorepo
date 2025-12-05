@@ -24,7 +24,7 @@ export { CollapsibleSection } from './components/common/CollapsibleSection';
 export { BUS_AMENITIES_WITH_ICONS } from './data/amenities';
 export * from './components/passengers';
 export { cn } from './lib/utils';
-export { countries } from './data';
+export { countries } from '@mishwari/utils';
 
 // Layout components
 export * from './layouts';

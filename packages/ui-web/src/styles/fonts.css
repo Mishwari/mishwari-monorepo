@@ -2,12 +2,15 @@
   font-family: 'Cairo';
   src: url('/fonts/Cairo-VariableFont_slnt,wght.ttf') format('truetype');
   font-weight: 100 900;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Noto Color Emoji';
   src: url('/fonts/NotoColorEmoji-Regular.ttf') format('truetype');
   font-weight: normal;
+  font-display: swap;
+  unicode-range: U+1F1E6-1F1FF;
 }
 
 .font-cairo {
