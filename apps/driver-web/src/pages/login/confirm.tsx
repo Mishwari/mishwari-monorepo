@@ -10,6 +10,7 @@ import { OtpInput, Button } from '@mishwari/ui-web';
 export default function Confirm() {
   const router = useRouter();
   const mobileNumber = useSelector((state: AppState) => state.mobileAuth.number);
+  const verificationMethod = useSelector((state: AppState) => state.mobileAuth.verificationMethod);
   const [otpCode, setOtpCode] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [requiresPassword, setRequiresPassword] = useState<boolean>(false);
@@ -27,7 +28,7 @@ export default function Confirm() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      await dispatch(performVerifyLogin(mobileNumber!, otpCode, router, requiresPassword ? password : undefined) as any);
+      await dispatch(performVerifyLogin(mobileNumber!, otpCode, router, requiresPassword ? password : undefined, verificationMethod || 'sms') as any);
     } catch (error) {
       // Error handled in action
     }
@@ -57,7 +58,7 @@ export default function Confirm() {
             <OtpInput
               value={otpCode}
               onChange={setOtpCode}
-              length={4}
+              length={6}
             />
           </div>
 

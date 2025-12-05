@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Button, Input } from '@mishwari/ui-web';
-import { authApi } from '@mishwari/api';
+import { authApi, createAuthenticatedClient } from '@mishwari/api';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { performLogin } from '@/store/actions/mobileAuthActions';
+import { setAuthState, setProfile } from '@/store/slices/authSlice';
+import { encryptToken } from '@mishwari/utils';
+import '@/config/firebase';
+import { sendFirebaseOtp, verifyFirebaseOtp, cleanupRecaptcha } from '@mishwari/utils';
 
 export default function JoinInvitationPage() {
   const router = useRouter();
@@ -14,6 +17,7 @@ export default function JoinInvitationPage() {
   const [invitation, setInvitation] = useState<any>(null);
   const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOtp] = useState('');
+  const [verificationMethod, setVerificationMethod] = useState<'sms' | 'firebase'>('sms');
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -26,13 +30,16 @@ export default function JoinInvitationPage() {
     if (code) {
       validateInvite();
     }
+    return () => cleanupRecaptcha();
   }, [code]);
 
   const validateInvite = async () => {
     try {
       const response = await authApi.validateInvite(code as string);
       setInvitation(response.data);
-      setMobileNumber(response.data.mobile_number);
+      const phone = response.data.mobile_number;
+      setMobileNumber(phone);
+      setVerificationMethod(phone.startsWith('967') ? 'firebase' : 'sms');
       setStep('otp');
     } catch (error: any) {
       toast.error(error?.response?.data?.error || 'رمز دعوة غير صالح');
@@ -43,7 +50,11 @@ export default function JoinInvitationPage() {
   const handleRequestOtp = async () => {
     setLoading(true);
     try {
-      await authApi.requestOtp({ phone: mobileNumber });
+      if (verificationMethod === 'firebase') {
+        await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
+      } else {
+        await authApi.requestOtp({ phone: mobileNumber });
+      }
       toast.success('تم إرسال رمز التحقق');
     } catch (error: any) {
       toast.error('فشل إرسال رمز التحقق');
@@ -55,16 +66,20 @@ export default function JoinInvitationPage() {
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
-      const response = await authApi.verifyOtp({ phone: mobileNumber, otp });
-      const accessToken = response.data.tokens.access;
-      const refreshToken = response.data.tokens.refresh;
+      let response;
+      if (verificationMethod === 'firebase') {
+        const { token } = await verifyFirebaseOtp(otp);
+        response = await authApi.verifyFirebaseOtp({ firebase_token: token });
+      } else {
+        response = await authApi.verifyOtp({ phone: mobileNumber, otp });
+      }
+      const { access, refresh } = response.data.tokens;
       
-      localStorage.setItem('access_token', accessToken);
-      localStorage.setItem('refresh_token', refreshToken);
-      
-      // Set token in axios default headers for next request
-      const { apiClient } = await import('@mishwari/api');
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      dispatch(setAuthState({
+        isAuthenticated: true,
+        token: encryptToken(access),
+        refreshToken: encryptToken(refresh),
+      }));
       
       setStep('profile');
     } catch (error: any) {
@@ -77,16 +92,21 @@ export default function JoinInvitationPage() {
   const handleAcceptInvite = async () => {
     setLoading(true);
     try {
-      const response = await authApi.acceptInvite({
+      await authApi.acceptInvite({
         invite_code: code as string,
         ...formData
       });
+      
+      // Fetch updated profile
+      const profileResponse = await authApi.getMe();
+      dispatch(setProfile(profileResponse.data.profile));
+      
       toast.success('تم الانضمام بنجاح!');
+      
       setTimeout(() => {
         router.push('/');
       }, 1000);
     } catch (error: any) {
-      console.error('Accept invite error:', error?.response?.data);
       toast.error(error?.response?.data?.error || 'فشل قبول الدعوة');
     } finally {
       setLoading(false);
@@ -104,6 +124,7 @@ export default function JoinInvitationPage() {
   if (step === 'otp') {
     return (
       <div className='w-full h-screen bg-white flex justify-center items-center'>
+        <div id='recaptcha-container'></div>
         <div className='flex flex-col w-full max-w-md px-6 py-8 border border-gray-200 rounded-xl bg-gray-100'>
           <h1 className='text-2xl font-bold text-center mb-4'>انضم إلى {invitation?.operator_name}</h1>
           <p className='text-center text-gray-600 mb-6'>تم دعوتك للانضمام كسائق</p>
@@ -121,7 +142,7 @@ export default function JoinInvitationPage() {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 placeholder='أدخل رمز التحقق'
-                maxLength={4}
+                maxLength={6}
               />
             </div>
 

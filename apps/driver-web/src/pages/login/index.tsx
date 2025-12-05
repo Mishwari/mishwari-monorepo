@@ -5,6 +5,8 @@ import { useRouter } from 'next/router';
 import { AppState } from '@/store/store';
 import { PhoneInput, Button, countries } from '@mishwari/ui-web';
 import useAuth from '@/hooks/useAuth';
+import '@/config/firebase';
+import { cleanupRecaptcha } from '@mishwari/utils';
 
 export default function Login() {
   const { isAuthenticated } = useAuth();
@@ -23,6 +25,7 @@ export default function Login() {
     if (isAuthenticated) {
       router.push('/');
     }
+    return () => cleanupRecaptcha();
   }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: any) => {
@@ -34,6 +37,7 @@ export default function Login() {
 
   return (
     <div className='w-full h-screen bg-white flex justify-center items-center'>
+      <div id='recaptcha-container'></div>
       <div className='flex min-h-full sm:min-h-fit flex-col justify-center sm:h-max sm:msx-auto w-full sm:max-w-md px-12 sm:px-6 py-8 sm:py-4 lg:px-8 sm:border border-gray-200 sm:rounded-xl bg-gray-100'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
           <h1 className='mt-5 text-center text-2xl font-bold leading-9 tracking-tight text-brand-text-dark'>

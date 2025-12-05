@@ -4,23 +4,34 @@ import { toast } from 'react-toastify';
 import { authApi, createAuthenticatedClient } from '@mishwari/api';
 import { encryptToken, decryptToken } from '@mishwari/utils';
 import axios from 'axios';
+import '@/config/firebase';
+import { sendFirebaseOtp, verifyFirebaseOtp } from '@mishwari/utils';
 
 export const performMobileLogin = (mobileNumber: string, router: any) => async (dispatch: any) => {
   const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  const isYemen = mobileNumber.startsWith('967');
 
   try {
-    const [response] = await Promise.all([
-      authApi.requestOtp({ phone: mobileNumber }),
-      delay(1000),
-    ]);
+    if (isYemen) {
+      await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
+      dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
+    } else {
+      const [response] = await Promise.all([
+        authApi.requestOtp({ phone: mobileNumber }),
+        delay(1000),
+      ]);
+      dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
+      const requiresPassword = response.data.requires_password ? 'true' : 'false';
+      router.push(`/login/confirm?requiresPassword=${requiresPassword}`);
+      toast.dismiss(waitingLogin);
+      toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
+      return;
+    }
 
-    dispatch(setMobileAuth(mobileNumber));
     toast.dismiss(waitingLogin);
     toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
-    
-    const requiresPassword = response.data.requires_password ? 'true' : 'false';
-    router.push(`/login/confirm?requiresPassword=${requiresPassword}`);
+    router.push('/login/confirm');
   } catch (error: any) {
     toast.dismiss(waitingLogin);
     toast.error('فشل تسجيل الدخول', { autoClose: 2000, hideProgressBar: true });
@@ -28,13 +39,19 @@ export const performMobileLogin = (mobileNumber: string, router: any) => async (
   }
 };
 
-export const performVerifyLogin = (mobileNumber: string, otpCode: string, router: any, password?: string) => async (dispatch: any) => {
+export const performVerifyLogin = (mobileNumber: string, otpCode: string, router: any, password?: string, verificationMethod?: 'sms' | 'firebase') => async (dispatch: any) => {
   const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
 
   try {
-    const response = await authApi.verifyOtp({ phone: mobileNumber, otp: otpCode, password });
+    let response;
     
-    // Check if password is required
+    if (verificationMethod === 'firebase') {
+      const { token } = await verifyFirebaseOtp(otpCode);
+      response = await authApi.verifyFirebaseOtp({ firebase_token: token, password });
+    } else {
+      response = await authApi.verifyOtp({ phone: mobileNumber, otp: otpCode, password });
+    }
+    
     if (response.data.requires_password) {
       toast.dismiss(waitingLogin);
       return { requiresPassword: true };
@@ -48,7 +65,6 @@ export const performVerifyLogin = (mobileNumber: string, otpCode: string, router
       refreshToken: encryptToken(response.data.tokens.refresh),
     }));
 
-    // Fetch profile with token directly and extract nested profile
     const authenticatedClient = createAuthenticatedClient(accessToken);
     const profileResponse = await authenticatedClient.get('/profile/me/');
     const profileData = profileResponse.data.profile;
