@@ -16,7 +16,11 @@ import { toast } from 'react-toastify';
 import { encryptToken } from '@/utils/tokenUtils';
 import ProfileFormModal from './ProfileFormModal';
 import '@/config/firebase';
-import { sendFirebaseOtp, verifyFirebaseOtp, cleanupRecaptcha } from '@mishwari/utils';
+import {
+  sendFirebaseOtp,
+  verifyFirebaseOtp,
+  cleanupRecaptcha,
+} from '@mishwari/utils';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -54,8 +58,10 @@ export default function LoginModal({
     e.preventDefault();
     if (!mobileNumber) return;
 
-    const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
-    const isYemen = mobileNumber.startsWith('91');
+    const waitingLogin = toast.info('جاري تسجيل الدخول...', {
+      autoClose: false,
+    });
+    const isYemen = mobileNumber.startsWith('20');
 
     (async () => {
       try {
@@ -67,17 +73,30 @@ export default function LoginModal({
           dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
         }
         toast.dismiss(waitingLogin);
-        toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
+        toast.success('تم ارسال رمز التحقق', {
+          autoClose: 2000,
+          hideProgressBar: true,
+        });
         setShowOtp(true);
       } catch (error: any) {
         toast.dismiss(waitingLogin);
         let errorMsg = 'فشل تسجيل الدخول';
         const errMsg = (error.message || '').toUpperCase();
-        if (errMsg.includes('INVALID_APP_CREDENTIAL') || errMsg.includes('INVALID-APP-CREDENTIAL')) {
+        if (
+          errMsg.includes('INVALID_APP_CREDENTIAL') ||
+          errMsg.includes('INVALID-APP-CREDENTIAL')
+        ) {
           errorMsg = 'Firebase: Enable Phone Auth in Console or check API key';
-        } else if (errMsg.includes('TOO MANY ATTEMPTS') || errMsg.includes('TOO-MANY-REQUESTS') || errMsg.includes('TOO_MANY_ATTEMPTS_TRY_LATER')) {
+        } else if (
+          errMsg.includes('TOO MANY ATTEMPTS') ||
+          errMsg.includes('TOO-MANY-REQUESTS') ||
+          errMsg.includes('TOO_MANY_ATTEMPTS_TRY_LATER')
+        ) {
           errorMsg = 'محاولات كثيرة. حاول بعد قليل';
-        } else if (errMsg.includes('FIREBASE NOT CONFIGURED') || errMsg.includes('FIREBASE NOT INITIALIZED')) {
+        } else if (
+          errMsg.includes('FIREBASE NOT CONFIGURED') ||
+          errMsg.includes('FIREBASE NOT INITIALIZED')
+        ) {
           errorMsg = 'Firebase not configured';
         }
         toast.error(errorMsg, { autoClose: 4000, hideProgressBar: true });
@@ -214,7 +233,9 @@ export default function LoginModal({
                 countries={countries}
               />
 
-              <div id='recaptcha-container' className='flex justify-center my-4'></div>
+              <div
+                id='recaptcha-container'
+                className='flex justify-center my-4'></div>
 
               <button
                 type='submit'
