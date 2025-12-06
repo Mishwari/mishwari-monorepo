@@ -16,8 +16,12 @@ export const performMobileLogin = (mobileNumber: string, onSuccess: () => void, 
   try {
     if (useFirebase) {
       try {
+        const checkResponse = await authApi.checkPasswordRequired(mobileNumber);
+        const requiresPassword = checkResponse.data.requires_password;
+        
         await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
         dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
+        if (onRequiresPassword) onRequiresPassword(requiresPassword);
       } catch (firebaseError: any) {
         if (firebaseError.code === 'auth/too-many-requests') {
           const [response] = await Promise.all([

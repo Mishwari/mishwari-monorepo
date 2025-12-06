@@ -8,6 +8,9 @@ export const authApi = {
   verifyOtp: (data: { phone: string; otp: string; password?: string }) =>
     apiClient.patch('/mobile-login/verify-otp/', { mobile_number: data.phone, otp_code: data.otp, password: data.password }),
 
+  checkPasswordRequired: (phone: string) =>
+    apiClient.post('/mobile-login/check-password-required/', { mobile_number: phone }),
+
   verifyFirebaseOtp: (data: { firebase_token: string; password?: string }) =>
     apiClient.post('/mobile-login/verify-firebase-otp/', data),
 

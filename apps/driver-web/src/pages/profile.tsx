@@ -195,6 +195,14 @@ export default function Profile() {
         onClose={() => setShowChangeMobileModal(false)}
         currentMobile={profile.mobile_number}
         requirePassword={profile.role === 'operator_admin'}
+        onCheckPasswordRequired={async (mobile) => {
+          try {
+            const response = await authApi.checkPasswordRequired(mobile);
+            return response.data.requires_password;
+          } catch (error) {
+            return profile.role === 'operator_admin';
+          }
+        }}
         onRequestOtp={async (mobile) => {
           try {
             await authApi.requestOtp({ phone: mobile });

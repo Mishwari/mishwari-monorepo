@@ -12,6 +12,7 @@ interface ChangeMobileModalProps {
   requirePassword?: boolean;
   onSubmit: (data: { newMobile: string; otpCode: string; password?: string; firebaseToken?: string }) => Promise<void>;
   onRequestOtp: (mobile: string) => Promise<void>;
+  onCheckPasswordRequired?: (mobile: string) => Promise<boolean>;
 }
 
 export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
@@ -21,6 +22,7 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
   requirePassword = false,
   onSubmit,
   onRequestOtp,
+  onCheckPasswordRequired,
 }) => {
   const [newMobile, setNewMobile] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -28,6 +30,7 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
   const [showOtp, setShowOtp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verificationMethod, setVerificationMethod] = useState<'sms' | 'firebase' | null>(null);
+  const [needsPassword, setNeedsPassword] = useState(requirePassword);
 
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +42,10 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
     try {
       if (useFirebase) {
         try {
+          if (onCheckPasswordRequired) {
+            const passwordRequired = await onCheckPasswordRequired(newMobile);
+            setNeedsPassword(passwordRequired);
+          }
           await sendFirebaseOtp(newMobile, 'recaptcha-container-change-mobile');
           setVerificationMethod('firebase');
           setShowOtp(true);
@@ -64,7 +71,7 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
   const handleChangeMobile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMobile || !otpCode) return;
-    if (requirePassword && !password) return;
+    if (needsPassword && !password) return;
 
     setLoading(true);
     try {
@@ -77,7 +84,7 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
       await onSubmit({
         newMobile,
         otpCode,
-        ...(requirePassword && { password }),
+        ...(needsPassword && { password }),
         ...(firebaseToken && { firebaseToken })
       });
       setNewMobile('');
@@ -164,7 +171,7 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
                 />
               </div>
 
-              {requirePassword && (
+              {needsPassword && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">كلمة المرور</label>
                   <input
