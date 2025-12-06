@@ -209,7 +209,8 @@ export default function Profile() {
             await authApi.changeMobile({
               new_mobile: data.newMobile,
               otp_code: data.otpCode,
-              ...(data.password && { password: data.password })
+              ...(data.password && { password: data.password }),
+              ...(data.firebaseToken && { firebase_token: data.firebaseToken })
             });
             toast.success('تم تحديث رقم الجوال بنجاح');
             await fetchProfile();

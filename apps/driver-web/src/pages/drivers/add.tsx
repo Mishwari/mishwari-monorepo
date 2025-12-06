@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+import { AppState } from '@/store/store';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button, Input, PhoneInput, countries } from '@mishwari/ui-web';
 import { driversApi } from '@mishwari/api';
@@ -8,6 +10,9 @@ import { toast } from 'react-toastify';
 
 export default function AddDriverPage() {
   const router = useRouter();
+  const { profile } = useSelector((state: AppState) => state.auth);
+  const nestedProfile = (profile as any)?.profile;
+  const operatorName = (profile as any)?.operator_name || nestedProfile?.full_name || 'أسطولنا';
   const [mobileNumber, setMobileNumber] = useState('');
   const [inviteLink, setInviteLink] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -34,8 +39,13 @@ export default function AddDriverPage() {
   };
 
   const handleShareWhatsApp = () => {
-    const message = `انضم إلى أسطولنا كسائق: ${inviteLink}`;
+    const message = `مرحباً! أنت مدعو للانضمام إلى ${operatorName} كسائق في مشواري.\n\nللانضمام، اضغط على الرابط أدناه:\n${inviteLink}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+  };
+
+  const handleShareSMS = () => {
+    const message = `مرحباً! أنت مدعو للانضمام إلى ${operatorName} كسائق في مشواري. ${inviteLink}`;
+    window.open(`sms:${mobileNumber}?body=${encodeURIComponent(message)}`);
   };
 
   return (
@@ -81,11 +91,16 @@ export default function AddDriverPage() {
             <h3 className='text-xl font-bold mb-4'>دعوة السائق</h3>
             <p className='text-gray-600 mb-4'>شارك هذا الرابط مع السائق:</p>
             <Input value={inviteLink} readOnly className='mb-4' dir='ltr' />
-            <div className='flex gap-2'>
-              <Button onClick={handleCopyLink} className='flex-1'>نسخ الرابط</Button>
-              <Button onClick={handleShareWhatsApp} variant='default' className='flex-1'>
-                مشاركة عبر واتساب
-              </Button>
+            <div className='flex flex-col gap-2'>
+              <Button onClick={handleCopyLink} className='w-full'>نسخ الرابط</Button>
+              <div className='flex gap-2'>
+                <Button onClick={handleShareWhatsApp} variant='default' className='flex-1'>
+                  مشاركة عبر واتساب
+                </Button>
+                <Button onClick={handleShareSMS} variant='outline' className='flex-1 md:hidden'>
+                  مشاركة عبر SMS
+                </Button>
+              </div>
             </div>
             <Button 
               variant='outline' 

@@ -23,7 +23,7 @@ export const authApi = {
   acceptInvite: (data: { invite_code: string; full_name: string; email?: string; national_id?: string; driver_license?: string }) =>
     apiClient.post('/mobile-login/accept-invite/', data),
 
-  changeMobile: (data: { new_mobile: string; otp_code: string; password?: string }) =>
+  changeMobile: (data: { new_mobile: string; otp_code: string; password?: string; firebase_token?: string }) =>
     apiClient.post('/mobile-login/change-mobile/', data),
 
   refreshToken: (refreshToken: string) =>

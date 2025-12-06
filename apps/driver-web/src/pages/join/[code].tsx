@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { Button, Input } from '@mishwari/ui-web';
+import { Button, Input, OtpInput } from '@mishwari/ui-web';
 import { authApi, createAuthenticatedClient } from '@mishwari/api';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
@@ -18,6 +18,7 @@ export default function JoinInvitationPage() {
   const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [verificationMethod, setVerificationMethod] = useState<'sms' | 'firebase'>('sms');
+  const [showOtpInput, setShowOtpInput] = useState(false);
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
@@ -48,21 +49,30 @@ export default function JoinInvitationPage() {
   };
 
   const handleRequestOtp = async () => {
+    if (showOtpInput) {
+      cleanupRecaptcha();
+      setShowOtpInput(false);
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
     setLoading(true);
     try {
       if (verificationMethod === 'firebase') {
         try {
           await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
+          setShowOtpInput(true);
         } catch (firebaseError: any) {
           if (firebaseError.code === 'auth/too-many-requests') {
             await authApi.requestOtp({ phone: mobileNumber });
             setVerificationMethod('sms');
+            setShowOtpInput(true);
           } else {
             throw firebaseError;
           }
         }
       } else {
         await authApi.requestOtp({ phone: mobileNumber });
+        setShowOtpInput(true);
       }
       toast.success('تم إرسال رمز التحقق');
     } catch (error: any) {
@@ -108,7 +118,7 @@ export default function JoinInvitationPage() {
       
       // Fetch updated profile
       const profileResponse = await authApi.getMe();
-      dispatch(setProfile(profileResponse.data.profile));
+      dispatch(setProfile(profileResponse.data));
       
       toast.success('تم الانضمام بنجاح!');
       
@@ -133,7 +143,6 @@ export default function JoinInvitationPage() {
   if (step === 'otp') {
     return (
       <div className='w-full h-screen bg-white flex justify-center items-center'>
-        <div id='recaptcha-container'></div>
         <div className='flex flex-col w-full max-w-md px-6 py-8 border border-gray-200 rounded-xl bg-gray-100'>
           <h1 className='text-2xl font-bold text-center mb-4'>انضم إلى {invitation?.operator_name}</h1>
           <p className='text-center text-gray-600 mb-6'>تم دعوتك للانضمام كسائق</p>
@@ -144,24 +153,31 @@ export default function JoinInvitationPage() {
               <Input type='tel' value={mobileNumber} disabled dir='ltr' />
             </div>
 
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>رمز التحقق</label>
-              <Input
-                type='text'
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder='أدخل رمز التحقق'
-                maxLength={6}
-              />
-            </div>
+            {!showOtpInput && <div id='recaptcha-container' className='flex justify-center my-4'></div>}
 
-            <Button onClick={handleVerifyOtp} disabled={loading || !otp} className='w-full'>
-              {loading ? 'جاري التحقق...' : 'تحقق'}
-            </Button>
+            {showOtpInput ? (
+              <>
+                <div className='flex justify-center'>
+                  <OtpInput
+                    value={otp}
+                    onChange={setOtp}
+                    length={6}
+                  />
+                </div>
 
-            <Button onClick={handleRequestOtp} variant='outline' disabled={loading} className='w-full'>
-              إرسال رمز التحقق
-            </Button>
+                <Button onClick={handleVerifyOtp} disabled={loading || !otp} className='w-full'>
+                  {loading ? 'جاري التحقق...' : 'تحقق'}
+                </Button>
+
+                <Button onClick={handleRequestOtp} variant='outline' disabled={loading} className='w-full'>
+                  إعادة إرسال رمز التحقق
+                </Button>
+              </>
+            ) : (
+              <Button onClick={handleRequestOtp} disabled={loading} className='w-full'>
+                {loading ? 'جاري الإرسال...' : 'طلب رمز التحقق'}
+              </Button>
+            )}
           </div>
         </div>
       </div>

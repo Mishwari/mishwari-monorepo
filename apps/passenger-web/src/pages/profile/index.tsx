@@ -201,6 +201,7 @@ function index() {
               await authApi.changeMobile({
                 new_mobile: data.newMobile,
                 otp_code: data.otpCode,
+                ...(data.firebaseToken && { firebase_token: data.firebaseToken })
               });
               toast.success('تم تحديث رقم الجوال بنجاح');
               await fetchProfile();

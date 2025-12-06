@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { XMarkIcon, DevicePhoneMobileIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import { PhoneInput } from './PhoneInput';
 import { OtpInput } from './OtpInput';
-import { countries } from '@mishwari/utils';
+import { countries, shouldUseFirebase, sendFirebaseOtp, verifyFirebaseOtp } from '@mishwari/utils';
 
 interface ChangeMobileModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentMobile: string;
   requirePassword?: boolean;
-  onSubmit: (data: { newMobile: string; otpCode: string; password?: string }) => Promise<void>;
+  onSubmit: (data: { newMobile: string; otpCode: string; password?: string; firebaseToken?: string }) => Promise<void>;
   onRequestOtp: (mobile: string) => Promise<void>;
 }
 
@@ -27,15 +27,35 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
   const [password, setPassword] = useState('');
   const [showOtp, setShowOtp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verificationMethod, setVerificationMethod] = useState<'sms' | 'firebase' | null>(null);
 
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMobile) return;
 
     setLoading(true);
+    const useFirebase = shouldUseFirebase(newMobile);
+
     try {
-      await onRequestOtp(newMobile);
-      setShowOtp(true);
+      if (useFirebase) {
+        try {
+          await sendFirebaseOtp(newMobile, 'recaptcha-container-change-mobile');
+          setVerificationMethod('firebase');
+          setShowOtp(true);
+        } catch (firebaseError: any) {
+          if (firebaseError.code === 'auth/too-many-requests') {
+            await onRequestOtp(newMobile);
+            setVerificationMethod('sms');
+            setShowOtp(true);
+          } else {
+            throw firebaseError;
+          }
+        }
+      } else {
+        await onRequestOtp(newMobile);
+        setVerificationMethod('sms');
+        setShowOtp(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -48,15 +68,23 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
 
     setLoading(true);
     try {
+      let firebaseToken;
+      if (verificationMethod === 'firebase') {
+        const result = await verifyFirebaseOtp(otpCode);
+        firebaseToken = result.token;
+      }
+
       await onSubmit({
         newMobile,
         otpCode,
-        ...(requirePassword && { password })
+        ...(requirePassword && { password }),
+        ...(firebaseToken && { firebaseToken })
       });
       setNewMobile('');
       setOtpCode('');
       setPassword('');
       setShowOtp(false);
+      setVerificationMethod(null);
       onClose();
     } finally {
       setLoading(false);
@@ -66,6 +94,7 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
   const handleEdit = () => {
     setShowOtp(false);
     setOtpCode('');
+    setVerificationMethod(null);
   };
 
   if (!isOpen) return null;
@@ -108,6 +137,8 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
               />
             </div>
 
+            <div id="recaptcha-container-change-mobile" className="flex justify-center my-4" />
+
             <button
               type="submit"
               disabled={loading}
@@ -129,7 +160,7 @@ export const ChangeMobileModal: React.FC<ChangeMobileModalProps> = ({
                 <OtpInput
                   value={otpCode}
                   onChange={setOtpCode}
-                  length={4}
+                  length={6}
                 />
               </div>
 

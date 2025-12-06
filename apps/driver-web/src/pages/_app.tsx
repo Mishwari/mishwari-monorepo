@@ -22,10 +22,20 @@ function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     const publicPaths = ['/login', '/login/complete_profile'];
+    
+    // Wait for profile to be loaded before checking
+    if (!isAuthenticated || !profile || publicPaths.includes(router.pathname)) {
+      return;
+    }
+    
     const nestedProfile = (profile as any)?.profile;
     const fullName = profile?.full_name || nestedProfile?.full_name;
+    const isStandalone = (profile as any)?.is_standalone;
+    const hasOperatorName = !!(profile as any)?.operator_name;
     
-    if (isAuthenticated && !fullName && !publicPaths.includes(router.pathname)) {
+    // Only redirect if: no full_name AND is standalone (not invited driver)
+    // Invited drivers have is_standalone=false or have operator_name
+    if (!fullName && isStandalone !== false && !hasOperatorName) {
       router.push('/login/complete_profile');
     }
   }, [isAuthenticated, profile, router.pathname]);
