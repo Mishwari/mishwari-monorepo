@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { performRegister } from '@/store/actions/mobileAuthActions';
 import { useRouter } from 'next/router';
-import { Button, DateInput } from '@mishwari/ui-web';
+import { Button, DateInput, MultiSelect } from '@mishwari/ui-web';
+import { tripsApi } from '@mishwari/api';
+import { toast } from 'react-toastify';
 
 export default function CompleteProfile() {
   const router = useRouter();
@@ -14,7 +16,18 @@ export default function CompleteProfile() {
     gender: 'male',
     birth_date: '',
     password: '',
+    operator_name: '',
+    operational_regions: [] as string[],
+    driver_license: '',
+    national_id: '',
   });
+  const [cities, setCities] = useState<{ value: string; label: string }[]>([]);
+
+  useEffect(() => {
+    tripsApi.getCities().then(cityList => {
+      setCities(cityList.map(c => ({ value: c.city, label: c.city })));
+    }).catch(() => toast.error('فشل تحميل قائمة المدن'));
+  }, []);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -68,9 +81,56 @@ export default function CompleteProfile() {
               </div>
             </div>
 
+            {formData.role === 'operator_admin' && (
+              <div>
+                <label className='block text-sm font-medium text-gray-700 text-right'>
+                  اسم الشركة
+                </label>
+                <input
+                  type='text'
+                  required
+                  value={formData.operator_name}
+                  onChange={(e) => setFormData({ ...formData, operator_name: e.target.value })}
+                  className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary'
+                />
+              </div>
+            )}
+
+            {formData.role === 'operator_admin' && (
+              <div>
+                <label className='block text-sm font-medium text-gray-700 text-right'>
+                  المناطق التشغيلية
+                </label>
+                <div className='mt-1'>
+                  <MultiSelect
+                    options={cities}
+                    value={formData.operational_regions}
+                    onChange={(value) => setFormData({ ...formData, operational_regions: value })}
+                    placeholder="اختر المدن"
+                  />
+                </div>
+              </div>
+            )}
+
+            {formData.role === 'driver' && (
+              <div>
+                <label className='block text-sm font-medium text-gray-700 text-right'>
+                  موقعك
+                </label>
+                <div className='mt-1'>
+                  <MultiSelect
+                    options={cities}
+                    value={formData.operational_regions}
+                    onChange={(value) => setFormData({ ...formData, operational_regions: value })}
+                    placeholder="اختر المدن"
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
               <label className='block text-sm font-medium text-gray-700 text-right'>
-                {formData.role === 'driver' ? 'الاسم الكامل' : 'اسم الشركة'}
+                الاسم الكامل
               </label>
               <input
                 type='text'
@@ -118,6 +178,36 @@ export default function CompleteProfile() {
                 placeholder='DD/MM/YYYY'
               />
             </div>
+
+            {formData.role === 'driver' && (
+              <div>
+                <label className='block text-sm font-medium text-gray-700 text-right'>
+                  رقم رخصة القيادة
+                </label>
+                <input
+                  type='text'
+                  required
+                  value={formData.driver_license}
+                  onChange={(e) => setFormData({ ...formData, driver_license: e.target.value })}
+                  className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary'
+                />
+              </div>
+            )}
+
+            {formData.role === 'driver' && (
+              <div>
+                <label className='block text-sm font-medium text-gray-700 text-right'>
+                  رقم الهوية الوطنية
+                </label>
+                <input
+                  type='text'
+                  required
+                  value={formData.national_id}
+                  onChange={(e) => setFormData({ ...formData, national_id: e.target.value })}
+                  className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary'
+                />
+              </div>
+            )}
 
             {formData.role === 'operator_admin' && (
               <div>

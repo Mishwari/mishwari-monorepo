@@ -29,6 +29,9 @@ export const authApi = {
   changeMobile: (data: { new_mobile: string; otp_code: string; password?: string; firebase_token?: string }) =>
     apiClient.post('/mobile-login/change-mobile/', data),
 
+  changePassword: (data: { current_password: string; new_password: string }) =>
+    apiClient.post('/mobile-login/change-password/', data),
+
   refreshToken: (refreshToken: string) =>
     apiClient.post('/token/refresh/', { refresh: refreshToken }),
 

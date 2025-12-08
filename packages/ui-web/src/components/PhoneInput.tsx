@@ -6,6 +6,7 @@ import { cn } from '../lib/utils';
 
 interface PhoneInputWithCountriesProps extends PhoneInputProps {
   countries: Country[];
+  autoDetectRegion?: boolean;
 }
 
 export const PhoneInput: React.FC<PhoneInputWithCountriesProps> = ({
@@ -15,6 +16,7 @@ export const PhoneInput: React.FC<PhoneInputWithCountriesProps> = ({
   defaultCountry,
   countries,
   className,
+  autoDetectRegion = true,
 }) => {
   const {
     selectedCountry,
@@ -26,7 +28,7 @@ export const PhoneInput: React.FC<PhoneInputWithCountriesProps> = ({
     setSearchTerm,
     handlePhoneNumberChange,
     handleCountryChange,
-  } = usePhoneInput(onChange, defaultCountry || countries[0], value, countries);
+  } = usePhoneInput(onChange, defaultCountry || countries[0], value, countries, autoDetectRegion);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 

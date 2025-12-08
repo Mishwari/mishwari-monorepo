@@ -13,18 +13,13 @@ export default function JoinInvitationPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { code } = router.query;
-  const [step, setStep] = useState<'validate' | 'otp' | 'profile'>('validate');
+  const [step, setStep] = useState<'validate' | 'otp'>('validate');
   const [invitation, setInvitation] = useState<any>(null);
   const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [verificationMethod, setVerificationMethod] = useState<'sms' | 'firebase'>('sms');
   const [showOtpInput, setShowOtpInput] = useState(false);
-  const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    national_id: '',
-    driver_license: ''
-  });
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,13 +31,16 @@ export default function JoinInvitationPage() {
 
   const validateInvite = async () => {
     try {
+      console.log('[JOIN] Validating invitation:', code);
       const response = await authApi.validateInvite(code as string);
+      console.log('[JOIN] Invitation valid:', response.data);
       setInvitation(response.data);
       const phone = response.data.mobile_number;
       setMobileNumber(phone);
       setVerificationMethod(shouldUseFirebase(phone) ? 'firebase' : 'sms');
       setStep('otp');
     } catch (error: any) {
+      console.error('[JOIN] Validation failed:', error?.response?.data);
       toast.error(error?.response?.data?.error || 'رمز دعوة غير صالح');
       router.push('/login');
     }
@@ -85,6 +83,7 @@ export default function JoinInvitationPage() {
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
+      console.log('[JOIN] Verifying OTP:', { phone: mobileNumber, otp, method: verificationMethod });
       let response;
       if (verificationMethod === 'firebase') {
         const { token } = await verifyFirebaseOtp(otp);
@@ -92,6 +91,7 @@ export default function JoinInvitationPage() {
       } else {
         response = await authApi.verifyOtp({ phone: mobileNumber, otp });
       }
+      console.log('[JOIN] OTP verified, tokens received');
       const { access, refresh } = response.data.tokens;
       
       dispatch(setAuthState({
@@ -100,37 +100,19 @@ export default function JoinInvitationPage() {
         refreshToken: encryptToken(refresh),
       }));
       
-      setStep('profile');
+      toast.success('تم التحقق بنجاح');
+      
+      console.log('[JOIN] Redirecting to complete page with code:', code);
+      // Redirect immediately without waiting
+      router.push(`/join/complete?code=${code}`);
     } catch (error: any) {
-      toast.error('رمز التحقق غير صحيح');
-    } finally {
+      console.error('[JOIN] OTP verification failed:', error?.response?.data || error.message);
+      toast.error(error?.response?.data?.error || 'رمز التحقق غير صحيح');
       setLoading(false);
     }
   };
 
-  const handleAcceptInvite = async () => {
-    setLoading(true);
-    try {
-      await authApi.acceptInvite({
-        invite_code: code as string,
-        ...formData
-      });
-      
-      // Fetch updated profile
-      const profileResponse = await authApi.getMe();
-      dispatch(setProfile(profileResponse.data));
-      
-      toast.success('تم الانضمام بنجاح!');
-      
-      setTimeout(() => {
-        router.push('/');
-      }, 1000);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.error || 'فشل قبول الدعوة');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   if (step === 'validate') {
     return (
@@ -184,55 +166,5 @@ export default function JoinInvitationPage() {
     );
   }
 
-  return (
-    <div className='w-full h-screen bg-white flex justify-center items-center'>
-      <div className='flex flex-col w-full max-w-md px-6 py-8 border border-gray-200 rounded-xl bg-gray-100'>
-        <h1 className='text-2xl font-bold text-center mb-4'>أكمل معلوماتك</h1>
-        
-        <form onSubmit={(e) => { e.preventDefault(); handleAcceptInvite(); }} className='space-y-4'>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>الاسم الكامل *</label>
-            <Input
-              type='text'
-              value={formData.full_name}
-              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              required
-            />
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>البريد الإلكتروني</label>
-            <Input
-              type='email'
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              dir='ltr'
-            />
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>رقم الهوية الوطنية</label>
-            <Input
-              type='text'
-              value={formData.national_id}
-              onChange={(e) => setFormData({ ...formData, national_id: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>رقم رخصة القيادة</label>
-            <Input
-              type='text'
-              value={formData.driver_license}
-              onChange={(e) => setFormData({ ...formData, driver_license: e.target.value })}
-            />
-          </div>
-
-          <Button type='submit' disabled={loading || !formData.full_name} className='w-full'>
-            {loading ? 'جاري الانضمام...' : 'انضم الآن'}
-          </Button>
-        </form>
-      </div>
-    </div>
-  );
+  return null;
 }

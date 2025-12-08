@@ -15,6 +15,7 @@ export { QuickDaySelector } from './components/QuickDaySelector';
 export { FileUpload } from './components/FileUpload';
 export { Input } from './components/ui/input';
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
+export { MultiSelect } from './components/ui/multi-select';
 export { ToggleSwitch } from './components/ToggleSwitch';
 export { UserDropdownMenu } from './components/UserDropdownMenu';
 export { TripCardBase } from './components/TripCardBase';

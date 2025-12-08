@@ -78,7 +78,7 @@ export default function MainHeader({
                     d='M13 10V3L4 14h7v7l9-11h-7z'
                   />
                 </svg>
-                <span className='text-lg font-bold text-primary'>مشواري</span>
+                <span className='text-lg font-bold text-primary'>يلا باص</span>
               </div>
             )}
           </div>

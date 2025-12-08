@@ -49,7 +49,8 @@ export default function Home() {
   }, [isAuthenticated, router, dispatch]);
 
   useEffect(() => {
-    if (!isAuthenticated || !profile?.full_name) return;
+    const fullName = (profile as any)?.profile?.full_name || profile?.full_name;
+    if (!isAuthenticated || !fullName) return;
 
     const fetchSetupData = async () => {
       try {
@@ -69,10 +70,11 @@ export default function Home() {
     };
 
     fetchSetupData();
-  }, [isAuthenticated, canManageDrivers]);
+  }, [isAuthenticated, canManageDrivers, profile]);
 
   useEffect(() => {
-    if (!isAuthenticated || !profile?.full_name) return;
+    const fullName = (profile as any)?.profile?.full_name || profile?.full_name;
+    if (!isAuthenticated || !fullName) return;
 
     const fetchBookings = async () => {
       try {
@@ -122,7 +124,7 @@ export default function Home() {
       <div className='max-w-7xl mx-auto px-4 py-8 space-y-6'>
         <div>
           <h1 className='text-3xl font-bold text-gray-900'>
-            مرحباً، {profile.full_name}
+            مرحباً، {(profile as any)?.profile?.full_name || profile?.full_name}
           </h1>
           <p className='text-gray-600 mt-1'>إدارة رحلاتك وحجوزاتك</p>
         </div>
@@ -141,7 +143,7 @@ export default function Home() {
 
         {role === 'operator_admin' && <UpgradeBanner />}
 
-        {!setupLoading &&
+        {!setupLoading && !isInvitedDriver &&
           (busCount === 0 || (canManageDrivers && driverCount === 0)) && (
             <div className='bg-amber-50 border border-amber-200 rounded-lg p-6 text-center'>
               <h3 className='text-lg font-semibold text-amber-900 mb-2'>

@@ -15,7 +15,8 @@ export default function FleetPage() {
   const [buses, setBuses] = useState<Bus[]>([]);
   const [loading, setLoading] = useState(true);
   const role = (profile as any)?.profile?.role || profile?.role;
-  const isDriver = !canManageDrivers;
+  const isStandalone = (profile as any)?.is_standalone;
+  const shouldRedirectToBus = role === 'driver' && isStandalone;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -34,8 +35,8 @@ export default function FleetPage() {
         const data = await fleetApi.list();
         if (mounted) {
           setBuses(data);
-          // Redirect driver directly to their bus detail page
-          if (!canManageDrivers && data.length > 0) {
+          // Redirect standalone driver to their bus detail page
+          if (shouldRedirectToBus && data.length > 0) {
             router.push(`/fleet/${data[0].id}`);
             return;
           }
@@ -57,12 +58,12 @@ export default function FleetPage() {
     return () => {
       mounted = false;
     };
-  }, [isAuthenticated, isDriver, router]);
+  }, [isAuthenticated, shouldRedirectToBus, router]);
 
   if (!isAuthenticated) return null;
 
-  // Show loading while redirecting driver to their bus
-  if (loading && isDriver) {
+  // Show loading while redirecting standalone driver to their bus
+  if (loading && shouldRedirectToBus) {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
@@ -72,8 +73,8 @@ export default function FleetPage() {
     );
   }
 
-  // Driver with no bus - show add button
-  if (isDriver && buses.length === 0) {
+  // Standalone driver with no bus - show add button
+  if (shouldRedirectToBus && buses.length === 0) {
     return (
       <DashboardLayout>
         <div className="text-center py-12 bg-white rounded-lg shadow">

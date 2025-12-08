@@ -21,22 +21,31 @@ function App({ Component, pageProps }: AppProps) {
   useRevalidate();
 
   useEffect(() => {
-    const publicPaths = ['/login', '/login/complete_profile'];
+    const publicPaths = ['/login', '/login/complete_profile', '/join'];
     
     // Wait for profile to be loaded before checking
-    if (!isAuthenticated || !profile || publicPaths.includes(router.pathname)) {
+    if (!isAuthenticated || !profile || publicPaths.some(path => router.pathname.startsWith(path))) {
       return;
     }
     
     const nestedProfile = (profile as any)?.profile;
     const fullName = profile?.full_name || nestedProfile?.full_name;
+    const role = nestedProfile?.role || profile?.role;
     const isStandalone = (profile as any)?.is_standalone;
-    const hasOperatorName = !!(profile as any)?.operator_name;
+    const pendingInvitationCode = (profile as any)?.pending_invitation_code || nestedProfile?.pending_invitation_code;
     
-    // Only redirect if: no full_name AND is standalone (not invited driver)
-    // Invited drivers have is_standalone=false or have operator_name
-    if (!fullName && isStandalone !== false && !hasOperatorName) {
-      router.push('/login/complete_profile');
+    // Redirect to complete profile if no full_name:
+    // 1. Invited driver with pending invitation → /join/complete?code=XXX
+    // 2. operator_admin → /login/complete_profile
+    // 3. passenger (new user) → /login/complete_profile
+    // 4. standalone driver (is_standalone === true) → /login/complete_profile
+    if (!fullName) {
+      if (role === 'driver' && pendingInvitationCode) {
+        console.log('[APP] Redirecting invited driver to complete profile:', pendingInvitationCode);
+        router.push(`/join/complete?code=${pendingInvitationCode}`);
+      } else if (role === 'operator_admin' || role === 'passenger' || (role === 'driver' && isStandalone === true)) {
+        router.push('/login/complete_profile');
+      }
     }
   }, [isAuthenticated, profile, router.pathname]);
 
@@ -47,7 +56,7 @@ function App({ Component, pageProps }: AppProps) {
           <div className='min-h-screen bg-gradient-to-b from-primary-light to-white flex items-center justify-center'>
             <div className='text-center'>
               <div className='w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-              <p className='text-primary font-bold text-lg'>مشواري</p>
+              <p className='text-primary font-bold text-lg'>يلا باص</p>
             </div>
           </div>
         }>

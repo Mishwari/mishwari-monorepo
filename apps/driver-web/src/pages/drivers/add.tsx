@@ -39,12 +39,12 @@ export default function AddDriverPage() {
   };
 
   const handleShareWhatsApp = () => {
-    const message = `مرحباً! أنت مدعو للانضمام إلى ${operatorName} كسائق في مشواري.\n\nللانضمام، اضغط على الرابط أدناه:\n${inviteLink}`;
+    const message = `مرحباً! أنت مدعو للانضمام إلى ${operatorName} كسائق في يلا باص.\n\nللانضمام، اضغط على الرابط أدناه:\n${inviteLink}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
   };
 
   const handleShareSMS = () => {
-    const message = `مرحباً! أنت مدعو للانضمام إلى ${operatorName} كسائق في مشواري. ${inviteLink}`;
+    const message = `مرحباً! أنت مدعو للانضمام إلى ${operatorName} كسائق في يلا باص. ${inviteLink}`;
     window.open(`sms:${mobileNumber}?body=${encodeURIComponent(message)}`);
   };
 

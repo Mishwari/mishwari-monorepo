@@ -453,7 +453,7 @@ export const BottomNav = ({ items, currentPath }: { items: NavItem[], currentPat
 // packages/ui-web/src/components/Logo.tsx
 export const Logo = ({ variant = 'default' }: { variant?: 'default' | 'demo' }) => (
   <div className="flex gap-1 items-center">
-    <h1 className="text-white font-bold text-xl">مشواري</h1>
+    <h1 className="text-white font-bold text-xl">يلا باص</h1>
     {variant === 'demo' && (
       <span className="text-white text-[10px] font-normal self-end">(Demo)</span>
     )}

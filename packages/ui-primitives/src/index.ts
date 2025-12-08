@@ -4,3 +4,5 @@ export * from './OtpInput.types';
 export * from './hooks/usePhoneInput';
 export * from './hooks/useOtpInput';
 export * from './hooks/useCancelBooking';
+export * from './hooks/useIPLocation';
+export * from './hooks/useGPSLocation';

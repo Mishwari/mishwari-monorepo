@@ -18,7 +18,8 @@ export default function TripsPage() {
   const [filter, setFilter] = useState<string>('all');
   const isVerified = profile?.is_verified;
   const role = (profile as any)?.profile?.role || profile?.role;
-  const isOperatorAdmin = role === 'operator_admin';
+  const isStandalone = (profile as any)?.is_standalone;
+  const canCreateTrips = role === 'operator_admin' || (role === 'driver' && isStandalone);
   
   // Calculate active trips for limit warning
   const activeTripsCount = useMemo(() => {
@@ -84,7 +85,7 @@ export default function TripsPage() {
             <h1 className="text-3xl font-bold text-gray-900">الرحلات</h1>
             <p className="text-gray-600 mt-1">إدارة رحلاتك</p>
           </div>
-          {isOperatorAdmin && (
+          {canCreateTrips && (
             <Button 
               onClick={() => router.push('/trips/create')} 
               variant="default" 
@@ -141,7 +142,7 @@ export default function TripsPage() {
             {!isVerified && (
               <p className="text-sm text-gray-500 mb-4">يمكنك إنشاء رحلات كمسودات، وستتمكن من نشرها بعد إكمال التوثيق</p>
             )}
-            {isOperatorAdmin && (
+            {canCreateTrips && (
               <Button onClick={() => router.push('/trips/create')} variant="default">
               إنشاء أول رحلة
               </Button>

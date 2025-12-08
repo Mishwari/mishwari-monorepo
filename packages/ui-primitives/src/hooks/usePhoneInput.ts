@@ -1,18 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Country } from '../PhoneInput.types';
+import { useIPLocation } from './useIPLocation';
 
 export const usePhoneInput = (
   onChange: (value: string) => void,
   defaultCountry: Country,
   value?: string,
-  countries?: Country[]
+  countries?: Country[],
+  autoDetectRegion = true
 ) => {
+  const { location } = useIPLocation();
   const [selectedCountry, setSelectedCountry] = useState<Country>(defaultCountry);
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [initialized, setInitialized] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (autoDetectRegion && location?.country && countries && !initialized) {
+      const detectedCountry = countries.find(c => c.nameEn === location.country);
+      if (detectedCountry) {
+        setSelectedCountry(detectedCountry);
+      }
+    }
+  }, [location, countries, autoDetectRegion, initialized]);
 
   useEffect(() => {
     if (value && !initialized && countries) {

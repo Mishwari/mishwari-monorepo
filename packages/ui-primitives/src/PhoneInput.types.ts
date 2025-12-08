@@ -1,6 +1,7 @@
 export interface Country {
   value: string;
   label: string;
+  nameEn: string;
   symbol: string;
   code: string;
   digitLength: number;

@@ -6,6 +6,7 @@ import {
   CheckIcon,
 } from '@heroicons/react/24/outline';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { filterByArabicSearch } from '../lib/searchUtils';
 
 export interface CityOption {
   id: number;
@@ -69,31 +70,7 @@ export default function CityDropdown({
     }
   }, [isMobile]);
 
-  const normalizeArabic = (text: string) => {
-    return text
-      .replace(/[ًٌٍَُِّْ]/g, '')
-      .replace(/[أإآ]/g, 'ا')
-      .replace(/[ىئ]/g, 'ي')
-      .replace(/ة/g, 'ه')
-      .toLowerCase();
-  };
-
-  const filteredOptions = options.filter((option) => {
-    if (!searchQuery.trim()) return true;
-
-    const normalizedCity = normalizeArabic(option.city);
-    const normalizedQuery = normalizeArabic(searchQuery.trim());
-    const cityWords = normalizedCity.split(/\s+/);
-
-    if (normalizedQuery.length === 1) {
-      return cityWords[0]?.startsWith(normalizedQuery);
-    }
-
-    return (
-      cityWords.some((word) => word.startsWith(normalizedQuery)) ||
-      normalizedCity.includes(normalizedQuery)
-    );
-  });
+  const filteredOptions = filterByArabicSearch(options, searchQuery);
 
   const handleSelect = (city: string) => {
     onChange(city);
@@ -111,7 +88,7 @@ export default function CityDropdown({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder='بحث عن مدينة...'
-            className='w-full pr-9 pl-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#005687] focus:ring-2 focus:ring-[#e6f2f7]'
+            className='w-full pr-9 pl-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary-light'
             autoComplete='off'
           />
         </div>
@@ -132,13 +109,13 @@ export default function CityDropdown({
               key={option.id}
               onClick={() => handleSelect(option.city)}
               className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors ${
-                value === option.city ? 'bg-[#e6f2f7]' : 'hover:bg-slate-50'
+                value === option.city ? 'bg-brand-primary-light' : 'hover:bg-slate-50'
               }`}>
               <div className='flex items-center gap-3'>
                 <div
                   className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                     value === option.city
-                      ? 'bg-white text-[#005687]'
+                      ? 'bg-white text-brand-primary'
                       : 'bg-slate-100 text-slate-400'
                   }`}>
                   <MapPinIcon className='w-4 h-4' />
@@ -147,15 +124,15 @@ export default function CityDropdown({
                   <div
                     className={`text-sm font-bold ${
                       value === option.city
-                        ? 'text-[#005687]'
-                        : 'text-[#042f40]'
+                        ? 'text-brand-primary'
+                        : 'text-brand-text-dark'
                     }`}>
                     {option.city}
                   </div>
                 </div>
               </div>
               {value === option.city ? (
-                <CheckIcon className='w-4 h-4 text-[#005687]' />
+                <CheckIcon className='w-4 h-4 text-brand-primary' />
               ) : (
                 showTripCount &&
                 option.trip_count !== undefined && (
@@ -180,8 +157,8 @@ export default function CityDropdown({
           onClick={() => !disabled && setIsOpen(!isOpen)}
           className={`flex items-center gap-2 p-2 sm:p-3 rounded-xl transition-all cursor-pointer border h-full ${
             isOpen
-              ? 'bg-white border-[#005687] ring-4 ring-[#e6f2f7]'
-              : 'bg-slate-50 hover:bg-[#F0F7FA] border-transparent hover:border-blue-100'
+              ? 'bg-white border-brand-primary ring-4 ring-brand-primary-light'
+              : 'bg-slate-50 hover:bg-brand-hover border-transparent hover:border-blue-100'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
           <Icon className='w-5 h-5 shrink-0 text-[#005687]' />
           <div className='flex-1 min-w-0 flex flex-col justify-center text-right'>

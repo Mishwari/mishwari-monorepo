@@ -16,8 +16,9 @@ interface TripCreationWizardProps {
 }
 
 export default function TripCreationWizard({ onSuccess }: TripCreationWizardProps) {
-  const { canManageDrivers } = useSelector((state: AppState) => state.auth);
-  const isDriver = !canManageDrivers;
+  const { canManageDrivers, profile } = useSelector((state: AppState) => state.auth);
+  const isStandalone = (profile as any)?.is_standalone;
+  const isDriver = !canManageDrivers && isStandalone;
   const [step, setStep] = useState(1);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);

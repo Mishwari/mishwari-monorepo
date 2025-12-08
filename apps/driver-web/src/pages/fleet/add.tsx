@@ -12,11 +12,13 @@ export default function AddBusPage() {
   const { profile } = useSelector((state: AppState) => state.auth);
   const [loading, setLoading] = useState(false);
   const [canAdd, setCanAdd] = useState<boolean | null>(null);
-  const isDriver = profile?.role === 'driver';
+  const role = (profile as any)?.profile?.role || profile?.role;
+  const isStandalone = (profile as any)?.is_standalone;
+  const shouldCheckLimit = role === 'driver' && isStandalone;
 
   useEffect(() => {
-    // Check if driver can add bus
-    if (isDriver) {
+    // Check if standalone driver can add bus
+    if (shouldCheckLimit) {
       fleetApi.list()
         .then(buses => {
           if (buses.length >= 1) {
@@ -30,7 +32,7 @@ export default function AddBusPage() {
     } else {
       setCanAdd(true);
     }
-  }, [isDriver, router]);
+  }, [shouldCheckLimit, router]);
 
   if (canAdd === null) {
     return (

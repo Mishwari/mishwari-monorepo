@@ -224,7 +224,7 @@ export default function LoginModal({
               <ArrowRightOnRectangleIcon className='w-6 h-6' />
             </div>
             <h2 className='text-2xl font-black text-[#042f40]'>
-              {showOtp ? 'تاكيد رمز التحقق' : 'سجل دخولك في مشواري'}
+              {showOtp ? 'تاكيد رمز التحقق' : 'سجل دخولك في يلا باص'}
             </h2>
             <p className='text-slate-500 text-sm mt-1'>
               {showOtp

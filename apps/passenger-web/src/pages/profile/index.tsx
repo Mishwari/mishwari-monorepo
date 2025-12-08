@@ -124,9 +124,9 @@ function index() {
   }
 
   return (
-    <main className='min-h-screen bg-light'>
-      <MainLayout>
-        <section className='max-w-2xl mx-auto px-4 md:px-6 py-6'>
+    <MainLayout>
+      <div className='min-h-screen bg-light'>
+        <section className='max-w-4xl mx-auto px-4 py-6'>
           <div className='flex justify-between items-center mb-6'>
             <div className='flex gap-3 items-center'>
               <UserIcon className='w-6 h-6 text-primary' />
@@ -181,8 +181,9 @@ function index() {
             </div>
           </div>
         </section>
+      </div>
 
-        <ChangeMobileModal
+      <ChangeMobileModal
           isOpen={showChangeMobileModal}
           onClose={() => setShowChangeMobileModal(false)}
           currentMobile={profile.mobile_number}
@@ -211,8 +212,7 @@ function index() {
             }
           }}
         />
-      </MainLayout>
-    </main>
+    </MainLayout>
   );
 }
 

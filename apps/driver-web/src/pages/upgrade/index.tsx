@@ -9,7 +9,7 @@ import FileUpload from '@/components/kyc/FileUpload';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export default function UpgradePage() {
-  const { isAuthenticated, profile } = useSelector((state: AppState) => state.auth);
+  const { isAuthenticated, profile, canUpgrade } = useSelector((state: AppState) => state.auth);
   const router = useRouter();
   const [formData, setFormData] = useState({
     company_name: '',
@@ -36,10 +36,10 @@ export default function UpgradePage() {
       router.push('/login');
       return;
     }
-    if (profile?.role !== 'driver') {
+    if (!canUpgrade) {
       router.push('/');
     }
-  }, [isAuthenticated, profile, router]);
+  }, [isAuthenticated, canUpgrade, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +65,7 @@ export default function UpgradePage() {
     }
   };
 
-  if (!isAuthenticated || profile?.role !== 'driver') return null;
+  if (!isAuthenticated || !canUpgrade) return null;
 
   return (
     <DashboardLayout>

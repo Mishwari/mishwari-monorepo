@@ -138,11 +138,23 @@ export default function TripDetailsPage() {
     if (profile) {
       setContactDetails({
         name: profile?.full_name || profile?.user.username || '',
-        phone: profile?.phone || '',
+        phone: profile?.mobile_number || '',
         email: profile?.user.email || '',
       });
     }
   }, [profile]);
+
+  const calculateAge = (birthDate: string | null | undefined): number | null => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   useEffect(() => {
     if (!isFullyAuthenticated || !profile?.full_name) return;
@@ -170,7 +182,7 @@ export default function TripDetailsPage() {
       const userPassenger = {
         id: null,
         name: profile.full_name,
-        age: profile.age || null,
+        age: calculateAge(profile.birth_date),
         is_checked: true,
         gender: profile.gender || 'male',
       };
@@ -543,21 +555,24 @@ export default function TripDetailsPage() {
                     </span>
                   </div>
                   <div className='flex flex-wrap gap-2'>
-                    {tripDetails.bus?.amenities &&
-                      Object.entries(tripDetails.bus.amenities).map(
-                        ([key, val]) => {
-                          if (val !== 'true' && val !== true) return null;
-                          const { icon: Icon, label } = getAmenityIcon(key);
-                          return (
-                            <div
-                              key={key}
-                              className='flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100 text-xs font-bold text-brand'>
-                              <Icon className='w-4 h-4 text-primary' />
-                              {label}
-                            </div>
-                          );
-                        }
-                      )}
+                    {tripDetails.bus?.has_wifi && (
+                      <div className='flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100 text-xs font-bold text-brand'>
+                        <Wifi className='w-4 h-4 text-primary' />
+                        واي فاي
+                      </div>
+                    )}
+                    {tripDetails.bus?.has_ac && (
+                      <div className='flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100 text-xs font-bold text-brand'>
+                        <Wind className='w-4 h-4 text-primary' />
+                        مكيف
+                      </div>
+                    )}
+                    {tripDetails.bus?.has_usb_charging && (
+                      <div className='flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100 text-xs font-bold text-brand'>
+                        <Zap className='w-4 h-4 text-primary' />
+                        شحن USB
+                      </div>
+                    )}
                     <div className='flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100 text-xs font-bold text-brand'>
                       <span className='font-mono text-slate-500'>
                         #{tripDetails.bus?.bus_number}
@@ -776,9 +791,11 @@ export default function TripDetailsPage() {
                           }`}>
                           {p.name}
                         </div>
-                        {p.age && (
-                          <div className='text-xs text-slate-400 mt-0.5'>
-                            <span>{p.age} سنة</span>
+                        {(p.age || p.gender) && (
+                          <div className='text-xs text-slate-400 mt-0.5 flex items-center gap-2'>
+                            {p.age && <span>{p.age} سنة</span>}
+                            {p.age && p.gender && <span>•</span>}
+                            {p.gender && <span>{p.gender === 'male' ? 'ذكر' : 'أنثى'}</span>}
                           </div>
                         )}
                       </div>

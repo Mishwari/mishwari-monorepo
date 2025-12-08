@@ -19,7 +19,7 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
   const { profile } = authState;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navItems = getNavigationItems(profile);
-  
+
   console.log('[HomeLayout] Full auth state:', authState);
   console.log('[HomeLayout] Profile:', profile);
   console.log('[HomeLayout] NavItems:', navItems);
@@ -29,12 +29,23 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
       <VerificationBanner />
       <Header
         logo={
-          <Link href="/" className="flex gap-1">
-            <h1 className="text-white font-bold text-xl">مشواري</h1>
-            <h1 className="text-white text-[10px] font-normal self-end">(مشغل)</h1>
+          <Link
+            href='/'
+            className='flex gap-1'>
+            <h1 className='text-white font-bold text-xl text-nowrap'>
+              يلا باص
+            </h1>
+            <h1 className='text-white text-[10px] font-normal self-end'>
+              (مشغل)
+            </h1>
           </Link>
         }
-        actions={<UserDropdownMenu items={navItems} onLogout={logout} />}
+        actions={
+          <UserDropdownMenu
+            items={navItems}
+            onLogout={logout}
+          />
+        }
         onBurgerClick={() => setIsMobileMenuOpen(true)}
       />
       <MobileMenu
@@ -45,15 +56,12 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
         footer={
           <button
             onClick={logout}
-            className="w-full text-lg font-semibold border rounded-md p-2 bg-brand-primary text-white"
-          >
+            className='w-full text-lg font-semibold border rounded-md p-2 bg-brand-primary text-white'>
             تسجيل الخروج
           </button>
         }
       />
-      <div className="min-h-screen bg-gray-50 pt-16">
-        {children}
-      </div>
+      <div className='min-h-screen bg-gray-50 pt-16'>{children}</div>
     </>
   );
 }

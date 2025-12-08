@@ -7,13 +7,13 @@ import { decryptToken } from '@/utils/tokenUtils';
 import MiniTicket from '@/components/MiniTicket';
 import MiniTicketSkeleton from '@/components/Skeletons/MiniTicketSkeleton';
 import MainLayout from '@/layouts/MainLayout';
+import { Ticket } from 'lucide-react';
 
 function index() {
   const token = useSelector((state: AppState) => state.auth.token);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('all');
 
   const fetchBookings = useCallback(async () => {
@@ -59,49 +59,69 @@ function index() {
 
   const bookingOptions = [
     { id: 1, label: 'الكل', value: 'all' },
-    { id: 2, label: 'قيد الانتظار', value: 'pending' },
-    { id: 3, label: 'نشط', value: 'active' },
+    { id: 2, label: 'نشط', value: 'active' },
+    { id: 3, label: 'قيد الانتظار', value: 'pending' },
     { id: 4, label: 'مكتمل', value: 'completed' },
     { id: 5, label: 'ملغي', value: 'cancelled' },
   ];
 
   return (
-    <main className="min-h-screen bg-light">
-      <MainLayout>
-        <section className="relative">
-          <div className="sticky z-10 top-16 bg-white/90 backdrop-blur-md px-4 md:px-6 flex justify-between gap-1.5 md:gap-2 w-full py-4 border-b border-slate-200/60">
-            {bookingOptions.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => setFilter(option.value)}
-                className={`py-2 px-1.5 md:px-2 flex-1 rounded-lg text-center font-bold transition-all text-xs md:text-sm whitespace-nowrap ${
-                  filter === option.value
-                    ? 'bg-brand-primary text-white shadow-sm'
-                    : 'bg-slate-50 text-slate-600 hover:bg-hover'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
+    <MainLayout>
+      <div className="min-h-screen bg-light">
+        <div className="sticky top-16 z-10 bg-light pb-4 pt-6">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+              {bookingOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => setFilter(option.value)}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all border ${
+                    filter === option.value
+                      ? 'bg-brand-primary text-white border-brand-primary shadow-lg shadow-blue-900/20'
+                      : 'bg-white text-slate-500 border-slate-200 hover:border-blue-200 hover:bg-blue-50'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="max-w-4xl mx-auto flex flex-col gap-4 px-4 md:px-6 py-6 mb-24">
-            {loading ? (
-              Array.from({ length: 5 }).map((_, index) => (
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 py-6 mb-20">
+          {loading ? (
+            <div className="flex flex-col gap-4">
+              {Array.from({ length: 4 }).map((_, index) => (
                 <MiniTicketSkeleton key={index} />
-              ))
-            ) : filteredBookings.length > 0 ? (
-              filteredBookings.sort((a, b) => new Date(b.booking_time).getTime() - new Date(a.booking_time).getTime()).map((booking) => (
-                <MiniTicket key={booking.id} booking={booking} onReviewSuccess={fetchBookings} />
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">ليس لديك رحلات</p>
+              ))}
+            </div>
+          ) : filteredBookings.length > 0 ? (
+            <div className="flex flex-col gap-4">
+              {filteredBookings
+                .sort((a, b) => new Date(b.booking_time).getTime() - new Date(a.booking_time).getTime())
+                .map((booking) => (
+                  <MiniTicket key={booking.id} booking={booking} onReviewSuccess={fetchBookings} />
+                ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400">
+                <Ticket className="w-10 h-10" />
               </div>
-            )}
-          </div>
-        </section>
-      </MainLayout>
-    </main>
+              <h3 className="text-lg font-bold text-brand">لا توجد حجوزات</h3>
+              <p className="text-slate-500 text-sm mt-1 max-w-xs mx-auto">
+                لم نتمكن من العثور على أي حجوزات في هذه القائمة. جرب تغيير الفلتر أو احجز رحلة جديدة.
+              </p>
+              <a href="/" className="mt-6 inline-block">
+                <button className="px-6 py-3 bg-brand-primary text-white rounded-xl font-bold shadow-lg shadow-blue-900/20 active:scale-95 transition-all">
+                  احجز رحلة الآن
+                </button>
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    </MainLayout>
   );
 }
 

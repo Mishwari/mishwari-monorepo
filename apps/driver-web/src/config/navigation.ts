@@ -3,7 +3,8 @@ import { Profile } from '@mishwari/types';
 
 export const getNavigationItems = (profile: Profile | null) => {
   const role = (profile as any)?.profile?.role || profile?.role;
-  console.log('[getNavigationItems] Profile:', profile, 'Role:', role);
+  const isStandalone = (profile as any)?.is_standalone;
+  console.log('[getNavigationItems] Profile:', profile, 'Role:', role, 'isStandalone:', isStandalone);
   
   const baseItems = [
     { name: 'الرحلات', href: '/trips', icon: MapIcon },
@@ -14,6 +15,11 @@ export const getNavigationItems = (profile: Profile | null) => {
   if (role === 'operator_admin') {
     baseItems.splice(1, 0, { name: 'الأسطول', href: '/fleet', icon: TruckIcon });
     baseItems.splice(2, 0, { name: 'السائقين', href: '/drivers', icon: UsersIcon });
+  }
+  
+  // standalone driver sees "my bus" menu
+  if (role === 'driver' && isStandalone === true) {
+    baseItems.splice(1, 0, { name: 'حافلتي', href: '/fleet', icon: TruckIcon });
   }
 
   return baseItems;

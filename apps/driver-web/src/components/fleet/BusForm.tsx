@@ -8,9 +8,11 @@ interface BusFormProps {
     bus_number: string;
     bus_type: string;
     capacity: number;
-    amenities?: Record<string, string>;
+    has_wifi?: boolean;
+    has_ac?: boolean;
+    has_usb_charging?: boolean;
   };
-  onSubmit: (data: { bus_number: string; bus_type: string; capacity: number; amenities: Record<string, string> }) => void;
+  onSubmit: (data: { bus_number: string; bus_type: string; capacity: number; has_wifi: boolean; has_ac: boolean; has_usb_charging: boolean }) => void;
   onCancel: () => void;
   loading?: boolean;
   isDisabled?: boolean;
@@ -21,7 +23,9 @@ export default function BusForm({ initialData, onSubmit, onCancel, loading, isDi
     bus_number: initialData?.bus_number || '',
     bus_type: initialData?.bus_type || '',
     capacity: initialData?.capacity || 30,
-    amenities: initialData?.amenities || {},
+    has_wifi: initialData?.has_wifi || false,
+    has_ac: initialData?.has_ac || true,
+    has_usb_charging: initialData?.has_usb_charging || false,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -79,26 +83,36 @@ export default function BusForm({ initialData, onSubmit, onCancel, loading, isDi
           المرافق
         </label>
         <div className="flex flex-wrap gap-3">
-          {BUS_AMENITIES.map((amenity) => (
-            <label key={amenity.key} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.amenities[amenity.key] === 'true'}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    amenities: {
-                      ...formData.amenities,
-                      [amenity.key]: e.target.checked ? 'true' : 'false',
-                    },
-                  });
-                }}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                disabled={isDisabled}
-              />
-              <span className="text-sm text-gray-700">{amenity.label}</span>
-            </label>
-          ))}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.has_wifi}
+              onChange={(e) => setFormData({ ...formData, has_wifi: e.target.checked })}
+              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              disabled={isDisabled}
+            />
+            <span className="text-sm text-gray-700">واي فاي</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.has_ac}
+              onChange={(e) => setFormData({ ...formData, has_ac: e.target.checked })}
+              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              disabled={isDisabled}
+            />
+            <span className="text-sm text-gray-700">مكيف</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.has_usb_charging}
+              onChange={(e) => setFormData({ ...formData, has_usb_charging: e.target.checked })}
+              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              disabled={isDisabled}
+            />
+            <span className="text-sm text-gray-700">شحن USB</span>
+          </label>
         </div>
       </div>
 

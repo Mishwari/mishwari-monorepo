@@ -11,6 +11,13 @@ export const ProfileDetailsSchema = z.object({
     address: z.string().nullable().optional(),
     role: z.enum(['passenger', 'driver', 'operator_admin']),
     is_verified: z.boolean(),
+    is_standalone: z.boolean().optional(),
+    operator_name: z.string().nullable().optional(),
+    operator_contact: z.string().nullable().optional(),
+    operational_regions: z.array(z.string()).optional(),
+    driver_license: z.string().nullable().optional(),
+    national_id: z.string().nullable().optional(),
+    pending_invitation_code: z.string().nullable().optional(),
 })
 
 export type Profile = z.infer<typeof ProfileDetailsSchema>

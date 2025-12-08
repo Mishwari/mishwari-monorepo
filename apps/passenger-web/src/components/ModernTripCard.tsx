@@ -69,18 +69,18 @@ export default function ModernTripCard({ trip }: ModernTripCardProps) {
         {/* Operator Info */}
         <div className='flex items-center gap-3'>
           <div className='w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-primary font-bold text-sm border border-slate-100'>
-            {trip.bus_operator?.substring(0, 2).toUpperCase() || 'BU'}
+            {trip.operator?.name?.substring(0, 2).toUpperCase() || 'BU'}
           </div>
           <div>
             <h3 className='font-bold text-lg leading-tight'>
-              {trip.bus_operator || 'شركة النقل'}
+              {trip.operator?.name || 'شركة النقل'}
             </h3>
             <div className='flex items-center gap-2 text-xs font-medium text-slate-500 mt-1'>
               <span className='bg-slate-100 px-2 py-0.5 rounded text-slate-600'>
                 {trip.bus_type || 'VIP'}
               </span>
               <span className='text-slate-300'>•</span>
-              <span>{trip.bus_number || 'N/A'}</span>
+              <span>{trip.bus.bus_type || 'N/A'}</span>
             </div>
           </div>
         </div>
@@ -144,18 +144,18 @@ export default function ModernTripCard({ trip }: ModernTripCardProps) {
           <div
             className={`flex items-center gap-1 px-2 py-0.5 rounded-md border shadow-sm ${ratingStyle.bg} ${ratingStyle.text} ${ratingStyle.border}`}>
             <StarIcon className={`w-3 h-3 fill-current`} />
-            <span className='text-[10px] font-bold'>{operatorRating.toFixed(1)}</span>
+            <span className='text-[10px] font-bold'>
+              {operatorRating.toFixed(1)}
+            </span>
             {trip.operator?.total_reviews > 0 && (
-              <span className='text-[9px] opacity-70'>({trip.operator.total_reviews})</span>
+              <span className='text-[9px] opacity-70'>
+                ({trip.operator.total_reviews})
+              </span>
             )}
           </div>
           <div className='hidden sm:flex gap-2'>
-            {trip.bus?.has_wifi && (
-              <Wifi className='w-3 h-3 text-slate-400' />
-            )}
-            {trip.bus?.has_ac && (
-              <Wind className='w-3 h-3 text-slate-400' />
-            )}
+            {trip.bus?.has_wifi && <Wifi className='w-3 h-3 text-slate-400' />}
+            {trip.bus?.has_ac && <Wind className='w-3 h-3 text-slate-400' />}
             {trip.bus?.has_usb_charging && (
               <Zap className='w-3 h-3 text-slate-400' />
             )}

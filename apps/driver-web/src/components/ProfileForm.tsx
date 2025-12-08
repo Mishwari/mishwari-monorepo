@@ -15,10 +15,16 @@ interface ProfileDataProps {
     full_name: string;
     birth_date: string;
     address?: string;
+    operator_name?: string;
+    operator_contact?: string;
+    driver_license?: string;
+    national_id?: string;
   };
   updateProfileData: (name: string, value: string) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isDisabled?: boolean;
+  showOperatorFields?: boolean;
+  showDriverFields?: boolean;
 }
 
 const ProfileForm: React.FC<ProfileDataProps> = ({
@@ -26,6 +32,8 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
   isDisabled = false,
   updateProfileData,
   handleSubmit,
+  showOperatorFields = false,
+  showDriverFields = false,
 }) => {
 
   return (
@@ -55,6 +63,61 @@ const ProfileForm: React.FC<ProfileDataProps> = ({
             className='w-full'
           />
         </div>
+
+        {showOperatorFields && (
+          <>
+            <div className='col-span-2 border-t pt-4 mt-2'>
+              <h3 className='text-base font-semibold text-gray-800 mb-3'>معلومات الشركة</h3>
+            </div>
+            <div>
+              <label className='text-sm font-medium text-gray-700 block mb-2'>اسم الشركة</label>
+              <Input
+                value={profileData.operator_name || ''}
+                onChange={(e) => updateProfileData('operator_name', e.target.value)}
+                placeholder={isDisabled ? '(لا يوجد)' : 'ادخل اسم الشركة'}
+                readOnly={isDisabled}
+                className='w-full'
+              />
+            </div>
+            <div>
+              <label className='text-sm font-medium text-gray-700 block mb-2'>رقم التواصل</label>
+              <Input
+                value={profileData.operator_contact || ''}
+                onChange={(e) => updateProfileData('operator_contact', e.target.value)}
+                placeholder={isDisabled ? '(لا يوجد)' : 'ادخل رقم التواصل'}
+                readOnly={isDisabled}
+                className='w-full'
+              />
+            </div>
+            {showDriverFields && (
+              <>
+                <div className='col-span-2 border-t pt-4 mt-2'>
+                  <h3 className='text-base font-semibold text-gray-800 mb-3'>معلومات السائق</h3>
+                </div>
+                <div>
+                  <label className='text-sm font-medium text-gray-700 block mb-2'>رقم الرخصة</label>
+                  <Input
+                    value={profileData.driver_license || ''}
+                    onChange={(e) => updateProfileData('driver_license', e.target.value)}
+                    placeholder={isDisabled ? '(لا يوجد)' : 'ادخل رقم الرخصة'}
+                    readOnly={isDisabled}
+                    className='w-full'
+                  />
+                </div>
+                <div>
+                  <label className='text-sm font-medium text-gray-700 block mb-2'>رقم الهوية</label>
+                  <Input
+                    value={profileData.national_id || ''}
+                    onChange={(e) => updateProfileData('national_id', e.target.value)}
+                    placeholder={isDisabled ? '(لا يوجد)' : 'ادخل رقم الهوية'}
+                    readOnly={isDisabled}
+                    className='w-full'
+                  />
+                </div>
+              </>
+            )}
+          </>
+        )}
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>

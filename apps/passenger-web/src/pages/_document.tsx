@@ -4,11 +4,12 @@ export default function Document() {
   return (
     <Html lang="ar" dir='rtl'>
       <Head>
-        <title>مشواري</title>
+        <title>يلا باص</title>
         <meta name="facebook-domain-verification" content="i33h9droweiek5s7g1bn1qhlbm2mov" />
+        <link rel="preload" href="/fonts/Cairo-VariableFont_slnt,wght.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/NotoColorEmoji-Regular.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
       </Head>
       <body className='font-cairo'>
-        <span className='noto-color-emoji' style={{ position: 'absolute', visibility: 'hidden', pointerEvents: 'none' }}>🇸🇦🇾🇪🇪🇬</span>
         <Main />
         <NextScript />
       </body>

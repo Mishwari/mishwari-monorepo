@@ -7,7 +7,7 @@ export interface AuthState {
   isAuthenticated: boolean| undefined;
   token: string | null| undefined;
   refreshToken: string|null| undefined;
-  profile: Profile | null;
+  profile: any | null;
   canManageDrivers: boolean;
   canUpgrade: boolean;
   canPublish: boolean;
@@ -34,8 +34,9 @@ export const authSlice = createSlice({
       state.profile = action.payload;
       const role = (action.payload as any)?.profile?.role || action.payload.role;
       const isVerified = (action.payload as any)?.profile?.is_verified || action.payload.is_verified;
+      const isStandalone = (action.payload as any)?.is_standalone;
       state.canManageDrivers = role === 'operator_admin';
-      state.canUpgrade = role === 'driver';
+      state.canUpgrade = role === 'driver' && isStandalone === true;
       state.canPublish = isVerified;
     },
     resetAuthState: () => initialState,

@@ -641,7 +641,7 @@ export default function ModernBusBooking() {
                 <TruckIcon className='w-5 h-5' />
               </div>
               <span className='font-black text-xl tracking-tighter text-[#005687]'>
-                مشواري
+                يلا باص
               </span>
             </div>
             <div>

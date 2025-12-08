@@ -13,7 +13,7 @@ export default function RecentActivity() {
 
   useEffect(() => {
     if (!profile?.full_name) {
-      setActivities([{ id: 1, type: 'info', message: 'مرحباً بك في منصة مشواري للسائقين', time: 'الآن' }]);
+      setActivities([{ id: 1, type: 'info', message: 'مرحباً بك في منصة يلا باص للسائقين', time: 'الآن' }]);
       setLoading(false);
       return;
     }
@@ -47,11 +47,11 @@ export default function RecentActivity() {
         }
 
         setActivities(activityItems.length > 0 ? activityItems : [
-          { id: 1, type: 'info', message: 'مرحباً بك في منصة مشواري للسائقين', time: 'الآن' },
+          { id: 1, type: 'info', message: 'مرحباً بك في منصة يلا باص للسائقين', time: 'الآن' },
         ]);
       } catch (error) {
         console.error('Failed to fetch activity:', error);
-        setActivities([{ id: 1, type: 'info', message: 'مرحباً بك في منصة مشواري للسائقين', time: 'الآن' }]);
+        setActivities([{ id: 1, type: 'info', message: 'مرحباً بك في منصة يلا باص للسائقين', time: 'الآن' }]);
       } finally {
         setLoading(false);
       }

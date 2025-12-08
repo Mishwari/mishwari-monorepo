@@ -4,6 +4,7 @@ import useAuth from '@/hooks/useAuth';
 import { ShieldCheckIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { BoltIcon as ZapIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { useGPSLocation } from '@mishwari/ui-primitives';
 
 const POPULAR_DESTINATIONS = [
   {
@@ -30,6 +31,7 @@ const POPULAR_DESTINATIONS = [
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
+  const { location, loading: gpsLoading } = useGPSLocation(true);
 
   return (
     <div className='min-h-screen bg-light relative overflow-hidden'>
@@ -53,9 +55,17 @@ export default function Home() {
                 <h2 className='text-2xl md:text-3xl font-black'>وجهات شائعة</h2>
                 <p className='text-sm font-medium text-slate-500 mt-1'>
                   من{' '}
-                  <strong className='text-primary underline decoration-brand-primary-light decoration-2 underline-offset-2'>
-                    سيئون
-                  </strong>
+                  {gpsLoading ? (
+                    <span className='text-slate-400'>جاري الكشف...</span>
+                  ) : location?.cityAr ? (
+                    <strong className='text-primary underline decoration-brand-primary-light decoration-2 underline-offset-2'>
+                      {location.cityAr}
+                    </strong>
+                  ) : (
+                    <strong className='text-primary underline decoration-brand-primary-light decoration-2 underline-offset-2'>
+                      سيئون
+                    </strong>
+                  )}
                 </p>
               </div>
             </div>

@@ -130,6 +130,22 @@ export const performRegister = (profileData: any, router: any) => async (dispatc
   if (profileData.password) {
     data.password = profileData.password;
   }
+  
+  if (profileData.operator_name) {
+    data.operator_name = profileData.operator_name;
+  }
+  
+  if (profileData.operational_regions) {
+    data.operational_regions = profileData.operational_regions;
+  }
+  
+  if (profileData.driver_license) {
+    data.driver_license = profileData.driver_license;
+  }
+  
+  if (profileData.national_id) {
+    data.national_id = profileData.national_id;
+  }
 
   const waitingRegister = toast.info('جاري التسجيل...', { autoClose: false });
 
