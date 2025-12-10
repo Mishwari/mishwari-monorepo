@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 function success() {
   const router = useRouter();
-  const { session_id } = router.query;
+  const { session_id, booking_id } = router.query;
 
   return (
     <div className='flex flex-col h-screen bg-white '>
@@ -22,7 +22,7 @@ function success() {
         <p>شكرا لحجزك التذكرة. حجزك قيد التنفيذ الان.</p>
       </div>
       <div className=' flex justify-center items-center p-3/5 mb-6'>
-        <Link href='/my_trips' className='py-2 px-4 text-white text-lg rounded-lg bg-[#005687]' >
+        <Link href={booking_id ? `/my_trips/${booking_id}` : '/my_trips'} className='py-2 px-4 text-white text-lg rounded-lg bg-[#005687]' >
           عرض معلومات التذكرة
         </Link>
       </div>

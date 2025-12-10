@@ -72,7 +72,7 @@ export const createBooking = (stripe: Stripe | null, fromStopId?: number, toStop
         if (bookingData.payment_method === 'stripe' && response.payment_url) {
             window.location.href = response.payment_url;
         } else {
-            window.location.href = '/checkout/success';
+            window.location.href = `/checkout/success?booking_id=${response.id}`;
         }
     } catch (error: any) {
         console.error('Booking creation error:', error.response?.status, error.response?.data);

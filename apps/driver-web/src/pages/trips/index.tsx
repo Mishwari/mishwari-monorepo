@@ -18,8 +18,7 @@ export default function TripsPage() {
   const [filter, setFilter] = useState<string>('all');
   const isVerified = profile?.is_verified;
   const role = (profile as any)?.profile?.role || profile?.role;
-  const isStandalone = (profile as any)?.is_standalone;
-  const canCreateTrips = role === 'operator_admin' || (role === 'driver' && isStandalone);
+  const canCreateTrips = role === 'operator_admin' || role === 'standalone_driver';
   
   // Calculate active trips for limit warning
   const activeTripsCount = useMemo(() => {

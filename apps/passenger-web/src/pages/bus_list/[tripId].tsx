@@ -1086,7 +1086,7 @@ export default function TripDetailsPage() {
               onClick={handleGoToPayment}
               disabled={amount === 0}
               className='flex-1 py-3 bg-brand-primary hover:bg-brand-primary-dark disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2'>
-              <span>إتمام الحجز</span>
+              <span> اللإنتقال لصفحة الدفع  </span>
               <ArrowRight className='w-4 h-4 rotate-180' />
             </button>
           ) : (

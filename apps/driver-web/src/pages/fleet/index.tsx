@@ -15,8 +15,7 @@ export default function FleetPage() {
   const [buses, setBuses] = useState<Bus[]>([]);
   const [loading, setLoading] = useState(true);
   const role = (profile as any)?.profile?.role || profile?.role;
-  const isStandalone = (profile as any)?.is_standalone;
-  const shouldRedirectToBus = role === 'driver' && isStandalone;
+  const shouldRedirectToBus = role === 'standalone_driver';
 
   useEffect(() => {
     if (!isAuthenticated) {

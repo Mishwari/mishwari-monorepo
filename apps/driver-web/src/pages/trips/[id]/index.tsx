@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import BookingsList from '@/components/bookings/BookingsList';
-import { Button, ConfirmDialog, CollapsibleSection } from '@mishwari/ui-web';
+import { Button, ConfirmDialog, CollapsibleSection, DropdownMenu, DropdownMenuItem } from '@mishwari/ui-web';
 import { tripsApi, operatorApi } from '@mishwari/api';
 import { Trip } from '@mishwari/types';
 import { convertToReadableTime } from '@mishwari/utils';
@@ -18,6 +18,8 @@ import {
   UserIcon,
   TableCellsIcon,
   ArrowsRightLeftIcon,
+  EllipsisVerticalIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline';
 
 export default function TripDetailsPage() {
@@ -199,7 +201,7 @@ export default function TripDetailsPage() {
               <ArrowRightIcon className='h-5 w-5' />
             </Button>
             <div>
-              <h1 className='text-3xl font-bold text-gray-900'>
+              <h1 className='text-xl md:text-3xl font-bold text-gray-900'>
                 {trip.from_city.city} ← {trip.to_city.city}
               </h1>
               <span
@@ -210,7 +212,8 @@ export default function TripDetailsPage() {
               </span>
             </div>
           </div>
-          <div className='flex gap-2'>
+          {/* Desktop buttons */}
+          <div className='hidden md:flex gap-2'>
             {trip.status === 'draft' && (
               <>
                 <Button
@@ -259,6 +262,64 @@ export default function TripDetailsPage() {
                 إكمال الرحلة
               </Button>
             )}
+          </div>
+
+          {/* Mobile dropdown */}
+          <div className='md:hidden'>
+            <DropdownMenu
+              trigger={
+                <Button variant='outline' size='sm'>
+                  <EllipsisVerticalIcon className='h-5 w-5' />
+                </Button>
+              }
+              items={[
+                ...(trip.status === 'draft'
+                  ? [
+                      {
+                        label: 'نشر',
+                        onClick: handlePublish,
+                        icon: PlayIcon,
+                        disabled: !trip.can_publish || actionLoading,
+                      },
+                      {
+                        label: 'إلغاء',
+                        onClick: () => setShowCancelDialog(true),
+                        icon: XMarkIcon,
+                        variant: 'destructive' as const,
+                        disabled: actionLoading,
+                      },
+                    ]
+                  : []),
+                ...(trip.status === 'published'
+                  ? [
+                      {
+                        label: 'بدء الرحلة',
+                        onClick: handleDepartNow,
+                        icon: PlayIcon,
+                        disabled: actionLoading,
+                      },
+                      {
+                        label: 'إلغاء',
+                        onClick: () => setShowCancelDialog(true),
+                        icon: XMarkIcon,
+                        variant: 'destructive' as const,
+                        disabled: actionLoading,
+                      },
+                    ]
+                  : []),
+                ...(trip.status === 'active'
+                  ? [
+                      {
+                        label: 'إكمال الرحلة',
+                        onClick: () => setShowCompleteDialog(true),
+                        icon: CheckIcon,
+                        disabled: actionLoading,
+                      },
+                    ]
+                  : []),
+              ]}
+              align='left'
+            />
           </div>
         </div>
 
@@ -427,7 +488,8 @@ export default function TripDetailsPage() {
               <Button
                 onClick={() => router.push(`/trips/${trip.id}/bookings/create`)}
                 variant='default'
-                size='sm'>
+                size='sm'
+                disabled={trip.status !== 'published' && trip.status !== 'active'}>
                 إضافة حجز
               </Button>
             </div>

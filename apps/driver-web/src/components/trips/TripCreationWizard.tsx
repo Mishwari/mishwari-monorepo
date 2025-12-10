@@ -16,9 +16,9 @@ interface TripCreationWizardProps {
 }
 
 export default function TripCreationWizard({ onSuccess }: TripCreationWizardProps) {
-  const { canManageDrivers, profile } = useSelector((state: AppState) => state.auth);
-  const isStandalone = (profile as any)?.is_standalone;
-  const isDriver = !canManageDrivers && isStandalone;
+  const { profile } = useSelector((state: AppState) => state.auth);
+  const role = (profile as any)?.profile?.role || profile?.role;
+  const isStandalone = role === 'standalone_driver';
   const [step, setStep] = useState(1);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -48,9 +48,9 @@ export default function TripCreationWizard({ onSuccess }: TripCreationWizardProp
 
   const selectedBus = buses.find(b => b.id === formData.bus);
   const selectedDriver = drivers.find(d => d.id === formData.driver);
-  const { canPublish, message } = useCanPublishTrip(selectedBus, selectedDriver);
+  const { canPublish, message } = useCanPublishTrip(selectedBus, selectedDriver, isStandalone);
   
-  const showBanner = isDriver || step === 4;
+  const showBanner = step === 4;
 
   useEffect(() => {
     Promise.all([

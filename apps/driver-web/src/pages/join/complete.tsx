@@ -10,8 +10,8 @@ import { toast } from 'react-toastify';
 export default function CompleteInvitedDriverProfile() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { code } = router.query;
   const { profile } = useSelector((state: AppState) => state.auth);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [operatorName, setOperatorName] = useState('');
   const [formData, setFormData] = useState({
     full_name: '',
@@ -23,25 +23,36 @@ export default function CompleteInvitedDriverProfile() {
   const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
-    if (!code) {
-      toast.error('رمز دعوة غير صالح');
-      router.push('/login');
-      return;
-    }
-    
-    // Validate invitation to get operator name
-    authApi.validateInvite(code as string)
+    // Fetch profile to get invitation code
+    authApi.getMe()
       .then(response => {
-        console.log('[JOIN COMPLETE] Invitation validated:', response.data);
-        setOperatorName(response.data.operator_name);
-        setPageLoading(false);
+        const profileData = response.data;
+        const code = profileData.pending_invitation_code;
+        
+        if (!code) {
+          toast.error('لم يتم العثور على دعوة');
+          router.push('/login');
+          return;
+        }
+        
+        setInviteCode(code);
+        
+        // Validate invitation to get operator name
+        return authApi.validateInvite(code);
+      })
+      .then(response => {
+        if (response) {
+          console.log('[JOIN COMPLETE] Invitation validated:', response.data);
+          setOperatorName(response.data.operator_name);
+          setPageLoading(false);
+        }
       })
       .catch((error) => {
-        console.error('[JOIN COMPLETE] Validation failed:', error?.response?.data);
-        toast.error('رمز دعوة غير صالح');
+        console.error('[JOIN COMPLETE] Error:', error?.response?.data);
+        toast.error('فشل تحميل معلومات الدعوة');
         router.push('/login');
       });
-  }, [code, router]);
+  }, [router]);
 
   if (pageLoading) {
     return (
@@ -55,10 +66,15 @@ export default function CompleteInvitedDriverProfile() {
     e.preventDefault();
     setLoading(true);
     
+    if (!inviteCode) {
+      toast.error('رمز الدعوة غير موجود');
+      return;
+    }
+    
     try {
-      console.log('[JOIN COMPLETE] Accepting invitation:', { code, formData });
+      console.log('[JOIN COMPLETE] Accepting invitation:', { inviteCode, formData });
       const acceptResponse = await authApi.acceptInvite({
-        invite_code: code as string,
+        invite_code: inviteCode,
         ...formData
       });
       console.log('[JOIN COMPLETE] Invitation accepted:', acceptResponse.data);

@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import { AppState } from '@/store/store';
 import { useRouter } from 'next/router';
-import { CheckCircleIcon, ExclamationTriangleIcon, ClockIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, ClockIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Button } from '@mishwari/ui-web';
 import { useState, useEffect } from 'react';
 
@@ -20,11 +20,16 @@ export default function VerificationBanner() {
   if (!profile || isDismissed) return null;
 
   const getVerificationStatus = () => {
-    if (profile.is_verified) return 'verified';
+    const nestedProfile = (profile as any)?.profile;
+    const isVerified = profile?.is_verified || nestedProfile?.is_verified;
+    if (isVerified) return 'verified';
     return 'unverified';
   };
 
   const status = getVerificationStatus();
+  
+  // Don't show banner if verified
+  if (status === 'verified') return null;
 
   const banners = {
     unverified: {
@@ -40,13 +45,6 @@ export default function VerificationBanner() {
       icon: <ClockIcon className="h-6 w-6 text-yellow-600" />,
       message: 'مستنداتك قيد المراجعة',
       action: { text: 'تتبع الحالة', href: '/kyc/status' },
-    },
-    verified: {
-      bg: 'bg-green-50 border-green-200',
-      text: 'text-green-800',
-      icon: <CheckCircleIcon className="h-6 w-6 text-green-600" />,
-      message: 'حساب موثق ✓',
-      action: null,
     },
     suspended: {
       bg: 'bg-red-50 border-red-200',

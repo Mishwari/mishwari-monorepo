@@ -18,6 +18,7 @@ export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 export { MultiSelect } from './components/ui/multi-select';
 export { ToggleSwitch } from './components/ToggleSwitch';
 export { UserDropdownMenu } from './components/UserDropdownMenu';
+export { DropdownMenu, type DropdownMenuItem } from './components/DropdownMenu';
 export { TripCardBase } from './components/TripCardBase';
 export { TripCard } from './components/TripCard';
 export { BookingCardBase } from './components/BookingCardBase';

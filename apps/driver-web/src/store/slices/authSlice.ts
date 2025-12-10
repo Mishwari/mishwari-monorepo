@@ -34,9 +34,9 @@ export const authSlice = createSlice({
       state.profile = action.payload;
       const role = (action.payload as any)?.profile?.role || action.payload.role;
       const isVerified = (action.payload as any)?.profile?.is_verified || action.payload.is_verified;
-      const isStandalone = (action.payload as any)?.is_standalone;
+      
       state.canManageDrivers = role === 'operator_admin';
-      state.canUpgrade = role === 'driver' && isStandalone === true;
+      state.canUpgrade = role === 'standalone_driver';
       state.canPublish = isVerified;
     },
     resetAuthState: () => initialState,

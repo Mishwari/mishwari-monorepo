@@ -31,19 +31,15 @@ function App({ Component, pageProps }: AppProps) {
     const nestedProfile = (profile as any)?.profile;
     const fullName = profile?.full_name || nestedProfile?.full_name;
     const role = nestedProfile?.role || profile?.role;
-    const isStandalone = (profile as any)?.is_standalone;
-    const pendingInvitationCode = (profile as any)?.pending_invitation_code || nestedProfile?.pending_invitation_code;
     
-    // Redirect to complete profile if no full_name:
-    // 1. Invited driver with pending invitation → /join/complete?code=XXX
-    // 2. operator_admin → /login/complete_profile
-    // 3. passenger (new user) → /login/complete_profile
-    // 4. standalone driver (is_standalone === true) → /login/complete_profile
+    // Redirect to complete profile if no full_name
     if (!fullName) {
-      if (role === 'driver' && pendingInvitationCode) {
-        console.log('[APP] Redirecting invited driver to complete profile:', pendingInvitationCode);
-        router.push(`/join/complete?code=${pendingInvitationCode}`);
-      } else if (role === 'operator_admin' || role === 'passenger' || (role === 'driver' && isStandalone === true)) {
+      if (role === 'invited_driver') {
+        // Invited driver with incomplete profile - redirect to join page
+        // The join page will fetch the invitation code
+        router.push('/join/complete');
+      } else if (role === 'standalone_driver' || role === 'operator_admin' || role === 'passenger') {
+        // All other roles go to standard complete profile
         router.push('/login/complete_profile');
       }
     }

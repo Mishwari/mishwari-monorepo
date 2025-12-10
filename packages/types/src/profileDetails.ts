@@ -9,7 +9,7 @@ export const ProfileDetailsSchema = z.object({
     birth_date: z.string().optional().nullable(),
     gender: z.enum(['male', 'female']),
     address: z.string().nullable().optional(),
-    role: z.enum(['passenger', 'driver', 'operator_admin']),
+    role: z.enum(['passenger', 'standalone_driver', 'invited_driver', 'operator_admin']),
     is_verified: z.boolean(),
     is_standalone: z.boolean().optional(),
     operator_name: z.string().nullable().optional(),

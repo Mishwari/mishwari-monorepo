@@ -92,11 +92,11 @@ export default function Profile() {
               <span className="text-gray-600">الدور:</span>
               <span className="font-medium">
                 {profile.role === 'operator_admin' ? 'مشغل' : 
-                 profile.role === 'driver' && profile.is_standalone ? 'سائق مستقل' :
-                 profile.role === 'driver' ? 'سائق مدعو' : 'سائق'}
+                 profile.role === 'standalone_driver' ? 'سائق مستقل' :
+                 profile.role === 'invited_driver' ? 'سائق مدعو' : 'راكب'}
               </span>
             </div>
-            {profile.role === 'driver' && !profile.is_standalone && profile.operator_name && (
+            {profile.role === 'invited_driver' && profile.operator_name && (
               <div className="flex justify-between">
                 <span className="text-gray-600">الشركة:</span>
                 <span className="font-medium">{profile.operator_name}</span>
@@ -222,28 +222,9 @@ export default function Profile() {
           )}
         </section>
 
-        {/* Company Info Section */}
-        {canEditAll && profile.is_standalone && (
+        {/* Company Info Section - Only for operator_admin */}
+        {profile.role === 'operator_admin' && (
           <section className="bg-white rounded-lg border border-gray-200 p-6">
-            {profile.role === 'driver' && (
-              <div className="mb-4 p-4 bg-gradient-to-r from-brand-primary to-blue-600 rounded-lg text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-lg mb-1">قم بترقية حسابك إلى شركة نقل</h3>
-                    <p className="text-sm opacity-90">أضف المزيد من الحافلات والسائقين وقم بإدارة أسطولك بسهولة</p>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => router.push('/upgrade')}
-                    className="bg-white text-brand-primary hover:bg-gray-50 border-white"
-                  >
-                    <ArrowUpCircleIcon className="w-4 h-4" />
-                    ترقية الآن
-                  </Button>
-                </div>
-              </div>
-            )}
             <div className="flex justify-between items-center mb-4">
               <div className="flex gap-2 items-center">
                 <BuildingOfficeIcon className="w-5 h-5 text-brand-primary" />
@@ -324,8 +305,27 @@ export default function Profile() {
         )}
 
         {/* Driver Info Section */}
-        {profile.role === 'driver' && (
+        {(profile.role === 'standalone_driver' || profile.role === 'invited_driver') && (
           <section className="bg-white rounded-lg border border-gray-200 p-6">
+            {profile.role === 'standalone_driver' && (
+              <div className="mb-4 p-4 bg-gradient-to-r from-brand-primary to-blue-600 rounded-lg text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-lg mb-1">قم بترقية حسابك إلى شركة نقل</h3>
+                    <p className="text-sm opacity-90">أضف المزيد من الحافلات والسائقين وقم بإدارة أسطولك بسهولة</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => router.push('/upgrade')}
+                    className="bg-white text-brand-primary hover:bg-gray-50 border-white"
+                  >
+                    <ArrowUpCircleIcon className="w-4 h-4" />
+                    ترقية الآن
+                  </Button>
+                </div>
+              </div>
+            )}
             <div className="flex justify-between items-center mb-4">
               <div className="flex gap-2 items-center">
                 <IdentificationIcon className="w-5 h-5 text-brand-primary" />
@@ -345,6 +345,52 @@ export default function Profile() {
             </div>
 
             <div className="space-y-4">
+              {profile.role === 'standalone_driver' && (
+                <>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-2">الاسم المعروض</label>
+                    <Input
+                      value={profileData.operator_name}
+                      onChange={(e) => setProfileData({...profileData, operator_name: e.target.value})}
+                      readOnly={!isEditing('driver')}
+                      placeholder="الاسم الذي يظهر للركاب"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-2">رقم التواصل</label>
+                    <Input
+                      value={profileData.operator_contact}
+                      onChange={(e) => setProfileData({...profileData, operator_contact: e.target.value})}
+                      readOnly={!isEditing('driver')}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-2">المناطق التشغيلية</label>
+                    {isEditing('driver') ? (
+                      <MultiSelect
+                        options={cities}
+                        value={selectedRegions}
+                        onChange={setSelectedRegions}
+                        placeholder="اختر المدن"
+                      />
+                    ) : (
+                      <div className="text-sm text-gray-900">
+                        {selectedRegions.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {selectedRegions.map((region: string) => (
+                              <span key={region} className="px-3 py-1 bg-brand-primary-light text-brand-primary rounded-full text-xs font-semibold">
+                                {region}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">لم يتم تحديد مناطق تشغيلية</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-2">رقم الرخصة</label>
                 <Input
@@ -367,6 +413,11 @@ export default function Profile() {
               <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
                 <Button
                   onClick={() => handleUpdate('driver', {
+                    ...(profile.role === 'standalone_driver' && {
+                      operator_name: profileData.operator_name,
+                      operator_contact: profileData.operator_contact,
+                      operational_regions: selectedRegions,
+                    }),
                     driver_license: profileData.driver_license,
                     national_id: profileData.national_id,
                   })}

@@ -12,9 +12,9 @@ interface CanPublishResult {
  * Hook to check if a trip can be published based on Golden Rule:
  * - Operator must be verified
  * - Bus must be verified
- * - Driver must be verified (if provided)
+ * - Driver must be verified (if provided and not standalone)
  */
-export function useCanPublishTrip(bus?: Bus | null, driver?: Driver | null): CanPublishResult {
+export function useCanPublishTrip(bus?: Bus | null, driver?: Driver | null, isStandalone?: boolean): CanPublishResult {
   const { canPublish: operatorVerified } = useSelector((state: AppState) => state.auth);
   
   const missing: string[] = [];
@@ -31,12 +31,16 @@ export function useCanPublishTrip(bus?: Bus | null, driver?: Driver | null): Can
     missing.push('الحافلة');
   }
   
-  if (driver) {
-    if (!driver.is_verified) {
+  // For standalone drivers, skip driver verification check (they are the driver)
+  // For operator_admin, require driver verification
+  if (!isStandalone) {
+    if (driver) {
+      if (!driver.is_verified) {
+        missing.push('السائق');
+      }
+    } else {
       missing.push('السائق');
     }
-  } else {
-    missing.push('السائق');
   }
   
   const canPublish = missing.length === 0 && bus !== undefined && bus !== null;

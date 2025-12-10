@@ -3,8 +3,6 @@ import { Profile } from '@mishwari/types';
 
 export const getNavigationItems = (profile: Profile | null) => {
   const role = (profile as any)?.profile?.role || profile?.role;
-  const isStandalone = (profile as any)?.is_standalone;
-  console.log('[getNavigationItems] Profile:', profile, 'Role:', role, 'isStandalone:', isStandalone);
   
   const baseItems = [
     { name: 'الرحلات', href: '/trips', icon: MapIcon },
@@ -18,7 +16,7 @@ export const getNavigationItems = (profile: Profile | null) => {
   }
   
   // standalone driver sees "my bus" menu
-  if (role === 'driver' && isStandalone === true) {
+  if (role === 'standalone_driver') {
     baseItems.splice(1, 0, { name: 'حافلتي', href: '/fleet', icon: TruckIcon });
   }
 

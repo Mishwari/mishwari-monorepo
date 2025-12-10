@@ -85,6 +85,6 @@ export const useProfileManager = () => {
     submitUpgradeRequest,
     isOperator: profile?.role === 'operator_admin',
     isVerified: profile?.is_verified || false,
-    canEditAll: profile?.role === 'operator_admin' || profile?.role === 'driver',
+    canEditAll: profile?.role === 'operator_admin' || profile?.role === 'standalone_driver' || profile?.role === 'invited_driver',
   };
 };

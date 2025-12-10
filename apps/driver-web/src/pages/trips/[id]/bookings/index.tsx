@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import BookingsList from '@/components/bookings/BookingsList';
 import { Button } from '@mishwari/ui-web';
 import { operatorApi } from '@mishwari/api';
+import { Trip } from '@mishwari/types';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 
 
@@ -11,23 +12,28 @@ export default function TripBookingsPage() {
   const router = useRouter();
   const { id } = router.query;
   const [bookings, setBookings] = useState<any[]>([]);
+  const [trip, setTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
     
-    const fetchBookings = async () => {
+    const fetchData = async () => {
       try {
-        const data = await operatorApi.getTripBookings(Number(id));
-        setBookings(data);
+        const [tripData, bookingsData] = await Promise.all([
+          operatorApi.getTripById(Number(id)),
+          operatorApi.getTripBookings(Number(id))
+        ]);
+        setTrip(tripData);
+        setBookings(bookingsData);
       } catch (error) {
-        console.error('Failed to fetch bookings:', error);
+        console.error('Failed to fetch data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBookings();
+    fetchData();
   }, [id]);
 
   if (loading) {
@@ -55,7 +61,10 @@ export default function TripBookingsPage() {
               <p className="text-gray-600 mt-1">إجمالي {bookings.length} حجز</p>
             </div>
           </div>
-          <Button onClick={() => router.push(`/trips/${id}/bookings/create`)} variant="default">
+          <Button 
+            onClick={() => router.push(`/trips/${id}/bookings/create`)} 
+            variant="default"
+            disabled={trip?.status !== 'published' && trip?.status !== 'active'}>
             إضافة حجز
           </Button>
         </div>
