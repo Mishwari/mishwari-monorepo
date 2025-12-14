@@ -124,11 +124,12 @@ export default function LoginModal({
         let response;
         if (verificationMethod === 'firebase') {
           const { token } = await verifyFirebaseOtp(otpCode);
-          response = await authApi.verifyFirebaseOtp({ firebase_token: token });
+          response = await authApi.verifyFirebaseOtp({ firebase_token: token, app_type: 'passenger' });
         } else {
           response = await authApi.verifyOtp({
             phone: mobileNumber,
             otp: otpCode,
+            app_type: 'passenger',
           });
         }
         const accessToken = response.data.tokens.access;
@@ -178,18 +179,23 @@ export default function LoginModal({
         }
       } catch (error: any) {
         toast.dismiss(waitingLogin);
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.response?.data?.detail ||
-          'رمز التحقق غير صحيح أو منتهي الصلاحية';
-        toast.error('فشل تسجيل الدخول', {
-          autoClose: 2000,
-          hideProgressBar: true,
-        });
-        setTimeout(() => {
-          toast.error(errorMessage, { autoClose: 3000, hideProgressBar: true });
-        }, 2200);
+        
+        if (error.response?.status === 403 && error.response?.data?.error === 'WRONG_APP') {
+          toast.error(error.response.data.message, { autoClose: 5000, hideProgressBar: true });
+        } else {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.error ||
+            error.response?.data?.detail ||
+            'رمز التحقق غير صحيح أو منتهي الصلاحية';
+          toast.error('فشل تسجيل الدخول', {
+            autoClose: 2000,
+            hideProgressBar: true,
+          });
+          setTimeout(() => {
+            toast.error(errorMessage, { autoClose: 3000, hideProgressBar: true });
+          }, 2200);
+        }
       }
     }
   };

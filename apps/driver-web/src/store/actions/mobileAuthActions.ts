@@ -67,11 +67,12 @@ export const performVerifyLogin = (mobileNumber: string, otpCode: string, router
   try {
     let response;
     
+    console.log('[DRIVER-WEB] Sending app_type=driver');
     if (verificationMethod === 'firebase') {
       const { token } = await verifyFirebaseOtp(otpCode);
-      response = await authApi.verifyFirebaseOtp({ firebase_token: token, password });
+      response = await authApi.verifyFirebaseOtp({ firebase_token: token, password, app_type: 'driver' });
     } else {
-      response = await authApi.verifyOtp({ phone: mobileNumber, otp: otpCode, password });
+      response = await authApi.verifyOtp({ phone: mobileNumber, otp: otpCode, password, app_type: 'driver' });
     }
     
     if (response.data.requires_password) {
@@ -105,7 +106,9 @@ export const performVerifyLogin = (mobileNumber: string, otpCode: string, router
     toast.dismiss(waitingLogin);
     console.error('Login failed:', error.response?.data || error);
     
-    if (error.response?.status === 401) {
+    if (error.response?.status === 403 && error.response?.data?.error === 'WRONG_APP') {
+      toast.error(error.response.data.message, { autoClose: 5000, hideProgressBar: true });
+    } else if (error.response?.status === 401) {
       toast.error('كلمة المرور غير صحيحة', { autoClose: 2000, hideProgressBar: true });
     } else if (error.response?.status === 400) {
       const errorMsg = error.response?.data?.error || error.response?.data?.message || 'رمز التحقق غير صحيح';

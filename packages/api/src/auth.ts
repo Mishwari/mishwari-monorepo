@@ -5,13 +5,13 @@ export const authApi = {
   requestOtp: (data: { phone: string }) =>
     apiClient.post('/mobile-login/request-otp/', { mobile_number: data.phone }),
 
-  verifyOtp: (data: { phone: string; otp: string; password?: string }) =>
-    apiClient.patch('/mobile-login/verify-otp/', { mobile_number: data.phone, otp_code: data.otp, password: data.password }),
+  verifyOtp: (data: { phone: string; otp: string; password?: string; app_type?: string }) =>
+    apiClient.patch('/mobile-login/verify-otp/', { mobile_number: data.phone, otp_code: data.otp, password: data.password, app_type: data.app_type }),
 
   checkPasswordRequired: (phone: string) =>
     apiClient.post('/mobile-login/check-password-required/', { mobile_number: phone }),
 
-  verifyFirebaseOtp: (data: { firebase_token: string; password?: string }) =>
+  verifyFirebaseOtp: (data: { firebase_token: string; password?: string; app_type?: string }) =>
     apiClient.post('/mobile-login/verify-firebase-otp/', data),
 
   completeProfile: (data: { full_name: string; email?: string; gender?: string; birth_date?: string; role?: string; password?: string }) =>
