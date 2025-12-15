@@ -24,10 +24,11 @@ module.exports = {
   ],
   
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.yallabus.app';
     return [
       {
         source: '/sitemap.xml',
-        destination: process.env.NEXT_PUBLIC_API_URL + '/sitemap.xml'
+        destination: `${apiUrl}/sitemap.xml`
       }
     ];
   },
