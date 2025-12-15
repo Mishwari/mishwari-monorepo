@@ -5,6 +5,7 @@ import { ShieldCheckIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { BoltIcon as ZapIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useGPSLocation } from '@mishwari/ui-primitives';
+import { SEO } from '@mishwari/ui-web';
 
 const POPULAR_DESTINATIONS = [
   {
@@ -34,7 +35,25 @@ export default function Home() {
   const { location, loading: gpsLoading } = useGPSLocation(true);
 
   return (
-    <div className='min-h-screen bg-light relative overflow-hidden'>
+    <>
+      <SEO
+        title="حجز تذاكر الباص في اليمن"
+        description="احجز تذاكر الباص بسهولة من صنعاء، عدن، تعز، مأرب وجميع المدن اليمنية. أسعار منافسة، حجز فوري، دفع آمن."
+        keywords="حجز باص اليمن, تذاكر باص, صنعاء عدن, تعز مأرب, يلا باص"
+        canonical="/"
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'يلا باص',
+          url: 'https://yallabus.app',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: 'https://yallabus.app/bus_list?pickup={pickup}&destination={destination}',
+            'query-input': 'required name=pickup required name=destination'
+          }
+        }}
+      />
+      <div className='min-h-screen bg-light relative overflow-hidden'>
       <div className='absolute top-0 left-0 w-full h-full overflow-hidden z-0'>
         <div className='absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-brand-primary-light rounded-full blur-3xl opacity-80 mix-blend-multiply' />
         <div className='absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-50 rounded-full blur-3xl opacity-80 mix-blend-multiply' />
@@ -138,5 +157,6 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </>
   );
 }

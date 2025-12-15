@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { Transition, Dialog } from '@headlessui/react';
+import { GetServerSideProps } from 'next';
+import { SEO } from '@mishwari/ui-web';
 
 // Icons
 import {
@@ -430,7 +432,40 @@ export default function TripDetailsPage() {
       </div>
     );
 
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'BusTrip',
+    name: `${tripDetails.from_city?.name || tripDetails.from_city?.city} - ${tripDetails.to_city?.name || tripDetails.to_city?.city}`,
+    provider: {
+      '@type': 'Organization',
+      name: tripDetails.driver?.operator?.name || 'يلا باص',
+    },
+    departureStation: {
+      '@type': 'BusStation',
+      name: tripDetails.from_city?.name || tripDetails.from_city?.city,
+    },
+    arrivalStation: {
+      '@type': 'BusStation',
+      name: tripDetails.to_city?.name || tripDetails.to_city?.city,
+    },
+    departureTime: tripDetails.departure_time,
+    offers: {
+      '@type': 'Offer',
+      price: tripDetails.price,
+      priceCurrency: 'YER',
+      availability: tripDetails.available_seats > 0 ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
+    },
+  };
+
   return (
+    <>
+      <SEO
+        title={`رحلة ${tripDetails.from_city?.name || tripDetails.from_city?.city} إلى ${tripDetails.to_city?.name || tripDetails.to_city?.city} - ${tripDetails.price} ر.ي`}
+        description={`احجز رحلة من ${tripDetails.from_city?.name || tripDetails.from_city?.city} إلى ${tripDetails.to_city?.name || tripDetails.to_city?.city} مع ${tripDetails.driver?.operator?.name || 'يلا باص'}. المغادرة ${departureTime}. السعر ${tripDetails.price} ريال يمني.`}
+        keywords={`${tripDetails.from_city?.name}, ${tripDetails.to_city?.name}, حجز باص اليمن, ${tripDetails.driver?.operator?.name}`}
+        canonical={`/bus_list/${tripId}`}
+        structuredData={structuredData}
+      />
     <main
       className='flex flex-col m-0 bg-light min-h-screen text-brand'
       dir='rtl'>
@@ -1111,5 +1146,10 @@ export default function TripDetailsPage() {
         initialData={contactDetails}
       />
     </main>
+    </>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  return { props: {} };
+};

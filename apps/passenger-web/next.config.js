@@ -23,6 +23,15 @@ module.exports = {
     '@mishwari/features-trips'
   ],
   
+  async rewrites() {
+    return [
+      {
+        source: '/sitemap.xml',
+        destination: process.env.NEXT_PUBLIC_API_URL + '/sitemap.xml'
+      }
+    ];
+  },
+  
   webpack: (config) => {
     config.module.rules.push({
       test: /\.svg$/,

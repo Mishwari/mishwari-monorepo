@@ -37,6 +37,8 @@ export { LogoutButton } from './components/LogoutButton';
 export { RatingBadge } from './components/RatingBadge';
 export { default as CityDropdown } from './components/CityDropdown';
 export type { CityOption, CityDropdownProps } from './components/CityDropdown';
+export { SEO } from './components/SEO';
+export type { SEOProps } from './components/SEO';
 
 // Asset paths
 export const ASSETS = {

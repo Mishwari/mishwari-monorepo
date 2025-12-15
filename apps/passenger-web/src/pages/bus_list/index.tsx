@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { SEO } from '@mishwari/ui-web';
 import {
   XMarkIcon,
   AdjustmentsHorizontalIcon,
@@ -214,7 +215,22 @@ function index() {
     }
   };
 
+  const seoTitle = pickup && destination 
+    ? `رحلات ${pickup} إلى ${destination}`
+    : 'رحلات الباص في اليمن';
+  
+  const seoDescription = pickup && destination
+    ? `اعثر على ${sortedTrips.length} رحلة متاحة من ${pickup} إلى ${destination}. قارن الأسعار واحجز فوراً.`
+    : 'ابحث عن رحلات الباص في اليمن واحجز تذكرتك بسهولة';
+
   return (
+    <>
+      <SEO
+        title={seoTitle}
+        description={seoDescription}
+        keywords={`${pickup}, ${destination}, حجز باص, تذاكر باص اليمن`}
+        canonical={`/bus_list?pickup=${pickup}&destination=${destination}&date=${selectedDate}`}
+      />
     <div className='min-h-screen bg-light'>
       {showCalendar && (
         <>
@@ -479,6 +495,7 @@ function index() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

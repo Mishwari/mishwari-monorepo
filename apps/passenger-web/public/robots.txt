@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /profile
+Disallow: /my_trips
+Disallow: /checkout
+
+Sitemap: https://yallabus.app/sitemap.xml
