@@ -36,7 +36,7 @@ export default function DriversPage() {
         const data = await driversApi.list();
         setDrivers(data);
       } catch (error: any) {
-        console.log('Drivers fetch error:', error?.response?.status);
+        console.error('Drivers fetch error:', error?.response?.status);
         setDrivers([]);
       } finally {
         setLoading(false);

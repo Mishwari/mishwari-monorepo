@@ -38,7 +38,6 @@ export default function Home() {
     authApi
       .getMe()
       .then((response) => {
-        console.log('[Dashboard] Profile refreshed:', response.data);
         dispatch(setProfile(response.data));
         setLoading(false);
       })

@@ -22,7 +22,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (!profile?.id) {
-      fetchProfile().catch(err => console.log('Profile not loaded:', err?.message));
+      fetchProfile().catch(err => console.error('Profile not loaded:', err?.message));
     }
   }, []);
 

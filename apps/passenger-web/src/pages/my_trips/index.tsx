@@ -18,7 +18,6 @@ function index() {
 
   const fetchBookings = useCallback(async () => {
     if (!token) {
-      console.log('No token available');
       setLoading(false);
       return;
     }

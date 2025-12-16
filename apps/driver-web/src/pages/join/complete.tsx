@@ -42,7 +42,6 @@ export default function CompleteInvitedDriverProfile() {
       })
       .then(response => {
         if (response) {
-          console.log('[JOIN COMPLETE] Invitation validated:', response.data);
           setOperatorName(response.data.operator_name);
           setPageLoading(false);
         }
@@ -72,16 +71,13 @@ export default function CompleteInvitedDriverProfile() {
     }
     
     try {
-      console.log('[JOIN COMPLETE] Accepting invitation:', { inviteCode, formData });
       const acceptResponse = await authApi.acceptInvite({
         invite_code: inviteCode,
         ...formData
       });
-      console.log('[JOIN COMPLETE] Invitation accepted:', acceptResponse.data);
       
       // Fetch updated profile
       const profileResponse = await authApi.getMe();
-      console.log('[JOIN COMPLETE] Profile fetched:', profileResponse.data);
       dispatch(setProfile(profileResponse.data));
       
       toast.success('تم الانضمام بنجاح!');

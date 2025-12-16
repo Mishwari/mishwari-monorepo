@@ -31,9 +31,7 @@ export default function JoinInvitationPage() {
 
   const validateInvite = async () => {
     try {
-      console.log('[JOIN] Validating invitation:', code);
       const response = await authApi.validateInvite(code as string);
-      console.log('[JOIN] Invitation valid:', response.data);
       setInvitation(response.data);
       const phone = response.data.mobile_number;
       setMobileNumber(phone);
@@ -83,7 +81,6 @@ export default function JoinInvitationPage() {
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
-      console.log('[JOIN] Verifying OTP:', { phone: mobileNumber, otp, method: verificationMethod });
       let response;
       if (verificationMethod === 'firebase') {
         const { token } = await verifyFirebaseOtp(otp);
@@ -91,7 +88,6 @@ export default function JoinInvitationPage() {
       } else {
         response = await authApi.verifyOtp({ phone: mobileNumber, otp });
       }
-      console.log('[JOIN] OTP verified, tokens received');
       const { access, refresh } = response.data.tokens;
       
       dispatch(setAuthState({
@@ -102,7 +98,6 @@ export default function JoinInvitationPage() {
       
       toast.success('تم التحقق بنجاح');
       
-      console.log('[JOIN] Redirecting to complete page with code:', code);
       // Redirect immediately without waiting
       router.push(`/join/complete?code=${code}`);
     } catch (error: any) {

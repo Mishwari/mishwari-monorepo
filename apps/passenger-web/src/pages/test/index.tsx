@@ -10,17 +10,15 @@ const PhoneNumberInput = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(''); // For the search functionality
   const dropdownRef = useRef(null); // Reference for the dropdown
-  console.log(selectedCountry.code + phoneNumber);
 
   useEffect(() => {
     const fetchCityList = async () => {
       try {
         const response = await axios.get('/api/next-external/city-list');
         // const response = await axios.get(`${apiBaseUrl}city-list/pickup`);
-        console.log('city list: ', response);
       } catch (err: any) {
         // setList([]);
-        console.log('Error Message: ', err.message);
+        console.error('Error Message: ', err.message);
         if (err.response) {
           console.error('Error response:', err.response.data);
           console.error('Error response status:', err.response.status);

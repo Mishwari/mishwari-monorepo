@@ -42,12 +42,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Get role-based navigation items
   const navItems = useMemo(() => {
-    console.log('[DashboardLayout] Full auth state:', {
-      profile,
-      isAuthenticated,
-    });
+
     const items = getNavigationItems(profile);
-    console.log('[DashboardLayout] NavItems:', items);
     return items;
   }, [profile, isAuthenticated]);
 

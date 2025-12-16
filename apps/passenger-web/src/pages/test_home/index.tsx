@@ -542,8 +542,6 @@ export default function ModernBusBooking() {
   );
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
 
-  console.log('isAuthModalOpen:', isAuthModalOpen);
-
   const handleLogin = (userData: { email: string; name: string }) => {
     setUser(userData);
   };

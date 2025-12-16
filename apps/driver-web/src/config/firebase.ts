@@ -11,9 +11,7 @@ if (typeof window !== 'undefined') {
   };
 
   if (firebaseConfig.apiKey) {
-    console.log('Initializing Firebase with config:', { projectId: firebaseConfig.projectId, hasApiKey: !!firebaseConfig.apiKey });
     initializeFirebase(firebaseConfig);
-    console.log('Firebase initialized successfully');
   } else {
     console.error('Firebase API key missing in environment variables');
   }

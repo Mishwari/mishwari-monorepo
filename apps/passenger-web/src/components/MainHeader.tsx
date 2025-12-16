@@ -37,9 +37,7 @@ export default function MainHeader({
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   const phoneNumber = profile?.mobile_number;
-  
-  console.log('MainHeader - profile:', profile);
-  console.log('MainHeader - phoneNumber:', phoneNumber);
+
 
   const handleBack = () => {
     router.push(backTo);

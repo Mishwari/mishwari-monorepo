@@ -22,7 +22,6 @@ export const useRevalidate = ({
       onProfileUpdate(profile);
     } catch (error: any) {
       if (error?.response?.status === 401) {
-        console.log('Token not valid for revalidation');
       } else {
         console.error('Failed to revalidate profile:', error);
       }

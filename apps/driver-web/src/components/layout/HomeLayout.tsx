@@ -20,10 +20,6 @@ export default function HomeLayout({ children }: HomeLayoutProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navItems = getNavigationItems(profile);
 
-  console.log('[HomeLayout] Full auth state:', authState);
-  console.log('[HomeLayout] Profile:', profile);
-  console.log('[HomeLayout] NavItems:', navItems);
-
   return (
     <>
       <VerificationBanner />

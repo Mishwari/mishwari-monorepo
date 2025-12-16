@@ -67,7 +67,6 @@ export const performVerifyLogin = (mobileNumber: string, otpCode: string, router
   try {
     let response;
     
-    console.log('[DRIVER-WEB] Sending app_type=driver');
     if (verificationMethod === 'firebase') {
       const { token } = await verifyFirebaseOtp(otpCode);
       response = await authApi.verifyFirebaseOtp({ firebase_token: token, password, app_type: 'driver' });

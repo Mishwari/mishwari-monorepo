@@ -52,7 +52,6 @@ export const performRegister = (profileData: Profile, router: any) => async (dis
 
     // Fetch updated profile - getMe returns nested structure
     const response = await authApi.getMe();
-    console.log('Updated profile response:', response.data);
     // Reconstruct profile with user data from top level
     const profileData = {
       ...response.data.profile,

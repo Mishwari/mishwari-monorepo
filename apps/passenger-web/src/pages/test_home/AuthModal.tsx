@@ -15,8 +15,6 @@ export default function AuthModal({ isOpen, onClose, onLogin }: AuthModalProps) 
 
   if (!isOpen) return null;
 
-  console.log('AuthModal is rendering');
-
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
     

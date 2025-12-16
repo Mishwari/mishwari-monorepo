@@ -7,8 +7,6 @@ import { Stripe } from '@stripe/stripe-js';
 export const createBooking = (stripe: Stripe | null, fromStopId?: number, toStopId?: number) => async (dispatch:AppState, getState: () => AppStore)  =>{
     const {bookingCreation, auth, user} = getState();
 
-    console.log('Creating booking, trip data:', bookingCreation.trip);
-
     if(!auth.isAuthenticated) {
         alert('User is not authenticated');
         dispatch(setError('User is not authenticated'));
@@ -33,8 +31,6 @@ export const createBooking = (stripe: Stripe | null, fromStopId?: number, toStop
         }
     }
     
-    console.log('Using stops - from:', fromStopId, 'to:', toStopId);
-
     // Calculate fare based on stops
     const fromStop = bookingCreation.trip.stops?.find((s: any) => s.id === fromStopId);
     const toStop = bookingCreation.trip.stops?.find((s: any) => s.id === toStopId);
@@ -63,8 +59,6 @@ export const createBooking = (stripe: Stripe | null, fromStopId?: number, toStop
         payment_method: bookingCreation.paymentMethod,
     };
     
-    console.log('Sending booking data:', JSON.stringify(bookingData, null, 2));
-
     try {
         dispatch(setStatus('loading'));
         const response = await bookingsApi.create(bookingData);

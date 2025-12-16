@@ -49,7 +49,7 @@ function index() {
     }
     fetchProfile().catch(err => {
       // Silently handle errors - user might not be logged in
-      console.log('Profile not loaded:', err.message);
+      console.error('Profile not loaded:', err.message);
     });
   }, [fetchProfile]);
 

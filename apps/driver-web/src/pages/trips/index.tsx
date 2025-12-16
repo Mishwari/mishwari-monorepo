@@ -48,7 +48,7 @@ export default function TripsPage() {
         }
       } catch (error: any) {
         if (mounted) {
-          console.log('Trips fetch error:', error?.response?.status);
+          console.error('Trips fetch error:', error?.response?.status);
           setTrips([]);
         }
       } finally {

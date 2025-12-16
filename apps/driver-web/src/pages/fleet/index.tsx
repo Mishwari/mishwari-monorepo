@@ -42,7 +42,7 @@ export default function FleetPage() {
         }
       } catch (error: any) {
         if (mounted) {
-          console.log('Fleet fetch error:', error?.response?.status);
+          console.error('Fleet fetch error:', error?.response?.status);
           setBuses([]);
         }
       } finally {

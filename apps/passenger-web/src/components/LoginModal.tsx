@@ -145,11 +145,9 @@ export default function LoginModal({
         // Fetch profile with token directly (bypass localStorage)
         const authenticatedClient = createAuthenticatedClient(accessToken);
         const profileResponse = await authenticatedClient.get('/profile/me/');
-        console.log('Profile response from API:', profileResponse.data);
 
         // Extract profile from nested structure
         const profileData = profileResponse.data.profile;
-        console.log('Profile data extracted:', profileData);
         dispatch(setProfileDetails(profileData));
 
         const profile = { data: profileData };

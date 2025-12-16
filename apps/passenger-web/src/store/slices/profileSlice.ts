@@ -22,7 +22,6 @@ export const profileSlice = createSlice({
     initialState,
     reducers: {
         setProfileDetails(state, action:PayloadAction<Profile>) {
-            console.log("Profile slice - received data:", action.payload);
             return { ...state, ...action.payload };
         },
         resetUserState: () => initialState
