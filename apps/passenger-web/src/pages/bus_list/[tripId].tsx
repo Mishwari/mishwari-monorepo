@@ -194,9 +194,10 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
     }
   }, [profile, savedPassengers, isFullyAuthenticated]);
 
-  // Fetch Trip Logic (Preserved)
+  // Fetch Trip Logic
   useEffect(() => {
-    if (!router.isReady || !tripId || initialTripData) return;
+    if (!router.isReady || !tripId) return;
+    if (initialTripData && from_stop_id && to_stop_id) return;
     const fetchTripDetails = async () => {
       try {
         // Use public API without auth for trip details
@@ -204,21 +205,16 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
         const data = response.data;
 
         if (from_stop_id && to_stop_id && data.stops && data.seat_matrix) {
-          const fromStop = data.stops.find(
-            (s) => s.id === Number(from_stop_id)
-          );
+          const fromStop = data.stops.find((s) => s.id === Number(from_stop_id));
           const toStop = data.stops.find((s) => s.id === Number(to_stop_id));
 
-          if (fromStop && toStop) {
+          if (fromStop && toStop && fromStop.sequence < toStop.sequence) {
             const segments = [];
             for (let i = fromStop.sequence; i < toStop.sequence; i++) {
               segments.push(`${i}-${i + 1}`);
             }
-            const segmentSeats = segments.map(
-              (seg) => data.seat_matrix[seg] ?? 0
-            );
-            const availableSeats =
-              segmentSeats.length > 0 ? Math.min(...segmentSeats) : 0;
+            const segmentSeats = segments.map((seg) => data.seat_matrix[seg] ?? 0);
+            const availableSeats = segmentSeats.length > 0 ? Math.min(...segmentSeats) : 0;
 
             const segmentData = {
               ...data,
@@ -227,8 +223,7 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
               departure_time: fromStop.planned_departure,
               arrival_time: toStop.planned_arrival,
               price: toStop.price_from_start - fromStop.price_from_start,
-              distance:
-                toStop.distance_from_start_km - fromStop.distance_from_start_km,
+              distance: toStop.distance_from_start_km - fromStop.distance_from_start_km,
               available_seats: availableSeats,
             };
             setTripDetails(segmentData);
@@ -1161,7 +1156,33 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       return { notFound: true };
     }
     
-    const tripData = await response.json();
+    let tripData = await response.json();
+    
+    // Process segment data if stops are specified
+    if (from_stop_id && to_stop_id && tripData.stops && tripData.seat_matrix) {
+      const fromStop = tripData.stops.find((s: any) => s.id === Number(from_stop_id));
+      const toStop = tripData.stops.find((s: any) => s.id === Number(to_stop_id));
+
+      if (fromStop && toStop && fromStop.sequence < toStop.sequence) {
+        const segments = [];
+        for (let i = fromStop.sequence; i < toStop.sequence; i++) {
+          segments.push(`${i}-${i + 1}`);
+        }
+        const segmentSeats = segments.map((seg: string) => tripData.seat_matrix[seg] ?? 0);
+        const availableSeats = segmentSeats.length > 0 ? Math.min(...segmentSeats) : 0;
+
+        tripData = {
+          ...tripData,
+          from_city: fromStop.city,
+          to_city: toStop.city,
+          departure_time: fromStop.planned_departure,
+          arrival_time: toStop.planned_arrival,
+          price: toStop.price_from_start - fromStop.price_from_start,
+          distance: toStop.distance_from_start_km - fromStop.distance_from_start_km,
+          available_seats: availableSeats,
+        };
+      }
+    }
     
     return {
       props: {
