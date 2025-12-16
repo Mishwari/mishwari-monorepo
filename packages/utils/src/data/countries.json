@@ -6,6 +6,7 @@
     { "value": "EG", "label": "مصر", "nameEn": "Egypt", "symbol": "🇪🇬", "code": "20", "digitLength": 10 },
     { "value": "AE", "label": "الإمارات", "nameEn": "United Arab Emirates", "symbol": "🇦🇪", "code": "971", "digitLength": 9 },
     { "value": "GB", "label": "المملكة المتحدة", "nameEn": "United Kingdom", "symbol": "🇬🇧", "code": "44", "digitLength": 10 },
+    { "value": "ID", "label": "اندونيسيا", "nameEn": "Indonesia", "symbol": "🇮🇩", "code": "62", "digitLength": 10 } , 
     { "value": "FR", "label": "فرنسا", "nameEn": "France", "symbol": "🇫🇷", "code": "33", "digitLength": 9 },
     { "value": "DE", "label": "ألمانيا", "nameEn": "Germany", "symbol": "🇩🇪", "code": "49", "digitLength": 10 },
     { "value": "JP", "label": "اليابان", "nameEn": "Japan", "symbol": "🇯🇵", "code": "81", "digitLength": 10 },
