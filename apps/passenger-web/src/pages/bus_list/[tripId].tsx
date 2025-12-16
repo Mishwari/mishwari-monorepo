@@ -80,7 +80,7 @@ const getAmenityIcon = (key) => {
   }
 };
 
-export default function TripDetailsPage() {
+export default function TripDetailsPage({ initialTripData = null }: { initialTripData?: any }) {
   // --- STATE & HOOKS (Preserved) ---
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -103,7 +103,7 @@ export default function TripDetailsPage() {
   const [editingIndex, setEditingIndex] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [passengerToDelete, setPassengerToDelete] = useState(null);
-  const [tripDetails, setTripDetails] = useState(null);
+  const [tripDetails, setTripDetails] = useState(initialTripData);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [isPathOpen, setIsPathOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -196,7 +196,7 @@ export default function TripDetailsPage() {
 
   // Fetch Trip Logic (Preserved)
   useEffect(() => {
-    if (!router.isReady || !tripId) return;
+    if (!router.isReady || !tripId || initialTripData) return;
     const fetchTripDetails = async () => {
       try {
         // Use public API without auth for trip details
@@ -1151,5 +1151,35 @@ export default function TripDetailsPage() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  return { props: {} };
+  const { tripId, from_stop_id, to_stop_id } = context.query;
+  
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.yallabus.app/api/';
+    const response = await fetch(`${apiUrl}trips/${tripId}/`);
+    
+    if (!response.ok) {
+      return { notFound: true };
+    }
+    
+    const tripData = await response.json();
+    
+    return {
+      props: {
+        initialTripData: tripData,
+        tripId,
+        from_stop_id: from_stop_id || null,
+        to_stop_id: to_stop_id || null,
+      },
+    };
+  } catch (error) {
+    console.error('SSR Error fetching trip:', error);
+    return {
+      props: {
+        initialTripData: null,
+        tripId,
+        from_stop_id: null,
+        to_stop_id: null,
+      },
+    };
+  }
 };
