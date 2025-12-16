@@ -427,23 +427,36 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
       </div>
     );
 
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
+  };
+
+  const fromCity = tripDetails.from_city?.name || tripDetails.from_city?.city;
+  const toCity = tripDetails.to_city?.name || tripDetails.to_city?.city;
+  const operatorName = tripDetails.driver?.operator?.name || tripDetails.operator?.name || 'يلا باص';
+  const formattedDate = tripDetails.journey_date ? formatDate(tripDetails.journey_date) : '';
+
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'BusTrip',
-    name: `${tripDetails.from_city?.name || tripDetails.from_city?.city} - ${tripDetails.to_city?.name || tripDetails.to_city?.city}`,
+    name: `${fromCity} - ${toCity}`,
     provider: {
       '@type': 'Organization',
-      name: tripDetails.driver?.operator?.name || 'يلا باص',
+      name: operatorName,
     },
     departureStation: {
       '@type': 'BusStation',
-      name: tripDetails.from_city?.name || tripDetails.from_city?.city,
+      name: fromCity,
     },
     arrivalStation: {
       '@type': 'BusStation',
-      name: tripDetails.to_city?.name || tripDetails.to_city?.city,
+      name: toCity,
     },
     departureTime: tripDetails.departure_time,
+    arrivalTime: tripDetails.arrival_time,
     offers: {
       '@type': 'Offer',
       price: tripDetails.price,
@@ -455,9 +468,9 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
   return (
     <>
       <SEO
-        title={`رحلة ${tripDetails.from_city?.name || tripDetails.from_city?.city} إلى ${tripDetails.to_city?.name || tripDetails.to_city?.city} - ${tripDetails.price} ر.ي`}
-        description={`احجز رحلة من ${tripDetails.from_city?.name || tripDetails.from_city?.city} إلى ${tripDetails.to_city?.name || tripDetails.to_city?.city} مع ${tripDetails.driver?.operator?.name || 'يلا باص'}. المغادرة ${departureTime}. السعر ${tripDetails.price} ريال يمني.`}
-        keywords={`${tripDetails.from_city?.name}, ${tripDetails.to_city?.name}, حجز باص اليمن, ${tripDetails.driver?.operator?.name}`}
+        title={`رحلة ${fromCity} - ${toCity} ${formattedDate} | ${operatorName}`}
+        description={`احجز رحلة باص من ${fromCity} إلى ${toCity} يوم ${formattedDate} الساعة ${departureTime} مع ${operatorName}. السعر ${tripDetails.price} ريال. ${tripDetails.available_seats} مقعد متاح.`}
+        keywords={`${fromCity}, ${toCity}, حجز باص اليمن, ${operatorName}, ${formattedDate}`}
         canonical={`/bus_list/${tripId}`}
         structuredData={structuredData}
       />
