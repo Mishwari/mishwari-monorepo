@@ -438,6 +438,10 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
   const toCity = tripDetails.to_city?.name || tripDetails.to_city?.city;
   const operatorName = tripDetails.driver?.operator?.name || tripDetails.operator?.name || 'يلا باص';
   const formattedDate = tripDetails.journey_date ? formatDate(tripDetails.journey_date) : '';
+  
+  // Hide from Google if not published or trip date has passed
+  const isPastTrip = tripDetails.journey_date && new Date(tripDetails.journey_date) < new Date(new Date().setHours(0, 0, 0, 0));
+  const shouldNoIndex = tripDetails.status !== 'published' || isPastTrip;
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -473,6 +477,7 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
         keywords={`${fromCity}, ${toCity}, حجز باص اليمن, ${operatorName}, ${formattedDate}`}
         canonical={`/bus_list/${tripId}`}
         structuredData={structuredData}
+        noIndex={shouldNoIndex}
       />
     <main
       className='flex flex-col m-0 bg-light min-h-screen text-brand'

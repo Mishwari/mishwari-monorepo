@@ -8,6 +8,7 @@ export interface SEOProps {
   ogType?: 'website' | 'article';
   keywords?: string;
   structuredData?: object;
+  noIndex?: boolean;
 }
 
 export const SEO = ({
@@ -18,6 +19,7 @@ export const SEO = ({
   ogType = 'website',
   keywords,
   structuredData,
+  noIndex = false,
 }: SEOProps) => {
   const fullTitle = `${title} | يلا باص`;
   const siteUrl = 'https://yallabus.app';
@@ -29,6 +31,9 @@ export const SEO = ({
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
+      
+      {/* Robots */}
+      {noIndex && <meta name="robots" content="noindex, nofollow" />}
       
       {/* Canonical */}
       <link rel="canonical" href={fullCanonical} />
