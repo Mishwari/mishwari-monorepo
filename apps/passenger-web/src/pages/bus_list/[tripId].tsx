@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { Transition, Dialog } from '@headlessui/react';
 import { GetServerSideProps } from 'next';
-import { SEO } from '@mishwari/ui-web';
+import Head from 'next/head';
 
 // Icons
 import {
@@ -475,14 +475,17 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
 
   return (
     <>
-      <SEO
-        title={`رحلة ${fromCity} - ${toCity} ${formattedDate} | ${operatorName}`}
-        description={`احجز رحلة باص من ${fromCity} إلى ${toCity} يوم ${formattedDate} الساعة ${departureTime} مع ${operatorName}. السعر ${displayTrip.price} ريال. ${displayTrip.available_seats} مقعد متاح.`}
-        keywords={`${fromCity}, ${toCity}, حجز باص اليمن, ${operatorName}, ${formattedDate}`}
-        canonical={`/bus_list/${tripId}`}
-        structuredData={structuredData}
-        noIndex={shouldNoIndex}
-      />
+      <Head>
+        <title>{`رحلة ${fromCity} - ${toCity} ${formattedDate} | ${operatorName} | يلا باص`}</title>
+        <meta name="description" content={`احجز رحلة باص من ${fromCity} إلى ${toCity} يوم ${formattedDate} الساعة ${departureTime} مع ${operatorName}. السعر ${displayTrip.price} ريال. ${displayTrip.available_seats} مقعد متاح.`} />
+        <meta name="keywords" content={`${fromCity}, ${toCity}, حجز باص اليمن, ${operatorName}, ${formattedDate}`} />
+        {shouldNoIndex && <meta name="robots" content="noindex, nofollow" />}
+        <link rel="canonical" href={`https://yallabus.app/bus_list/${tripId}`} />
+        <meta property="og:title" content={`رحلة ${fromCity} - ${toCity} ${formattedDate} | ${operatorName} | يلا باص`} />
+        <meta property="og:description" content={`احجز رحلة باص من ${fromCity} إلى ${toCity} يوم ${formattedDate} الساعة ${departureTime} مع ${operatorName}. السعر ${displayTrip.price} ريال.`} />
+        <meta property="og:url" content={`https://yallabus.app/bus_list/${tripId}`} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
+      </Head>
     <main
       className='flex flex-col m-0 bg-light min-h-screen text-brand'
       dir='rtl'>
