@@ -81,6 +81,16 @@ const getAmenityIcon = (key) => {
 };
 
 export default function TripDetailsPage({ initialTripData = null }: { initialTripData?: any }) {
+  // SEO data computed directly from props for SSR
+  const seoFromCity = initialTripData?.from_city?.name || initialTripData?.from_city?.city || 'مدينة';
+  const seoToCity = initialTripData?.to_city?.name || initialTripData?.to_city?.city || 'مدينة';
+  const seoOperator = initialTripData?.driver?.operator?.name || initialTripData?.operator?.name || 'يلا باص';
+  const seoDate = initialTripData?.journey_date || '';
+  const seoPrice = initialTripData?.price || 0;
+  const seoSeats = initialTripData?.available_seats || 0;
+  const seoStatus = initialTripData?.status || 'draft';
+  const seoDepartureTime = initialTripData?.departure_time ? convertToReadableTime(initialTripData.departure_time) : '---';
+  
   // --- STATE & HOOKS (Preserved) ---
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -476,15 +486,14 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
   return (
     <>
       <Head>
-        <title>{`رحلة ${fromCity} - ${toCity} ${formattedDate} | ${operatorName} | يلا باص`}</title>
-        <meta name="description" content={`احجز رحلة باص من ${fromCity} إلى ${toCity} يوم ${formattedDate} الساعة ${departureTime} مع ${operatorName}. السعر ${displayTrip.price} ريال. ${displayTrip.available_seats} مقعد متاح.`} />
-        <meta name="keywords" content={`${fromCity}, ${toCity}, حجز باص اليمن, ${operatorName}, ${formattedDate}`} />
-        {shouldNoIndex && <meta name="robots" content="noindex, nofollow" />}
+        <title key="title">{`رحلة ${seoFromCity} - ${seoToCity} | ${seoOperator} | يلا باص`}</title>
+        <meta key="desc" name="description" content={`احجز رحلة باص من ${seoFromCity} إلى ${seoToCity} الساعة ${seoDepartureTime} مع ${seoOperator}. السعر ${seoPrice} ريال. ${seoSeats} مقعد متاح.`} />
+        <meta key="keywords" name="keywords" content={`${seoFromCity}, ${seoToCity}, حجز باص اليمن, ${seoOperator}`} />
+        {seoStatus !== 'published' && <meta name="robots" content="noindex, nofollow" />}
         <link rel="canonical" href={`https://yallabus.app/bus_list/${tripId}`} />
-        <meta property="og:title" content={`رحلة ${fromCity} - ${toCity} ${formattedDate} | ${operatorName} | يلا باص`} />
-        <meta property="og:description" content={`احجز رحلة باص من ${fromCity} إلى ${toCity} يوم ${formattedDate} الساعة ${departureTime} مع ${operatorName}. السعر ${displayTrip.price} ريال.`} />
+        <meta property="og:title" content={`رحلة ${seoFromCity} - ${seoToCity} | ${seoOperator}`} />
+        <meta property="og:description" content={`احجز رحلة باص من ${seoFromCity} إلى ${seoToCity}. السعر ${seoPrice} ريال.`} />
         <meta property="og:url" content={`https://yallabus.app/bus_list/${tripId}`} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </Head>
     <main
       className='flex flex-col m-0 bg-light min-h-screen text-brand'
