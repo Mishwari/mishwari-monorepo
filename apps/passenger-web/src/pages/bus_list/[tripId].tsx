@@ -420,12 +420,16 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
       ? `/bus_list?pickup=${router.query.pickup}&destination=${router.query.destination}&date=${router.query.date}`
       : '/';
 
-  if (!tripDetails)
+  // Don't show loading if we have initialTripData from SSR
+  if (!tripDetails && !initialTripData)
     return (
       <div className='min-h-screen flex items-center justify-center bg-light'>
         Loading...
       </div>
     );
+  
+  // Use initialTripData if tripDetails not yet set
+  const displayTrip = tripDetails || initialTripData;
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -434,14 +438,14 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
     return `${days[date.getDay()]} ${date.getDate()} ${months[date.getMonth()]}`;
   };
 
-  const fromCity = tripDetails.from_city?.name || tripDetails.from_city?.city;
-  const toCity = tripDetails.to_city?.name || tripDetails.to_city?.city;
-  const operatorName = tripDetails.driver?.operator?.name || tripDetails.operator?.name || 'يلا باص';
-  const formattedDate = tripDetails.journey_date ? formatDate(tripDetails.journey_date) : '';
+  const fromCity = displayTrip.from_city?.name || displayTrip.from_city?.city;
+  const toCity = displayTrip.to_city?.name || displayTrip.to_city?.city;
+  const operatorName = displayTrip.driver?.operator?.name || displayTrip.operator?.name || 'يلا باص';
+  const formattedDate = displayTrip.journey_date ? formatDate(displayTrip.journey_date) : '';
   
   // Hide from Google if not published or trip date has passed
-  const isPastTrip = tripDetails.journey_date && new Date(tripDetails.journey_date) < new Date(new Date().setHours(0, 0, 0, 0));
-  const shouldNoIndex = tripDetails.status !== 'published' || isPastTrip;
+  const isPastTrip = displayTrip.journey_date && new Date(displayTrip.journey_date) < new Date(new Date().setHours(0, 0, 0, 0));
+  const shouldNoIndex = displayTrip.status !== 'published' || isPastTrip;
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -459,13 +463,13 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
       '@type': 'BusStation',
       name: toCity,
     },
-    departureTime: tripDetails.departure_time,
-    arrivalTime: tripDetails.arrival_time,
+    departureTime: displayTrip.departure_time,
+    arrivalTime: displayTrip.arrival_time,
     offers: {
       '@type': 'Offer',
-      price: tripDetails.price,
+      price: displayTrip.price,
       priceCurrency: 'YER',
-      availability: tripDetails.available_seats > 0 ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
+      availability: displayTrip.available_seats > 0 ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
     },
   };
 
@@ -473,7 +477,7 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
     <>
       <SEO
         title={`رحلة ${fromCity} - ${toCity} ${formattedDate} | ${operatorName}`}
-        description={`احجز رحلة باص من ${fromCity} إلى ${toCity} يوم ${formattedDate} الساعة ${departureTime} مع ${operatorName}. السعر ${tripDetails.price} ريال. ${tripDetails.available_seats} مقعد متاح.`}
+        description={`احجز رحلة باص من ${fromCity} إلى ${toCity} يوم ${formattedDate} الساعة ${departureTime} مع ${operatorName}. السعر ${displayTrip.price} ريال. ${displayTrip.available_seats} مقعد متاح.`}
         keywords={`${fromCity}, ${toCity}, حجز باص اليمن, ${operatorName}, ${formattedDate}`}
         canonical={`/bus_list/${tripId}`}
         structuredData={structuredData}
