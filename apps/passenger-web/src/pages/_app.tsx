@@ -46,31 +46,43 @@ function App({ Component, pageProps }: AppProps) {
 
   const showBottomNavBar = ['/', '/my_trips', '/profile'];
 
+  // Identify if we are on the server
+  const isServer = typeof window === 'undefined';
+
+  const content = (
+    <Elements stripe={stripePromise}>
+      <ToastContainer
+        toastStyle={{ fontFamily: "'Cairo', sans-serif " }}
+        position={toast.POSITION.TOP_CENTER}
+        transition={Slide}
+        newestOnTop={true}
+        rtl={true}
+      />
+      <Component {...pageProps} />
+      {/* {showBottomNavBar.includes(router.pathname) && <BottomNavBar />} */}
+    </Elements>
+  );
+
   return (
     <div className='w-full'>
       <NextUIProvider className='light'>
-        <PersistGate
-          persistor={store.__persistor}
-          loading={
-            <div className='min-h-screen bg-gradient-to-b from-primary-light to-white flex items-center justify-center'>
-              <div className='text-center'>
-                <div className='w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-                <p className='text-primary font-bold text-lg'>يلا باص</p>
+        {/* Bypass PersistGate on server for SSR */}
+        {isServer ? (
+          content
+        ) : (
+          <PersistGate
+            persistor={store.__persistor}
+            loading={
+              <div className='min-h-screen bg-gradient-to-b from-primary-light to-white flex items-center justify-center'>
+                <div className='text-center'>
+                  <div className='w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+                  <p className='text-primary font-bold text-lg'>يلا باص</p>
+                </div>
               </div>
-            </div>
-          }>
-          <Elements stripe={stripePromise}>
-            <ToastContainer
-              toastStyle={{ fontFamily: "'Cairo', sans-serif " }}
-              position={toast.POSITION.TOP_CENTER}
-              transition={Slide}
-              newestOnTop={true}
-              rtl={true}
-            />
-            <Component {...pageProps} />
-            {/* {showBottomNavBar.includes(router.pathname) && <BottomNavBar />} */}
-          </Elements>
-        </PersistGate>
+            }>
+            {content}
+          </PersistGate>
+        )}
       </NextUIProvider>
     </div>
   );
