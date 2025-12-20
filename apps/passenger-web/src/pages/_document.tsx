@@ -11,7 +11,7 @@ export default function Document() {
           rel="alternate" 
           type="application/atom+xml" 
           title="YallaBus Latest Trips" 
-          href="https://yallabus.app/feeds/latest-trips/" 
+          href="https://api.yallabus.app/feeds/latest-trips/" 
         />
       </Head>
       <body className='font-cairo'>
