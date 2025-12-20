@@ -21,7 +21,7 @@ import {
   toast,
 } from 'react-toastify';
 import BottomNavBar from '@/components/BottomNavBar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   fetchProfileDetails,
   fetchUserDetails,
@@ -46,8 +46,12 @@ function App({ Component, pageProps }: AppProps) {
 
   const showBottomNavBar = ['/', '/my_trips', '/profile'];
 
-  // Identify if we are on the server
-  const isServer = typeof window === 'undefined';
+  // Use state to track client-side mount
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const content = (
     <Elements stripe={stripePromise}>
@@ -66,20 +70,12 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <div className='w-full'>
       <NextUIProvider className='light'>
-        {/* Bypass PersistGate on server for SSR */}
-        {isServer ? (
+        {!isMounted ? (
           content
         ) : (
           <PersistGate
             persistor={store.__persistor}
-            loading={
-              <div className='min-h-screen bg-gradient-to-b from-primary-light to-white flex items-center justify-center'>
-                <div className='text-center'>
-                  <div className='w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-                  <p className='text-primary font-bold text-lg'>يلا باص</p>
-                </div>
-              </div>
-            }>
+            loading={null}>
             {content}
           </PersistGate>
         )}

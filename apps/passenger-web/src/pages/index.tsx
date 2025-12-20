@@ -3,9 +3,12 @@ import MainHeader from '@/components/MainHeader';
 import useAuth from '@/hooks/useAuth';
 import { ShieldCheckIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { BoltIcon as ZapIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, CalendarIcon, ClockIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useGPSLocation } from '@mishwari/ui-primitives';
 import { SEO } from '@mishwari/ui-web';
+import { GetServerSideProps } from 'next';
 
 const POPULAR_DESTINATIONS = [
   {
@@ -30,7 +33,19 @@ const POPULAR_DESTINATIONS = [
   },
 ];
 
-export default function Home() {
+interface RecentTrip {
+  id: number;
+  from_city: { name: string };
+  to_city: { name: string };
+  journey_date: string;
+  departure_time: string;
+  price: number;
+  available_seats: number;
+  operator: { name: string };
+  planned_route_name: string;
+}
+
+export default function Home({ recentTrips = [] }: { recentTrips: RecentTrip[] }) {
   const { isAuthenticated } = useAuth();
   const { location, loading: gpsLoading } = useGPSLocation(true);
 
@@ -116,6 +131,60 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Recent Trips */}
+          {recentTrips.length > 0 && (
+            <section>
+              <div className='mb-6'>
+                <h2 className='text-2xl md:text-3xl font-black'>أحدث الرحلات</h2>
+                <p className='text-sm font-medium text-slate-500 mt-1'>رحلات متاحة للحجز الآن</p>
+              </div>
+
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+                {recentTrips.map((trip) => {
+                  const date = new Date(trip.journey_date);
+                  const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+                  const formattedDate = `${days[date.getDay()]} ${date.getDate()}/${date.getMonth() + 1}`;
+                  const time = trip.departure_time ? new Date(trip.departure_time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+
+                  return (
+                    <Link key={trip.id} href={`/bus_list/${trip.id}`}>
+                      <div className='bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md hover:border-primary transition-all cursor-pointer group'>
+                        <div className='flex items-center justify-between mb-3'>
+                          <div className='flex items-center gap-2 text-brand font-black text-lg'>
+                            <span>{trip.from_city.name}</span>
+                            <ArrowRightIcon className='w-4 h-4 text-slate-400 rotate-180' />
+                            <span>{trip.to_city.name}</span>
+                          </div>
+                        </div>
+                        
+                        <div className='space-y-2 text-sm'>
+                          <div className='flex items-center gap-2 text-slate-600'>
+                            <CalendarIcon className='w-4 h-4 text-slate-400' />
+                            <span className='font-bold'>{formattedDate}</span>
+                          </div>
+                          <div className='flex items-center gap-2 text-slate-600'>
+                            <ClockIcon className='w-4 h-4 text-slate-400' />
+                            <span className='font-bold'>{time}</span>
+                          </div>
+                        </div>
+
+                        <div className='mt-4 pt-3 border-t border-slate-100 flex items-center justify-between'>
+                          <div>
+                            <div className='text-xs text-slate-500'>السعر من</div>
+                            <div className='text-lg font-black text-primary'>{trip.price.toLocaleString()} ر.ي</div>
+                          </div>
+                          <div className='text-xs text-slate-500'>
+                            {trip.available_seats} مقعد متاح
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {/* Trust Indicators */}
           <section className='bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100'>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-8'>
@@ -160,3 +229,21 @@ export default function Home() {
     </>
   );
 }
+
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.yallabus.app';
+    const response = await fetch(`${apiUrl}/api/trips/recent/`);
+    
+    if (!response.ok) {
+      return { props: { recentTrips: [] } };
+    }
+    
+    const recentTrips = await response.json();
+    return { props: { recentTrips } };
+  } catch (error) {
+    console.error('Failed to fetch recent trips:', error);
+    return { props: { recentTrips: [] } };
+  }
+};
