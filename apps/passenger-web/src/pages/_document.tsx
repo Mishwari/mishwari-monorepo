@@ -7,6 +7,12 @@ export default function Document() {
         <meta name="facebook-domain-verification" content="i33h9droweiek5s7g1bn1qhlbm2mov" />
         <link rel="preload" href="/fonts/Cairo-VariableFont_slnt,wght.ttf" as="font" type="font/ttf" />
         <link rel="preload" href="/fonts/NotoColorEmoji-Regular.ttf" as="font" type="font/ttf" />
+        <link 
+          rel="alternate" 
+          type="application/atom+xml" 
+          title="YallaBus Latest Trips" 
+          href="https://yallabus.app/feeds/latest-trips/" 
+        />
       </Head>
       <body className='font-cairo'>
         <Main />
