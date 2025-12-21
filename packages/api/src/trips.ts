@@ -42,10 +42,16 @@ export const tripsApi = {
   getCities: () =>
     apiClient.get<City[]>('/city-list/').then(res => res.data),
 
-  // Search trips (supports partial journeys)
-  search: (params: { pickup?: string; destination?: string; date?: string }) =>
+  // Search trips (supports partial journeys and SEO-friendly from-only or to-only queries)
+  search: (params: { pickup?: string; destination?: string; date?: string; from?: string; to?: string }) =>
     apiClient.get<TripSearchResult[]>('/trips/', {
-      params: { from_city: params.pickup, to_city: params.destination, date: params.date }
+      params: { 
+        from_city: params.pickup, 
+        to_city: params.destination, 
+        date: params.date,
+        from: params.from,
+        to: params.to
+      }
     }).then(res => res.data),
 
   // Get departure cities with trip counts

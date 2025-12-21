@@ -7,7 +7,7 @@ export interface SEOProps {
   ogImage?: string;
   ogType?: 'website' | 'article';
   keywords?: string;
-  structuredData?: object;
+  structuredData?: object | object[];
   noIndex?: boolean;
 }
 
@@ -55,10 +55,20 @@ export const SEO = ({
       
       {/* Structured Data */}
       {structuredData && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+        Array.isArray(structuredData) ? (
+          structuredData.map((data, index) => (
+            <script
+              key={index}
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+            />
+          ))
+        ) : (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+          />
+        )
       )}
     </Head>
   );

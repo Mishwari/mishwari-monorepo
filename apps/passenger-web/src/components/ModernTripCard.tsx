@@ -29,6 +29,14 @@ export default function ModernTripCard({ trip }: ModernTripCardProps) {
   };
   const operatorRating = trip.operator?.avg_rating || 0;
   const ratingStyle = getRatingColor(operatorRating);
+  
+  // Check if we have journey_date (SEO mode)
+  const hasJourneyDate = trip.journey_date;
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    return `${days[date.getDay()]} ${date.getDate()}/${date.getMonth() + 1}`;
+  };
 
   // Extract time only from datetime string
   const getTimeOnly = (datetime: string) => {
@@ -64,6 +72,20 @@ export default function ModernTripCard({ trip }: ModernTripCardProps) {
       {/* Side Color Strip */}
       <div className='hidden sm:block absolute right-0 top-0 bottom-0 w-1 bg-brand-primary opacity-0 group-hover:opacity-100 transition-opacity' />
 
+      {/* SEO Mode: Show Date and Route */}
+      {hasJourneyDate && (
+        <div className='flex items-center justify-between mb-3 pb-3 border-b border-slate-100'>
+          <div className='flex items-center gap-2 text-sm'>
+            <span className='font-black text-brand'>{trip.from_city}</span>
+            <ChevronLeftIcon className='w-3 h-3 text-slate-400 ' />
+            <span className='font-black text-brand'>{trip.to_city}</span>
+          </div>
+          <div className='text-xs font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded'>
+            {formatDate(trip.journey_date)}
+          </div>
+        </div>
+      )}
+
       {/* Top Row: Info + Price */}
       <div className='flex justify-between items-start mb-5'>
         {/* Operator Info */}
@@ -96,7 +118,7 @@ export default function ModernTripCard({ trip }: ModernTripCardProps) {
               {trip.available_seats} متبقية
             </div>
           ) : (
-            <div className='text-[10px] font-bold text-green-600'>متاح</div>
+            <div className='text-[10px] font-bold text-green-600'>{trip.available_seats} مقعد</div>
           )}
         </div>
       </div>

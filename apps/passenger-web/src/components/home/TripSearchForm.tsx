@@ -90,8 +90,6 @@ export default function TripSearchForm() {
       router.push({
         pathname: '/bus_list',
         query: {
-          tripType: 2,
-          city: '',
           pickup: fromCity,
           destination: toCity,
           date: format(selectedDate, 'yyyy-MM-dd'),

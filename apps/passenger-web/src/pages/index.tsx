@@ -56,17 +56,76 @@ export default function Home({ recentTrips = [] }: { recentTrips: RecentTrip[] }
         description="احجز تذاكر الباص بسهولة من صنعاء، عدن، تعز، مأرب وجميع المدن اليمنية. أسعار منافسة، حجز فوري، دفع آمن."
         keywords="حجز باص اليمن, تذاكر باص, صنعاء عدن, تعز مأرب, يلا باص"
         canonical="/"
-        structuredData={{
-          '@context': 'https://schema.org',
-          '@type': 'WebSite',
-          name: 'يلا باص',
-          url: 'https://yallabus.app',
-          potentialAction: {
-            '@type': 'SearchAction',
-            target: 'https://yallabus.app/bus_list?pickup={pickup}&destination={destination}',
-            'query-input': 'required name=pickup required name=destination'
+        structuredData={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'يلا باص',
+            url: 'https://yallabus.app',
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: {
+                '@type': 'EntryPoint',
+                urlTemplate: 'https://yallabus.app/bus_list/search?q={search_term_string}'
+              },
+              'query-input': 'required name=search_term_string'
+            }
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'كيف أحجز تذكرة باص في اليمن؟',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'اختر مدينة المغادرة والوصول، حدد التاريخ، اختر الرحلة المناسبة، ثم أكمل عملية الحجز والدفع الآمن عبر الموقع.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'ما هي طرق الدفع المتاحة؟',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'نوفر طرق دفع متعددة تشمل الدفع الإلكتروني الآمن، الدفع النقدي عند الصعود، والتحويل البنكي.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'هل يمكنني إلغاء أو تعديل الحجز؟',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'نعم، يمكنك إلغاء أو تعديل حجزك من خلال حسابك على الموقع قبل موعد الرحلة بوقت كافٍ حسب سياسة الإلغاء.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'ما هي المدن المتاحة للحجز؟',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'نغطي جميع المدن الرئيسية في اليمن بما في ذلك صنعاء، عدن، تعز، مأرب، الحديدة، إب، ذمار، المكلا، وسيئون.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'كيف أعرف أن الحجز تم بنجاح؟',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'ستصلك رسالة تأكيد فورية عبر الواتساب والبريد الإلكتروني تحتوي على تفاصيل الرحلة ورقم الحجز.'
+                }
+              },
+              {
+                '@type': 'Question',
+                name: 'هل الأسعار شاملة جميع الرسوم؟',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'نعم، الأسعار المعروضة نهائية وشاملة جميع الرسوم دون أي تكاليف إضافية مخفية.'
+                }
+              }
+            ]
           }
-        }}
+        ]}
       />
       <div className='min-h-screen bg-light relative overflow-hidden'>
       <div className='absolute top-0 left-0 w-full h-full overflow-hidden z-0'>

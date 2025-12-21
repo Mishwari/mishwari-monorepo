@@ -39,8 +39,8 @@ function index() {
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [pickup, setPickup] = useState<string>('Unknown');
-  const [destination, setDestination] = useState<string>('Unknown');
+  const [pickup, setPickup] = useState<string>('');
+  const [destination, setDestination] = useState<string>('');
   const [tripType, setTripType] = useState<number>(0);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [departureCities, setDepartureCities] = useState<CityOption[]>([]);
@@ -57,6 +57,20 @@ function index() {
       setDestination(destVal);
       setFromCity(pickupVal);
       setToCity(destVal);
+    } else if (router.query.from) {
+      // SEO-friendly: only from city provided
+      const fromVal = router.query.from as string;
+      setPickup(fromVal);
+      setFromCity(fromVal);
+      setDestination('جميع الوجهات');
+      setToCity('');
+    } else if (router.query.to) {
+      // SEO-friendly: only to city provided
+      const toVal = router.query.to as string;
+      setDestination(toVal);
+      setToCity(toVal);
+      setPickup('جميع المدن');
+      setFromCity('');
     }
     if (router.query.tripType) {
       setTripType(Number(router.query.tripType));
@@ -75,8 +89,9 @@ function index() {
         setDepartureCities([]);
       }
     };
-    if (selectedDate) fetchDepartureCities();
-  }, [selectedDate]);
+    // Only fetch if we have a date (not in SEO mode)
+    if (selectedDate && !router.query.from && !router.query.to) fetchDepartureCities();
+  }, [selectedDate, router.query.from, router.query.to]);
 
   useEffect(() => {
     if (!fromCity) {
@@ -94,8 +109,9 @@ function index() {
         setDestinationCities([]);
       }
     };
-    fetchDestinationCities();
-  }, [fromCity, selectedDate]);
+    // Only fetch if we have a date (not in SEO mode)
+    if (selectedDate && !router.query.from && !router.query.to) fetchDestinationCities();
+  }, [fromCity, selectedDate, router.query.from, router.query.to]);
 
   const [trips, setTrips] = useState<Trip[]>([]);
   const { filteredTrips, filters, setFilters } = useTripsFilter(trips);
@@ -125,12 +141,25 @@ function index() {
 
     const fetchTrips = async () => {
       try {
-        const data = await tripsApi.search({
-          pickup: router.query.pickup as string,
-          destination: router.query.destination as string,
-          date: router.query.date as string,
-        });
-        setTrips(data);
+        // SEO-friendly: support ?from=city or ?to=city query
+        if (router.query.from && !router.query.destination) {
+          const data = await tripsApi.search({
+            from: router.query.from as string,
+          });
+          setTrips(data);
+        } else if (router.query.to && !router.query.pickup) {
+          const data = await tripsApi.search({
+            to: router.query.to as string,
+          });
+          setTrips(data);
+        } else {
+          const data = await tripsApi.search({
+            pickup: router.query.pickup as string,
+            destination: router.query.destination as string,
+            date: router.query.date as string,
+          });
+          setTrips(data);
+        }
         setIsLoading(false);
       } catch (err: any) {
         setIsLoading(false);
@@ -140,6 +169,8 @@ function index() {
     fetchTrips();
   }, [
     router.isReady,
+    router.query.from,
+    router.query.to,
     router.query.pickup,
     router.query.destination,
     router.query.date,
@@ -215,11 +246,19 @@ function index() {
     }
   };
 
-  const seoTitle = pickup && destination 
+  const seoTitle = router.query.from
+    ? `رحلات من ${router.query.from} - يلا باص`
+    : router.query.to
+    ? `رحلات إلى ${router.query.to} - يلا باص`
+    : pickup && destination 
     ? `رحلات ${pickup} إلى ${destination}`
     : 'رحلات الباص في اليمن';
   
-  const seoDescription = pickup && destination
+  const seoDescription = router.query.from
+    ? `اعثر على جميع الرحلات المتاحة من ${router.query.from}. قارن الأسعار واحجز تذكرتك فوراً.`
+    : router.query.to
+    ? `اعثر على جميع الرحلات المتاحة إلى ${router.query.to}. قارن الأسعار واحجز تذكرتك فوراً.`
+    : pickup && destination
     ? `اعثر على ${sortedTrips.length} رحلة متاحة من ${pickup} إلى ${destination}. قارن الأسعار واحجز فوراً.`
     : 'ابحث عن رحلات الباص في اليمن واحجز تذكرتك بسهولة';
 
@@ -282,38 +321,45 @@ function index() {
               />
             </div>
 
-            {/* SWAP BUTTON */}
-            <button
-              onClick={handleSwap}
-              className='hidden sm:flex p-1.5 bg-slate-50 hover:bg-hover rounded-full text-primary transition-all active:scale-95 shrink-0'>
-              <ArrowsRightLeftIcon className='w-4 h-4' />
-            </button>
+            {/* SWAP BUTTON - Hide in SEO mode */}
+            {!router.query.from && !router.query.to && (
+              <button
+                onClick={handleSwap}
+                className='hidden sm:flex p-1.5 bg-slate-50 hover:bg-hover rounded-full text-primary transition-all active:scale-95 shrink-0'>
+                <ArrowsRightLeftIcon className='w-4 h-4' />
+              </button>
+            )}
           </div>
 
-          <div className='h-6 w-px bg-slate-200 hidden sm:block shrink-0 mx-2' />
+          {/* Hide date picker and swap button in SEO mode */}
+          {!router.query.from && !router.query.to && (
+            <>
+              <div className='h-6 w-px bg-slate-200 hidden sm:block shrink-0 mx-2' />
 
-          <div className='flex items-center bg-slate-50 rounded-lg p-1 shrink-0 border border-slate-100 sm:border-transparent'>
-            <button
-              onClick={handlePrevDay}
-              className='p-1 hover:bg-white hover:shadow-sm rounded-md text-slate-400 hover:text-primary transition-all'>
-              <ChevronRightIcon className='w-4 h-4' />
-            </button>
-            <div
-              onClick={() => setShowCalendar(true)}
-              className='flex items-center gap-1.5 px-2 text-[10px] sm:text-xs font-bold cursor-pointer hover:text-primary transition-colors'>
-              <CalendarIcon className='w-3 h-3 text-slate-400 hidden sm:block' />
-              <span className='sm:hidden'>{currentDate.getDate()}</span>
-              <span className='hidden sm:inline truncate'>
-                {currentDate.getDate()}{' '}
-                {format(currentDate, 'MMMM', { locale: ar })}
-              </span>
-            </div>
-            <button
-              onClick={handleNextDay}
-              className='p-1 hover:bg-white hover:shadow-sm rounded-md text-slate-400 hover:text-primary transition-all'>
-              <ChevronLeftIcon className='w-4 h-4' />
-            </button>
-          </div>
+              <div className='flex items-center bg-slate-50 rounded-lg p-1 shrink-0 border border-slate-100 sm:border-transparent'>
+                <button
+                  onClick={handlePrevDay}
+                  className='p-1 hover:bg-white hover:shadow-sm rounded-md text-slate-400 hover:text-primary transition-all'>
+                  <ChevronRightIcon className='w-4 h-4' />
+                </button>
+                <div
+                  onClick={() => setShowCalendar(true)}
+                  className='flex items-center gap-1.5 px-2 text-[10px] sm:text-xs font-bold cursor-pointer hover:text-primary transition-colors'>
+                  <CalendarIcon className='w-3 h-3 text-slate-400 hidden sm:block' />
+                  <span className='sm:hidden'>{currentDate.getDate()}</span>
+                  <span className='hidden sm:inline truncate'>
+                    {currentDate.getDate()}{' '}
+                    {format(currentDate, 'MMMM', { locale: ar })}
+                  </span>
+                </div>
+                <button
+                  onClick={handleNextDay}
+                  className='p-1 hover:bg-white hover:shadow-sm rounded-md text-slate-400 hover:text-primary transition-all'>
+                  <ChevronLeftIcon className='w-4 h-4' />
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </MainHeader>
 
@@ -410,7 +456,12 @@ function index() {
               ) : sortedTrips.length !== 0 ? (
                 sortedTrips.map((trip: Trip, index) => (
                   <Link
-                    href={`/bus_list/${trip.id}?from_stop_id=${trip.from_stop_id}&to_stop_id=${trip.to_stop_id}&pickup=${pickup}&destination=${destination}&date=${selectedDate}`}
+                    href={router.query.from 
+                      ? `/bus_list/${trip.id}?from=${router.query.from}`
+                      : router.query.to
+                      ? `/bus_list/${trip.id}?to=${router.query.to}`
+                      : `/bus_list/${trip.id}?from_stop_id=${trip.from_stop_id}&to_stop_id=${trip.to_stop_id}&pickup=${pickup}&destination=${destination}&date=${selectedDate}`
+                    }
                     key={index}
                     className='block'>
                     <ModernTripCard trip={trip} />
