@@ -182,8 +182,9 @@ export default function Home({ recentTrips = [] }: { recentTrips: RecentTrip[] }
                     fill
                     sizes='(max-width: 768px) 50vw, 25vw'
                     className='object-cover'
-                    priority={idx < 2}
+                    priority={idx === 0}
                     fetchPriority={idx === 0 ? 'high' : 'auto'}
+                    quality={idx < 2 ? 85 : 75}
                   />
                   <div className='absolute inset-0 bg-gradient-to-t from-brand/80 to-transparent opacity-80 group-hover:opacity-90 transition-opacity' />
                   <div className='absolute bottom-4 right-4 text-white'>

@@ -1,4 +1,7 @@
 import { initializeFirebase } from '@mishwari/utils';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('firebase');
 
 if (typeof window !== 'undefined') {
   const firebaseConfig = {
@@ -11,9 +14,17 @@ if (typeof window !== 'undefined') {
   };
 
   if (firebaseConfig.apiKey) {
-    initializeFirebase(firebaseConfig);
+    // Initialize Firebase immediately for auth reliability
+    // Yemen OTP issues require Firebase to be ready before user interaction
+    try {
+      log.info('Initializing Firebase immediately for auth reliability');
+      initializeFirebase(firebaseConfig);
+      log.info('Firebase initialized successfully');
+    } catch (error) {
+      log.error('Firebase initialization failed', error);
+    }
   } else {
-    console.error('Firebase API key missing in environment variables');
+    log.error('Firebase API key missing in environment variables');
   }
 
   // Hide reCAPTCHA badge
