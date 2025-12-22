@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { tripsApi } from '@mishwari/api';
 import { useGPSLocation } from '@mishwari/ui-primitives';
+import { SEO } from '@mishwari/ui-web';
 
 export default function SearchPage() {
   const router = useRouter();
@@ -263,6 +264,12 @@ export default function SearchPage() {
   }, [router.isReady, router.query.q, gpsLoading, gpsLocation]);
 
   return (
+    <>
+      <SEO
+        title={`البحث عن ${searchCity || 'رحلات'} - يلا باص`}
+        description={`جاري البحث عن الرحلات المتاحة ${searchCity ? `إلى ${searchCity}` : ''}. قارن الأسعار واحجز تذكرتك فوراً.`}
+        canonical={`/bus_list/search?q=${encodeURIComponent(router.query.q as string || '')}`}
+      />
     <div className="min-h-screen flex items-center justify-center bg-light">
       <div className="text-center max-w-md mx-auto px-4">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-6"></div>
@@ -308,5 +315,6 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

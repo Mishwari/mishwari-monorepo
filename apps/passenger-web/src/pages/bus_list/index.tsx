@@ -280,13 +280,23 @@ function index() {
     ? `اعثر على ${sortedTrips.length} رحلة متاحة من ${pickup} إلى ${destination}. قارن الأسعار واحجز فوراً.`
     : 'ابحث عن رحلات الباص في اليمن واحجز تذكرتك بسهولة';
 
+  const canonicalUrl = router.query.from && router.query.to
+    ? `/bus_list?from=${encodeURIComponent(router.query.from as string)}&to=${encodeURIComponent(router.query.to as string)}`
+    : router.query.from
+    ? `/bus_list?from=${encodeURIComponent(router.query.from as string)}`
+    : router.query.to
+    ? `/bus_list?to=${encodeURIComponent(router.query.to as string)}`
+    : pickup && destination
+    ? `/bus_list?pickup=${encodeURIComponent(pickup)}&destination=${encodeURIComponent(destination)}&date=${selectedDate}`
+    : '/bus_list';
+
   return (
     <>
       <SEO
         title={seoTitle}
         description={seoDescription}
         keywords={`${pickup}, ${destination}, حجز باص, تذاكر باص اليمن`}
-        canonical={`/bus_list?pickup=${pickup}&destination=${destination}&date=${selectedDate}`}
+        canonical={canonicalUrl}
       />
     <div className='min-h-screen bg-light'>
       {showCalendar && (
