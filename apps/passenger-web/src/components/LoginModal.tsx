@@ -45,6 +45,7 @@ export default function LoginModal({
   const [otpCode, setOtpCode] = useState<string>('');
   const [showOtp, setShowOtp] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isRequesting, setIsRequesting] = useState(false);
 
   useEffect(() => {
     if (isOpen && getMobileNumber && !mobileNumber) {
@@ -57,8 +58,9 @@ export default function LoginModal({
 
   const handleRequestOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!mobileNumber) return;
+    if (!mobileNumber || isRequesting) return;
 
+    setIsRequesting(true);
     const waitingLogin = toast.info('جاري تسجيل الدخول...', {
       autoClose: false,
     });
@@ -76,7 +78,11 @@ export default function LoginModal({
             await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
             dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
           } catch (firebaseError: any) {
-            if (firebaseError.code === 'auth/too-many-requests') {
+            if (
+              firebaseError.code === 'auth/too-many-requests' ||
+              firebaseError.code === 'auth/internal-error'
+            ) {
+              console.log('[Login] Firebase failed, falling back to SMS:', firebaseError.code);
               await authApi.requestOtp({ phone: mobileNumber });
               dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
             } else {
@@ -129,8 +135,10 @@ export default function LoginModal({
           errorMsg = 'انتهت مهلة الاتصال. تحقق من الإنترنت';
         }
         toast.error(errorMsg, { autoClose: 4000, hideProgressBar: true });
+      } finally {
+        setIsRequesting(false);
       }
-    })().catch(() => {});
+    })().catch(() => setIsRequesting(false));
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
