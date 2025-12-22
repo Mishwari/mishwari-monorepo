@@ -72,12 +72,16 @@ export default function SearchPage() {
         return { from: fromCity, explicit: true };
       }
       
-      // Pattern 4: "إلى X" or "to X"
-      const toPattern = /(إلى|الى|to)\s+(\S+)/i;
+      // Pattern 4: "إلى X" or "to X" - extract all words after keyword and validate each
+      const toPattern = /(إلى|الى|to)\s+(.+)/i;
       const toMatch = normalized.match(toPattern);
       if (toMatch) {
-        toCity = toMatch[2];
-        return { to: toCity, explicit: true };
+        // Get all words after the keyword
+        const wordsAfter = toMatch[2].split(/\s+/).filter(w => w.length > 2);
+        // Return all words, validation will determine which is the actual city
+        if (wordsAfter.length > 0) {
+          return { to: wordsAfter, explicit: true, multipleWords: true };
+        }
       }
       
       // Pattern 5: Just a city name (ambiguous - need to check backend)
@@ -131,12 +135,27 @@ export default function SearchPage() {
             }
             router.replace(`/bus_list?from=${encodeURIComponent(parsed.from)}`);
           } else if (parsed.to) {
-            const toValid = await validateCity(parsed.to);
-            if (!toValid) {
-              router.replace(`/?error=invalid_city&city=${encodeURIComponent(parsed.to)}`);
+            // Handle multiple words case
+            if (parsed.multipleWords && Array.isArray(parsed.to)) {
+              // Try each word until we find a valid city
+              for (const word of parsed.to) {
+                const isValid = await validateCity(word);
+                if (isValid) {
+                  router.replace(`/bus_list?to=${encodeURIComponent(word)}`);
+                  return;
+                }
+              }
+              // No valid city found
+              router.replace(`/?error=invalid_city&city=${encodeURIComponent(parsed.to[0])}`);
               return;
             }
-            router.replace(`/bus_list?to=${encodeURIComponent(parsed.to)}`);
+            
+            const toValid = await validateCity(parsed.to as string);
+            if (!toValid) {
+              router.replace(`/?error=invalid_city&city=${encodeURIComponent(parsed.to as string)}`);
+              return;
+            }
+            router.replace(`/bus_list?to=${encodeURIComponent(parsed.to as string)}`);
           }
         } catch (error) {
           router.replace('/');
