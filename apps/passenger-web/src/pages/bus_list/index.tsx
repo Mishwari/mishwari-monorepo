@@ -57,6 +57,14 @@ function index() {
       setDestination(destVal);
       setFromCity(pickupVal);
       setToCity(destVal);
+    } else if (router.query.from && router.query.to) {
+      // SEO-friendly: both from and to cities provided
+      const fromVal = router.query.from as string;
+      const toVal = router.query.to as string;
+      setPickup(fromVal);
+      setDestination(toVal);
+      setFromCity(fromVal);
+      setToCity(toVal);
     } else if (router.query.from) {
       // SEO-friendly: only from city provided
       const fromVal = router.query.from as string;
@@ -89,9 +97,9 @@ function index() {
         setDepartureCities([]);
       }
     };
-    // Only fetch if we have a date (not in SEO mode)
-    if (selectedDate && !router.query.from && !router.query.to) fetchDepartureCities();
-  }, [selectedDate, router.query.from, router.query.to]);
+    // Fetch cities even in SEO mode to enable refinement
+    if (selectedDate) fetchDepartureCities();
+  }, [selectedDate]);
 
   useEffect(() => {
     if (!fromCity) {
@@ -109,9 +117,9 @@ function index() {
         setDestinationCities([]);
       }
     };
-    // Only fetch if we have a date (not in SEO mode)
-    if (selectedDate && !router.query.from && !router.query.to) fetchDestinationCities();
-  }, [fromCity, selectedDate, router.query.from, router.query.to]);
+    // Fetch cities even in SEO mode to enable refinement
+    if (selectedDate) fetchDestinationCities();
+  }, [fromCity, selectedDate]);
 
   const [trips, setTrips] = useState<Trip[]>([]);
   const { filteredTrips, filters, setFilters } = useTripsFilter(trips);
@@ -142,7 +150,13 @@ function index() {
     const fetchTrips = async () => {
       try {
         // SEO-friendly: support ?from=city or ?to=city query
-        if (router.query.from && !router.query.destination) {
+        if (router.query.from && router.query.to) {
+          const data = await tripsApi.search({
+            from: router.query.from as string,
+            to: router.query.to as string,
+          });
+          setTrips(data);
+        } else if (router.query.from && !router.query.destination) {
           const data = await tripsApi.search({
             from: router.query.from as string,
           });
@@ -150,6 +164,8 @@ function index() {
         } else if (router.query.to && !router.query.pickup) {
           const data = await tripsApi.search({
             to: router.query.to as string,
+            user_lat: router.query.user_lat as string,
+            user_lon: router.query.user_lon as string,
           });
           setTrips(data);
         } else {
@@ -171,6 +187,8 @@ function index() {
     router.isReady,
     router.query.from,
     router.query.to,
+    router.query.user_lat,
+    router.query.user_lon,
     router.query.pickup,
     router.query.destination,
     router.query.date,
@@ -321,45 +339,41 @@ function index() {
               />
             </div>
 
-            {/* SWAP BUTTON - Hide in SEO mode */}
-            {!router.query.from && !router.query.to && (
-              <button
-                onClick={handleSwap}
-                className='hidden sm:flex p-1.5 bg-slate-50 hover:bg-hover rounded-full text-primary transition-all active:scale-95 shrink-0'>
-                <ArrowsRightLeftIcon className='w-4 h-4' />
-              </button>
-            )}
+            {/* SWAP BUTTON - Always show */}
+            <button
+              onClick={handleSwap}
+              className='hidden sm:flex p-1.5 bg-slate-50 hover:bg-hover rounded-full text-primary transition-all active:scale-95 shrink-0'>
+              <ArrowsRightLeftIcon className='w-4 h-4' />
+            </button>
           </div>
 
-          {/* Hide date picker and swap button in SEO mode */}
-          {!router.query.from && !router.query.to && (
-            <>
-              <div className='h-6 w-px bg-slate-200 hidden sm:block shrink-0 mx-2' />
+          {/* Always show date picker and navigation */}
+          <>
+            <div className='h-6 w-px bg-slate-200 hidden sm:block shrink-0 mx-2' />
 
-              <div className='flex items-center bg-slate-50 rounded-lg p-1 shrink-0 border border-slate-100 sm:border-transparent'>
-                <button
-                  onClick={handlePrevDay}
-                  className='p-1 hover:bg-white hover:shadow-sm rounded-md text-slate-400 hover:text-primary transition-all'>
-                  <ChevronRightIcon className='w-4 h-4' />
-                </button>
-                <div
-                  onClick={() => setShowCalendar(true)}
-                  className='flex items-center gap-1.5 px-2 text-[10px] sm:text-xs font-bold cursor-pointer hover:text-primary transition-colors'>
-                  <CalendarIcon className='w-3 h-3 text-slate-400 hidden sm:block' />
-                  <span className='sm:hidden'>{currentDate.getDate()}</span>
-                  <span className='hidden sm:inline truncate'>
-                    {currentDate.getDate()}{' '}
-                    {format(currentDate, 'MMMM', { locale: ar })}
-                  </span>
-                </div>
-                <button
-                  onClick={handleNextDay}
-                  className='p-1 hover:bg-white hover:shadow-sm rounded-md text-slate-400 hover:text-primary transition-all'>
-                  <ChevronLeftIcon className='w-4 h-4' />
-                </button>
+            <div className='flex items-center bg-slate-50 rounded-lg p-1 shrink-0 border border-slate-100 sm:border-transparent'>
+              <button
+                onClick={handlePrevDay}
+                className='p-1 hover:bg-white hover:shadow-sm rounded-md text-slate-400 hover:text-primary transition-all'>
+                <ChevronRightIcon className='w-4 h-4' />
+              </button>
+              <div
+                onClick={() => setShowCalendar(true)}
+                className='flex items-center gap-1.5 px-2 text-[10px] sm:text-xs font-bold cursor-pointer hover:text-primary transition-colors'>
+                <CalendarIcon className='w-3 h-3 text-slate-400 hidden sm:block' />
+                <span className='sm:hidden'>{currentDate.getDate()}</span>
+                <span className='hidden sm:inline truncate'>
+                  {currentDate.getDate()}{' '}
+                  {format(currentDate, 'MMMM', { locale: ar })}
+                </span>
               </div>
-            </>
-          )}
+              <button
+                onClick={handleNextDay}
+                className='p-1 hover:bg-white hover:shadow-sm rounded-md text-slate-400 hover:text-primary transition-all'>
+                <ChevronLeftIcon className='w-4 h-4' />
+              </button>
+            </div>
+          </>
         </div>
       </MainHeader>
 
@@ -464,7 +478,11 @@ function index() {
                     }
                     key={index}
                     className='block'>
-                    <ModernTripCard trip={trip} />
+                    <ModernTripCard 
+                      trip={trip} 
+                      hideRoute={!!(router.query.from && router.query.to)}
+                      hideDate={!!router.query.date}
+                    />
                   </Link>
                 ))
               ) : (

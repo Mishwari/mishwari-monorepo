@@ -85,6 +85,14 @@ export default function Home({ recentTrips = [] }: { recentTrips: RecentTrip[] }
               },
               {
                 '@type': 'Question',
+                name: 'كيف أبحث عن رحلة معينة؟',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'يمكنك البحث بكتابة اسم المدينة مثل "من صنعاء" أو "إلى عدن" أو "من صنعاء إلى عدن" في مربع البحث. سيظهر لك النظام الرحلات المتاحة تلقائياً.'
+                }
+              },
+              {
+                '@type': 'Question',
                 name: 'ما هي طرق الدفع المتاحة؟',
                 acceptedAnswer: {
                   '@type': 'Answer',

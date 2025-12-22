@@ -38,4 +38,12 @@ export interface Trip {
   price: number | null;
   can_publish: boolean;
   stops?: TripStop[];
+  // Fields for intermediate stop support
+  from_stop_id?: number;
+  to_stop_id?: number;
+  is_intermediate_pickup?: boolean;
+  is_intermediate_dropoff?: boolean;
+  full_route?: string | null;
+  // GPS-based search
+  user_distance_km?: number;
 }

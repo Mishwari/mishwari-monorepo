@@ -59,6 +59,9 @@ export default function LoginModal({
     e.preventDefault();
     if (!mobileNumber) return;
 
+    // Clean up previous reCAPTCHA before new request
+    cleanupRecaptcha();
+
     const waitingLogin = toast.info('جاري تسجيل الدخول...', {
       autoClose: false,
     });
@@ -92,7 +95,17 @@ export default function LoginModal({
         toast.dismiss(waitingLogin);
         let errorMsg = 'فشل تسجيل الدخول';
         const errMsg = (error.message || '').toUpperCase();
-        if (
+        const errCode = error.code || '';
+        
+        console.error('[Login] OTP request failed:', {
+          message: error.message,
+          code: error.code,
+          fullError: error
+        });
+        
+        if (errCode === 'auth/recaptcha-timeout' || errMsg.includes('RECAPTCHA_TIMEOUT')) {
+          errorMsg = 'انتهت مهلة التحقق. تحقق من اتصال الإنترنت وحاول مرة أخرى';
+        } else if (
           errMsg.includes('INVALID_APP_CREDENTIAL') ||
           errMsg.includes('INVALID-APP-CREDENTIAL')
         ) {
@@ -108,6 +121,8 @@ export default function LoginModal({
           errMsg.includes('FIREBASE NOT INITIALIZED')
         ) {
           errorMsg = 'Firebase not configured';
+        } else if (errMsg.includes('TIMEOUT')) {
+          errorMsg = 'انتهت مهلة الاتصال. تحقق من الإنترنت';
         }
         toast.error(errorMsg, { autoClose: 4000, hideProgressBar: true });
       }
@@ -123,8 +138,21 @@ export default function LoginModal({
       try {
         let response;
         if (verificationMethod === 'firebase') {
-          const { token } = await verifyFirebaseOtp(otpCode);
-          response = await authApi.verifyFirebaseOtp({ firebase_token: token, app_type: 'passenger' });
+          try {
+            const { token } = await verifyFirebaseOtp(otpCode);
+            response = await authApi.verifyFirebaseOtp({ firebase_token: token, app_type: 'passenger' });
+          } catch (firebaseError: any) {
+            // Handle session expiration - allow user to resend OTP
+            if (firebaseError.code === 'auth/session-expired' || firebaseError.message === 'SESSION_EXPIRED') {
+              toast.dismiss(waitingLogin);
+              toast.error('انتهت صلاحية الجلسة. يرجى طلب رمز جديد', { autoClose: 4000, hideProgressBar: true });
+              setShowOtp(false);
+              setOtpCode('');
+              cleanupRecaptcha();
+              return;
+            }
+            throw firebaseError;
+          }
         } else {
           response = await authApi.verifyOtp({
             phone: mobileNumber,
@@ -181,11 +209,17 @@ export default function LoginModal({
         if (error.response?.status === 403 && error.response?.data?.error === 'WRONG_APP') {
           toast.error(error.response.data.message, { autoClose: 5000, hideProgressBar: true });
         } else {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            error.response?.data?.detail ||
-            'رمز التحقق غير صحيح أو منتهي الصلاحية';
+          // Better error messages for Firebase errors
+          let errorMessage = 'رمز التحقق غير صحيح أو منتهي الصلاحية';
+          
+          if (error.code === 'auth/invalid-verification-code' || error.message === 'INVALID_CODE') {
+            errorMessage = 'رمز التحقق غير صحيح';
+          } else if (error.code === 'auth/code-expired' || error.message === 'CODE_EXPIRED') {
+            errorMessage = 'رمز التحقق منتهي الصلاحية. يرجى طلب رمز جديد';
+          } else if (error.response?.data?.message || error.response?.data?.error || error.response?.data?.detail) {
+            errorMessage = error.response.data.message || error.response.data.error || error.response.data.detail;
+          }
+          
           toast.error('فشل تسجيل الدخول', {
             autoClose: 2000,
             hideProgressBar: true,
@@ -201,6 +235,7 @@ export default function LoginModal({
   const handleEdit = () => {
     setShowOtp(false);
     setOtpCode('');
+    cleanupRecaptcha();
   };
 
   if (!isOpen) return null;

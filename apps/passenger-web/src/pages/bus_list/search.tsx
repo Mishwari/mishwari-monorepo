@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { tripsApi } from '@mishwari/api';
+import { useGPSLocation } from '@mishwari/ui-primitives';
 
 export default function SearchPage() {
   const router = useRouter();
   const [checking, setChecking] = useState(false);
+  const [searchCity, setSearchCity] = useState<string>('');
+  const { location: gpsLocation, loading: gpsLoading, error: gpsError } = useGPSLocation(true); // Auto-request GPS
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -14,6 +17,18 @@ export default function SearchPage() {
       router.replace('/');
       return;
     }
+
+    // Extract city name for display
+    const extractCity = (q: string) => {
+      const normalized = q.trim();
+      const cities = ['صنعاء', 'عدن', 'تعز', 'مأرب', 'الحديدة', 'إب', 'ذمار', 'المكلا', 'سيئون'];
+      const found = cities.find(city => normalized.includes(city));
+      return found || normalized.split(/\s+/)[0];
+    };
+    setSearchCity(extractCity(query));
+
+    // Wait for GPS to finish loading before proceeding (or if error occurred)
+    if (gpsLoading) return;
 
     // Parse the search query
     const parseQuery = (q: string) => {
@@ -100,24 +115,36 @@ export default function SearchPage() {
       if (parsed.city) {
         setChecking(true);
         try {
-          // Check both directions
-          const [fromResults, toResults] = await Promise.all([
-            tripsApi.search({ from: parsed.city }).catch(() => ({ data: [] })),
-            tripsApi.search({ to: parsed.city }).catch(() => ({ data: [] }))
-          ]);
+          // If we have GPS, try nearest city search first
+          if (gpsLocation?.latitude && gpsLocation?.longitude) {
+            console.log('GPS Search - Coords:', gpsLocation.latitude, gpsLocation.longitude, 'To:', parsed.city);
+            const gpsResults = await tripsApi.search({
+              to: parsed.city,
+              user_lat: gpsLocation.latitude.toString(),
+              user_lon: gpsLocation.longitude.toString()
+            });
 
-          const fromCount = fromResults.data?.length || 0;
-          const toCount = toResults.data?.length || 0;
+            console.log('GPS Search Results:', gpsResults.length);
+            // Always redirect with GPS params if GPS is available, even if no results
+            router.replace(`/bus_list?to=${encodeURIComponent(parsed.city)}&user_lat=${gpsLocation.latitude}&user_lon=${gpsLocation.longitude}`);
+            return;
+          } else {
+            console.log('No GPS available - gpsLocation:', gpsLocation);
+          }
 
-          // Redirect based on which has more trips
-          if (toCount > fromCount) {
+          // Fallback: Check if city is a destination (last stop)
+          const toResults = await tripsApi.search({ to: parsed.city });
+
+          if (toResults.length > 0) {
+            // City is a final destination
             router.replace(`/bus_list?to=${encodeURIComponent(parsed.city)}`);
           } else {
-            router.replace(`/bus_list?from=${encodeURIComponent(parsed.city)}`);
+            // No results found - redirect to homepage with error
+            router.replace(`/?error=no_trips&city=${encodeURIComponent(parsed.city)}`);
           }
         } catch (error) {
-          // Fallback to FROM on error
-          router.replace(`/bus_list?from=${encodeURIComponent(parsed.city)}`);
+          // Fallback to showing destination trips
+          router.replace(`/bus_list?to=${encodeURIComponent(parsed.city)}`);
         }
       } else {
         router.replace('/');
@@ -125,15 +152,48 @@ export default function SearchPage() {
     };
 
     handleSearch();
-  }, [router.isReady, router.query.q]);
+  }, [router.isReady, router.query.q, gpsLoading, gpsLocation]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-light">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-slate-600 font-bold">
-          {checking ? 'جاري التحقق من الرحلات...' : 'جاري البحث...'}
-        </p>
+      <div className="text-center max-w-md mx-auto px-4">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-6"></div>
+        {gpsLoading ? (
+          <>
+            <p className="text-slate-800 font-bold text-xl mb-2">
+              🗺️ جاري تحديد موقعك
+            </p>
+            <p className="text-slate-600 text-sm mb-3">
+              للعثور على أقرب رحلة متاحة إلى <span className="font-bold text-primary">{searchCity}</span>
+            </p>
+            <p className="text-amber-600 text-xs bg-amber-50 border border-amber-200 rounded-lg py-2 px-3 inline-block">
+              ⚠️ يرجى السماح بالوصول إلى موقعك عند ظهور النافذة المنبثقة
+            </p>
+          </>
+        ) : gpsError ? (
+          <>
+            <p className="text-slate-800 font-bold text-xl mb-2">
+              🔍 جاري البحث عن الرحلات
+            </p>
+            <p className="text-slate-600 text-sm mb-2">
+              نبحث عن الرحلات المتاحة إلى <span className="font-bold text-primary">{searchCity}</span>
+            </p>
+            <p className="text-slate-500 text-xs">
+              📍 تعذر الوصول للموقع - سنعرض جميع الرحلات المتاحة
+            </p>
+          </>
+        ) : checking ? (
+          <>
+            <p className="text-slate-800 font-bold text-xl mb-2">
+              🔍 جاري البحث عن الرحلات
+            </p>
+            <p className="text-slate-600 text-sm">
+              نبحث عن أفضل الرحلات المتاحة إلى <span className="font-bold text-primary">{searchCity}</span>
+            </p>
+          </>
+        ) : (
+          <p className="text-slate-800 font-bold text-xl">جاري المعالجة...</p>
+        )}
       </div>
     </div>
   );

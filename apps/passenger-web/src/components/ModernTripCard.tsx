@@ -5,15 +5,18 @@ import {
   WifiIcon,
   BoltIcon,
   ChevronLeftIcon,
+  MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { Wind, Phone, Zap, Wifi } from 'lucide-react';
 import { Trip } from '@/types/trip';
 
 interface ModernTripCardProps {
   trip: Trip;
+  hideRoute?: boolean;
+  hideDate?: boolean;
 }
 
-export default function ModernTripCard({ trip }: ModernTripCardProps) {
+export default function ModernTripCard({ trip, hideRoute = false, hideDate = false }: ModernTripCardProps) {
   const getRatingColor = (score: number) => {
     if (score >= 4.5)
       return {
@@ -73,7 +76,7 @@ export default function ModernTripCard({ trip }: ModernTripCardProps) {
       <div className='hidden sm:block absolute right-0 top-0 bottom-0 w-1 bg-brand-primary opacity-0 group-hover:opacity-100 transition-opacity' />
 
       {/* SEO Mode: Show Date and Route */}
-      {hasJourneyDate && (
+      {hasJourneyDate && !hideDate && !hideRoute && (
         <div className='flex items-center justify-between mb-3 pb-3 border-b border-slate-100'>
           <div className='flex items-center gap-2 text-sm'>
             <span className='font-black text-brand'>{trip.from_city}</span>
