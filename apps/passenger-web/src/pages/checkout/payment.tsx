@@ -12,9 +12,14 @@ import {
   addPassenger,
 } from '@/store/slices/bookingCreationSlice';
 import { createBooking } from '@/store/actions/bookingActions';
+import { Elements } from '@stripe/react-stripe-js';
 import { useStripe } from '@stripe/react-stripe-js';
+import { stripePromise } from '@/lib/stripe';
 import { useRouter } from 'next/router';
 import MainHeader from '@/components/MainHeader';
+import { createLogger } from '@/utils/logger';
+
+const log = createLogger('payment');
 
 
 
@@ -147,6 +152,14 @@ const PaymentMethodCard = ({ id, label, icon: Icon, description, isSelected, onC
 );
 
 export default function Payment() {
+  return (
+    <Elements stripe={stripePromise}>
+      <PaymentContent />
+    </Elements>
+  );
+}
+
+function PaymentContent() {
   const router = useRouter();
   const stripe = useStripe();
   const dispatch = useDispatch();
@@ -180,6 +193,7 @@ export default function Payment() {
   }, []);
 
   const handlePayment = () => {
+      log.info('Payment initiated', { method: selectedMethod, amount: totalAmount });
       setIsProcessing(true);
       const draft = sessionStorage.getItem('bookingDraft');
       let fromStopId, toStopId;
@@ -187,6 +201,7 @@ export default function Payment() {
         const data = JSON.parse(draft);
         fromStopId = data.fromStopId;
         toStopId = data.toStopId;
+        log.debug('Booking draft loaded', { fromStopId, toStopId });
       }
       dispatch(createBooking(stripe, fromStopId, toStopId) as any);
   };

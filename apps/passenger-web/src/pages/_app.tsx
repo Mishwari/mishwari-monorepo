@@ -26,8 +26,6 @@ import {
   fetchProfileDetails,
   fetchUserDetails,
 } from '@/store/actions/authActions';
-import { stripePromise } from '../lib/stripe';
-import { Elements } from '@stripe/react-stripe-js';
 import { encryptToken, decryptToken } from '@/utils/tokenUtils';
 
 function App({ Component, pageProps }: AppProps) {
@@ -46,39 +44,22 @@ function App({ Component, pageProps }: AppProps) {
 
   const showBottomNavBar = ['/', '/my_trips', '/profile'];
 
-  // Use state to track client-side mount
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const content = (
-    <Elements stripe={stripePromise}>
-      <ToastContainer
-        toastStyle={{ fontFamily: "'Cairo', sans-serif " }}
-        position={toast.POSITION.TOP_CENTER}
-        transition={Slide}
-        newestOnTop={true}
-        rtl={true}
-      />
-      <Component {...pageProps} />
-      {/* {showBottomNavBar.includes(router.pathname) && <BottomNavBar />} */}
-    </Elements>
-  );
-
   return (
     <div className='w-full'>
       <NextUIProvider className='light'>
-        {!isMounted ? (
-          content
-        ) : (
-          <PersistGate
-            persistor={store.__persistor}
-            loading={null}>
-            {content}
-          </PersistGate>
-        )}
+        <PersistGate
+          persistor={store.__persistor}
+          loading={null}>
+          <ToastContainer
+            toastStyle={{ fontFamily: "'Cairo', sans-serif " }}
+            position={toast.POSITION.TOP_CENTER}
+            transition={Slide}
+            newestOnTop={true}
+            rtl={true}
+          />
+          <Component {...pageProps} />
+          {/* {showBottomNavBar.includes(router.pathname) && <BottomNavBar />} */}
+        </PersistGate>
       </NextUIProvider>
     </div>
   );

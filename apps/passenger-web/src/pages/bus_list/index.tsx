@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { SEO } from '@mishwari/ui-web';
 import {
   XMarkIcon,
@@ -13,9 +14,8 @@ import ModernTripCard from '@/components/ModernTripCard';
 import { useRouter } from 'next/router';
 import { tripsApi } from '@mishwari/api';
 import { Trip } from '@/types/trip';
-import FilterPanel from '@/components/FilterPanel';
 import TripSkeleton from '@/components/Skeletons/TripSkeleton';
-import { CityDropdown, DatePicker } from '@mishwari/ui-web';
+import { CityDropdown } from '@mishwari/ui-web';
 import type { CityOption } from '@mishwari/ui-web';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -25,6 +25,9 @@ import {
   SortOption,
 } from '@mishwari/features-trips';
 import MainHeader from '@/components/MainHeader';
+
+const FilterPanel = dynamic(() => import('@/components/FilterPanel'), { ssr: false });
+const DatePicker = dynamic(() => import('@mishwari/ui-web').then(mod => ({ default: mod.DatePicker })), { ssr: false });
 
 export type SortItem = {
   code: string | null;

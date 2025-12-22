@@ -10,6 +10,14 @@ module.exports = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn', 'info'], // Keep error, warn, info logs
+    } : false,
+  },
+  experimental: {
+    optimizePackageImports: ['@heroicons/react', 'date-fns', 'lucide-react'],
+  },
   transpilePackages: [
     '@mishwari/api',
     '@mishwari/types',
