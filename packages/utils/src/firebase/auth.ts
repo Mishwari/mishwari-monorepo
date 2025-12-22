@@ -12,6 +12,7 @@ export const initRecaptcha = (elementId: string) => {
   if (!auth) {
     throw new Error('Firebase not initialized');
   }
+  // Always create new verifier if previous was cleared
   if (!recaptchaVerifier) {
     recaptchaVerifier = new RecaptchaVerifier(auth, elementId, {
       size: 'normal',
@@ -154,8 +155,9 @@ export const cleanupRecaptcha = () => {
     } catch (e) {
       console.warn('Error clearing recaptcha:', e);
     }
-    recaptchaVerifier = null;
   }
+  // Always reset to null to force recreation
+  recaptchaVerifier = null;
   confirmationResult = null;
   lastPhoneNumber = null;
   

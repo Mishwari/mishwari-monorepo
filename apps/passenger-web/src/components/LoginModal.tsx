@@ -59,9 +59,6 @@ export default function LoginModal({
     e.preventDefault();
     if (!mobileNumber) return;
 
-    // Clean up previous reCAPTCHA before new request
-    cleanupRecaptcha();
-
     const waitingLogin = toast.info('جاري تسجيل الدخول...', {
       autoClose: false,
     });
@@ -69,6 +66,11 @@ export default function LoginModal({
 
     (async () => {
       try {
+        // Clean up before Firebase request only
+        if (useFirebase) {
+          cleanupRecaptcha();
+        }
+        
         if (useFirebase) {
           try {
             await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
@@ -103,7 +105,9 @@ export default function LoginModal({
           fullError: error
         });
         
-        if (errCode === 'auth/recaptcha-timeout' || errMsg.includes('RECAPTCHA_TIMEOUT')) {
+        if (errCode === 'auth/internal-error') {
+          errorMsg = 'خطأ في التحقق. يرجى إعادة تحميل الصفحة';
+        } else if (errCode === 'auth/recaptcha-timeout' || errMsg.includes('RECAPTCHA_TIMEOUT')) {
           errorMsg = 'انتهت مهلة التحقق. تحقق من اتصال الإنترنت وحاول مرة أخرى';
         } else if (
           errMsg.includes('INVALID_APP_CREDENTIAL') ||
