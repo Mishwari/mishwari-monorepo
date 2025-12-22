@@ -99,14 +99,47 @@ export default function SearchPage() {
     const handleSearch = async () => {
       const parsed = parseQuery(query);
       
-      // If explicit direction (has keywords), redirect immediately
+      // Validate cities exist before redirecting
+      const validateCity = async (cityName: string): Promise<boolean> => {
+        try {
+          const result = await tripsApi.search({ to: cityName });
+          return result && result.length > 0;
+        } catch {
+          return false;
+        }
+      };
+      
+      // If explicit direction (has keywords), validate and redirect
       if (parsed.explicit) {
-        if (parsed.from && parsed.to) {
-          router.replace(`/bus_list?from=${encodeURIComponent(parsed.from)}&to=${encodeURIComponent(parsed.to)}`);
-        } else if (parsed.from) {
-          router.replace(`/bus_list?from=${encodeURIComponent(parsed.from)}`);
-        } else if (parsed.to) {
-          router.replace(`/bus_list?to=${encodeURIComponent(parsed.to)}`);
+        setChecking(true);
+        try {
+          if (parsed.from && parsed.to) {
+            const [fromValid, toValid] = await Promise.all([
+              validateCity(parsed.from),
+              validateCity(parsed.to)
+            ]);
+            if (!fromValid || !toValid) {
+              router.replace(`/?error=invalid_city&city=${encodeURIComponent(!fromValid ? parsed.from : parsed.to)}`);
+              return;
+            }
+            router.replace(`/bus_list?from=${encodeURIComponent(parsed.from)}&to=${encodeURIComponent(parsed.to)}`);
+          } else if (parsed.from) {
+            const fromValid = await validateCity(parsed.from);
+            if (!fromValid) {
+              router.replace(`/?error=invalid_city&city=${encodeURIComponent(parsed.from)}`);
+              return;
+            }
+            router.replace(`/bus_list?from=${encodeURIComponent(parsed.from)}`);
+          } else if (parsed.to) {
+            const toValid = await validateCity(parsed.to);
+            if (!toValid) {
+              router.replace(`/?error=invalid_city&city=${encodeURIComponent(parsed.to)}`);
+              return;
+            }
+            router.replace(`/bus_list?to=${encodeURIComponent(parsed.to)}`);
+          }
+        } catch (error) {
+          router.replace('/');
         }
         return;
       }
@@ -115,6 +148,15 @@ export default function SearchPage() {
       if (parsed.city) {
         setChecking(true);
         try {
+          // Validate city exists in backend first
+          const cityValidation = await tripsApi.search({ to: parsed.city });
+          
+          // If city doesn't exist or no trips, redirect to homepage
+          if (!cityValidation || cityValidation.length === 0) {
+            router.replace(`/?error=no_trips&city=${encodeURIComponent(parsed.city)}`);
+            return;
+          }
+          
           // If we have GPS, try nearest city search first
           if (gpsLocation?.latitude && gpsLocation?.longitude) {
             console.log('GPS Search - Coords:', gpsLocation.latitude, gpsLocation.longitude, 'To:', parsed.city);
@@ -132,16 +174,8 @@ export default function SearchPage() {
             console.log('No GPS available - gpsLocation:', gpsLocation);
           }
 
-          // Fallback: Check if city is a destination (last stop)
-          const toResults = await tripsApi.search({ to: parsed.city });
-
-          if (toResults.length > 0) {
-            // City is a final destination
-            router.replace(`/bus_list?to=${encodeURIComponent(parsed.city)}`);
-          } else {
-            // No results found - redirect to homepage with error
-            router.replace(`/?error=no_trips&city=${encodeURIComponent(parsed.city)}`);
-          }
+          // Fallback: Show trips to destination
+          router.replace(`/bus_list?to=${encodeURIComponent(parsed.city)}`);
         } catch (error) {
           // Fallback to showing destination trips
           router.replace(`/bus_list?to=${encodeURIComponent(parsed.city)}`);

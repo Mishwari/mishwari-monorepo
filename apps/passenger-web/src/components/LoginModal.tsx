@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMobileAuth } from '@/store/slices/mobileAuthSlice';
@@ -45,7 +45,7 @@ export default function LoginModal({
   const [otpCode, setOtpCode] = useState<string>('');
   const [showOtp, setShowOtp] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [isRequesting, setIsRequesting] = useState(false);
+  const loginLock = useRef(false);
 
   useEffect(() => {
     if (isOpen && getMobileNumber && !mobileNumber) {
@@ -56,93 +56,111 @@ export default function LoginModal({
     };
   }, [isOpen, getMobileNumber]);
 
-  const handleRequestOtp = (e: React.FormEvent) => {
+  const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!mobileNumber || isRequesting) return;
+    console.log('[LoginModal] handleRequestOtp called', { mobileNumber, lockStatus: loginLock.current });
+    
+    if (!mobileNumber) {
+      console.log('[LoginModal] Blocked: No mobile number');
+      return;
+    }
+    
+    if (loginLock.current) {
+      console.log('[LoginModal] Blocked: Lock is active (double-click prevented)');
+      return;
+    }
 
-    setIsRequesting(true);
-    const waitingLogin = toast.info('جاري تسجيل الدخول...', {
-      autoClose: false,
-    });
-    const useFirebase = shouldUseFirebase(mobileNumber);
+    try {
+      loginLock.current = true;
+      console.log('[LoginModal] Lock acquired');
+      
+      const waitingLogin = toast.info('جاري تسجيل الدخول...', {
+        autoClose: false,
+      });
+      const useFirebase = shouldUseFirebase(mobileNumber);
+      console.log('[LoginModal] Method selected:', useFirebase ? 'Firebase' : 'SMS');
 
-    (async () => {
-      try {
-        // Clean up before Firebase request only
-        if (useFirebase) {
-          cleanupRecaptcha();
-        }
-        
-        if (useFirebase) {
-          try {
-            await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
-            dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
-          } catch (firebaseError: any) {
-            if (
-              firebaseError.code === 'auth/too-many-requests' ||
-              firebaseError.code === 'auth/internal-error'
-            ) {
-              console.log('[Login] Firebase failed, falling back to SMS:', firebaseError.code);
-              await authApi.requestOtp({ phone: mobileNumber });
-              dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
-            } else {
-              throw firebaseError;
-            }
+      if (useFirebase) {
+        try {
+          console.log('[LoginModal] Calling sendFirebaseOtp...');
+          await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
+          console.log('[LoginModal] Firebase OTP sent successfully');
+          dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
+        } catch (firebaseError: any) {
+          console.error('[LoginModal] Firebase error:', {
+            code: firebaseError.code,
+            message: firebaseError.message,
+            fullError: firebaseError
+          });
+          
+          if (firebaseError.code === 'auth/too-many-requests') {
+            console.log('[LoginModal] Falling back to SMS due to rate limit');
+            await authApi.requestOtp({ phone: mobileNumber });
+            dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
+          } else {
+            throw firebaseError;
           }
-        } else {
-          await authApi.requestOtp({ phone: mobileNumber });
-          dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
         }
-        toast.dismiss(waitingLogin);
-        toast.success('تم ارسال رمز التحقق', {
-          autoClose: 2000,
-          hideProgressBar: true,
-        });
-        setShowOtp(true);
-      } catch (error: any) {
-        toast.dismiss(waitingLogin);
-        let errorMsg = 'فشل تسجيل الدخول';
-        const errMsg = (error.message || '').toUpperCase();
-        const errCode = error.code || '';
-        
-        console.error('[Login] OTP request failed:', {
-          message: error.message,
-          code: error.code,
-          fullError: error
-        });
-        
-        if (errCode === 'auth/internal-error') {
-          errorMsg = 'خطأ في التحقق. يرجى إعادة تحميل الصفحة';
-        } else if (errCode === 'auth/recaptcha-timeout' || errMsg.includes('RECAPTCHA_TIMEOUT')) {
-          errorMsg = 'انتهت مهلة التحقق. تحقق من اتصال الإنترنت وحاول مرة أخرى';
-        } else if (
-          errMsg.includes('INVALID_APP_CREDENTIAL') ||
-          errMsg.includes('INVALID-APP-CREDENTIAL')
-        ) {
-          errorMsg = 'Firebase: Enable Phone Auth in Console or check API key';
-        } else if (
-          errMsg.includes('TOO MANY ATTEMPTS') ||
-          errMsg.includes('TOO-MANY-REQUESTS') ||
-          errMsg.includes('TOO_MANY_ATTEMPTS_TRY_LATER')
-        ) {
-          errorMsg = 'محاولات كثيرة. حاول بعد قليل';
-        } else if (
-          errMsg.includes('FIREBASE NOT CONFIGURED') ||
-          errMsg.includes('FIREBASE NOT INITIALIZED')
-        ) {
-          errorMsg = 'Firebase not configured';
-        } else if (errMsg.includes('TIMEOUT')) {
-          errorMsg = 'انتهت مهلة الاتصال. تحقق من الإنترنت';
-        }
-        toast.error(errorMsg, { autoClose: 4000, hideProgressBar: true });
-      } finally {
-        setIsRequesting(false);
+      } else {
+        console.log('[LoginModal] Calling SMS API...');
+        await authApi.requestOtp({ phone: mobileNumber });
+        console.log('[LoginModal] SMS OTP sent successfully');
+        dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
       }
-    })().catch(() => setIsRequesting(false));
+      
+      toast.dismiss(waitingLogin);
+      toast.success('تم ارسال رمز التحقق', {
+        autoClose: 2000,
+        hideProgressBar: true,
+      });
+      console.log('[LoginModal] OTP request completed successfully');
+      setShowOtp(true);
+    } catch (error: any) {
+      console.error('[LoginModal] Request OTP failed:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        fullError: error
+      });
+      
+      const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
+      toast.dismiss(waitingLogin);
+      let errorMsg = 'فشل تسجيل الدخول';
+      const errMsg = (error.message || '').toUpperCase();
+      const errCode = error.code || '';
+      
+      if (
+        errMsg.includes('INVALID_APP_CREDENTIAL') ||
+        errMsg.includes('INVALID-APP-CREDENTIAL')
+      ) {
+        errorMsg = 'Firebase: Enable Phone Auth in Console or check API key';
+      } else if (
+        errMsg.includes('TOO MANY ATTEMPTS') ||
+        errMsg.includes('TOO-MANY-REQUESTS') ||
+        errMsg.includes('TOO_MANY_ATTEMPTS_TRY_LATER')
+      ) {
+        errorMsg = 'محاولات كثيرة. حاول بعد قليل';
+      } else if (
+        errMsg.includes('FIREBASE NOT CONFIGURED') ||
+        errMsg.includes('FIREBASE NOT INITIALIZED')
+      ) {
+        errorMsg = 'Firebase not configured';
+      } else if (errCode === 'auth/internal-error') {
+        errorMsg = 'خطأ داخلي في Firebase. يرجى المحاولة مرة أخرى';
+      }
+      
+      console.log('[LoginModal] Showing error to user:', errorMsg);
+      toast.error(errorMsg, { autoClose: 4000, hideProgressBar: true });
+    } finally {
+      loginLock.current = false;
+      console.log('[LoginModal] Lock released');
+    }
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[LoginModal] handleVerifyOtp called', { mobileNumber, otpCode, verificationMethod });
+    
     if (mobileNumber && otpCode) {
       const waitingLogin = toast.info('جاري تسجيل الدخول...', {
         autoClose: false,
@@ -150,27 +168,19 @@ export default function LoginModal({
       try {
         let response;
         if (verificationMethod === 'firebase') {
-          try {
-            const { token } = await verifyFirebaseOtp(otpCode);
-            response = await authApi.verifyFirebaseOtp({ firebase_token: token, app_type: 'passenger' });
-          } catch (firebaseError: any) {
-            // Handle session expiration - allow user to resend OTP
-            if (firebaseError.code === 'auth/session-expired' || firebaseError.message === 'SESSION_EXPIRED') {
-              toast.dismiss(waitingLogin);
-              toast.error('انتهت صلاحية الجلسة. يرجى طلب رمز جديد', { autoClose: 4000, hideProgressBar: true });
-              setShowOtp(false);
-              setOtpCode('');
-              cleanupRecaptcha();
-              return;
-            }
-            throw firebaseError;
-          }
+          console.log('[LoginModal] Verifying Firebase OTP...');
+          const { token } = await verifyFirebaseOtp(otpCode);
+          console.log('[LoginModal] Firebase token received, calling backend...');
+          response = await authApi.verifyFirebaseOtp({ firebase_token: token, app_type: 'passenger' });
+          console.log('[LoginModal] Backend verification successful');
         } else {
+          console.log('[LoginModal] Verifying SMS OTP...');
           response = await authApi.verifyOtp({
             phone: mobileNumber,
             otp: otpCode,
             app_type: 'passenger',
           });
+          console.log('[LoginModal] SMS verification successful');
         }
         const accessToken = response.data.tokens.access;
 
@@ -183,6 +193,7 @@ export default function LoginModal({
         );
 
         // Fetch profile with token directly (bypass localStorage)
+        console.log('[LoginModal] Fetching user profile...');
         const authenticatedClient = createAuthenticatedClient(accessToken);
         const profileResponse = await authenticatedClient.get('/profile/me/');
 
@@ -197,6 +208,7 @@ export default function LoginModal({
           autoClose: 2000,
           hideProgressBar: true,
         });
+        console.log('[LoginModal] Login successful');
 
         setMobileNumber('');
         setOtpCode('');
@@ -204,6 +216,7 @@ export default function LoginModal({
         dispatch(setMobileAuth(''));
 
         if (!profile.data.full_name) {
+          console.log('[LoginModal] Profile incomplete, showing profile form');
           onClose();
           setTimeout(() => {
             if (onOpenProfileModal) {
@@ -213,25 +226,30 @@ export default function LoginModal({
             }
           }, 100);
         } else {
+          console.log('[LoginModal] Profile complete, closing modal');
           onClose();
         }
       } catch (error: any) {
+        console.error('[LoginModal] Verify OTP failed:', {
+          message: error.message,
+          code: error.code,
+          response: error.response?.data,
+          fullError: error
+        });
+        
         toast.dismiss(waitingLogin);
         
         if (error.response?.status === 403 && error.response?.data?.error === 'WRONG_APP') {
+          console.log('[LoginModal] Wrong app error');
           toast.error(error.response.data.message, { autoClose: 5000, hideProgressBar: true });
         } else {
-          // Better error messages for Firebase errors
-          let errorMessage = 'رمز التحقق غير صحيح أو منتهي الصلاحية';
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.error ||
+            error.response?.data?.detail ||
+            'رمز التحقق غير صحيح أو منتهي الصلاحية';
           
-          if (error.code === 'auth/invalid-verification-code' || error.message === 'INVALID_CODE') {
-            errorMessage = 'رمز التحقق غير صحيح';
-          } else if (error.code === 'auth/code-expired' || error.message === 'CODE_EXPIRED') {
-            errorMessage = 'رمز التحقق منتهي الصلاحية. يرجى طلب رمز جديد';
-          } else if (error.response?.data?.message || error.response?.data?.error || error.response?.data?.detail) {
-            errorMessage = error.response.data.message || error.response.data.error || error.response.data.detail;
-          }
-          
+          console.log('[LoginModal] Showing error to user:', errorMessage);
           toast.error('فشل تسجيل الدخول', {
             autoClose: 2000,
             hideProgressBar: true,
@@ -241,13 +259,14 @@ export default function LoginModal({
           }, 2200);
         }
       }
+    } else {
+      console.log('[LoginModal] Verify blocked: missing mobile or OTP', { mobileNumber, otpCode });
     }
   };
 
   const handleEdit = () => {
     setShowOtp(false);
     setOtpCode('');
-    cleanupRecaptcha();
   };
 
   if (!isOpen) return null;
