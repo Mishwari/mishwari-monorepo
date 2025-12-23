@@ -56,6 +56,7 @@ export default function Home({ recentTrips = [] }: { recentTrips: RecentTrip[] }
         description="احجز تذاكر الباص بسهولة من صنعاء، عدن، تعز، مأرب وجميع المدن اليمنية. أسعار منافسة، حجز فوري، دفع آمن."
         keywords="حجز باص اليمن, تذاكر باص, صنعاء عدن, تعز مأرب, يلا باص"
         canonical="/"
+        ogImage="/logo.jpeg"
         structuredData={[
           {
             '@context': 'https://schema.org',

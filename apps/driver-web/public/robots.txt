@@ -1,4 +1,10 @@
 User-agent: *
-Disallow: /
-
-# Driver portal - no indexing needed
+Allow: /
+Allow: /login
+Disallow: /trips
+Disallow: /fleet
+Disallow: /drivers
+Disallow: /kyc
+Disallow: /profile
+Disallow: /upgrade
+Disallow: /join

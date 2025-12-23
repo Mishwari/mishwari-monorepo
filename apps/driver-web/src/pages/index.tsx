@@ -3,7 +3,7 @@ import StatsCards from '@/components/dashboard/StatsCards';
 import UpgradeBanner from '@/components/dashboard/UpgradeBanner';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import BookingsList from '@/components/bookings/BookingsList';
-import { Button } from '@mishwari/ui-web';
+import { Button, SEO } from '@mishwari/ui-web';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppState } from '@/store/store';
 import { useRouter } from 'next/router';
@@ -120,6 +120,13 @@ export default function Home() {
 
   return (
     <HomeLayout>
+      <SEO
+        title="لوحة تحكم السائق"
+        description="إدارة رحلات الباصات والحجوزات - منصة يلا باص للسائقين وشركات النقل في اليمن"
+        canonical="/"
+        ogImage="/logo.jpeg"
+        noIndex={true}
+      />
       <div className='max-w-7xl mx-auto px-4 py-8 space-y-6'>
         <div>
           <h1 className='text-3xl font-bold text-gray-900'>

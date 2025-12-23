@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useSelector } from 'react-redux';
 import { Transition, Dialog } from '@headlessui/react';
 import { GetServerSideProps } from 'next';
-import Head from 'next/head';
+import { SEO } from '@mishwari/ui-web';
 
 // Icons
 import {
@@ -485,16 +485,15 @@ export default function TripDetailsPage({ initialTripData = null }: { initialTri
 
   return (
     <>
-      <Head>
-        <title key="title">{`رحلة ${seoFromCity} - ${seoToCity} | ${seoOperator} | يلا باص`}</title>
-        <meta key="desc" name="description" content={`احجز رحلة باص من ${seoFromCity} إلى ${seoToCity} الساعة ${seoDepartureTime} مع ${seoOperator}. السعر ${seoPrice} ريال. ${seoSeats} مقعد متاح.`} />
-        <meta key="keywords" name="keywords" content={`${seoFromCity}, ${seoToCity}, حجز باص اليمن, ${seoOperator}`} />
-        {seoStatus !== 'published' && <meta name="robots" content="noindex, nofollow" />}
-        <link rel="canonical" href={`https://yallabus.app/bus_list/${tripId}`} />
-        <meta property="og:title" content={`رحلة ${seoFromCity} - ${seoToCity} | ${seoOperator}`} />
-        <meta property="og:description" content={`احجز رحلة باص من ${seoFromCity} إلى ${seoToCity}. السعر ${seoPrice} ريال.`} />
-        <meta property="og:url" content={`https://yallabus.app/bus_list/${tripId}`} />
-      </Head>
+      <SEO
+        title={`رحلة ${seoFromCity} - ${seoToCity} | ${seoOperator}`}
+        description={`احجز رحلة باص من ${seoFromCity} إلى ${seoToCity} الساعة ${seoDepartureTime} مع ${seoOperator}. السعر ${seoPrice} ريال. ${seoSeats} مقعد متاح.`}
+        keywords={`${seoFromCity}, ${seoToCity}, حجز باص اليمن, ${seoOperator}`}
+        canonical={`/bus_list/${tripId}`}
+        ogImage="/logo.jpeg"
+        noIndex={shouldNoIndex}
+        structuredData={structuredData}
+      />
     <main
       className='flex flex-col m-0 bg-light min-h-screen text-brand'
       dir='rtl'>

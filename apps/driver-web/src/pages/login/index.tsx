@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { performMobileLogin, performVerifyLogin } from '@/store/actions/mobileAuthActions';
 import { useRouter } from 'next/router';
 import { AppState } from '@/store/store';
-import { PhoneInput, Button, countries, OtpInput } from '@mishwari/ui-web';
+import { PhoneInput, Button, countries, OtpInput, SEO } from '@mishwari/ui-web';
 import { PencilSquareIcon } from '@heroicons/react/24/outline';
 import useAuth from '@/hooks/useAuth';
 import '@/config/firebase';
@@ -66,7 +66,15 @@ export default function Login() {
   };
 
   return (
-    <div className='w-full h-screen bg-white flex justify-center items-center'>
+    <>
+      <SEO
+        title="تسجيل دخول السائق"
+        description="تسجيل دخول للسائقين وشركات النقل - إدارة رحلات الباصات في اليمن"
+        canonical="/login"
+        ogImage="/logo.jpeg"
+        keywords="تسجيل دخول سائق, شركة نقل, يلا باص, باصات اليمن"
+      />
+      <div className='w-full h-screen bg-white flex justify-center items-center'>
       <div className='flex min-h-full sm:min-h-fit flex-col justify-center sm:h-max sm:msx-auto w-full sm:max-w-md px-12 sm:px-6 py-8 sm:py-4 lg:px-8 sm:border border-gray-200 sm:rounded-xl bg-gray-100'>
         <div className='sm:mx-auto sm:w-full sm:max-w-sm'>
           <h1 className='mt-5 text-center text-2xl font-bold leading-9 tracking-tight text-brand-text-dark'>
@@ -138,5 +146,6 @@ export default function Login() {
         )}
       </div>
     </div>
+    </>
   );
 }

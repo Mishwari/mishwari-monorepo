@@ -300,6 +300,7 @@ function index() {
         description={seoDescription}
         keywords={`${pickup}, ${destination}, حجز باص, تذاكر باص اليمن`}
         canonical={canonicalUrl}
+        ogImage="/logo.jpeg"
       />
     <div className='min-h-screen bg-light'>
       {showCalendar && (

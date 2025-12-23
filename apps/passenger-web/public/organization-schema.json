@@ -1,0 +1,9 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "يلا باص",
+  "alternateName": "YallaBus",
+  "url": "https://yallabus.net",
+  "logo": "https://yallabus.net/logo.jpeg",
+  "description": "حجز تذاكر الباصات في اليمن - Book bus tickets in Yemen"
+}

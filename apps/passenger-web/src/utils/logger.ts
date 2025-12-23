@@ -11,6 +11,8 @@ const PRODUCTION_LOG_WHITELIST = [
   'checkout',
   'booking',
   'auth',
+  'firebase',
+  'loginmodal',
   // Add more as needed
 ];
 

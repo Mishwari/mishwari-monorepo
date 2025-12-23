@@ -269,6 +269,7 @@ export default function SearchPage() {
         title={`البحث عن ${searchCity || 'رحلات'} - يلا باص`}
         description={`جاري البحث عن الرحلات المتاحة ${searchCity ? `إلى ${searchCity}` : ''}. قارن الأسعار واحجز تذكرتك فوراً.`}
         canonical={`/bus_list/search?q=${encodeURIComponent(router.query.q as string || '')}`}
+        ogImage="/logo.jpeg"
       />
     <div className="min-h-screen flex items-center justify-center bg-light">
       <div className="text-center max-w-md mx-auto px-4">
