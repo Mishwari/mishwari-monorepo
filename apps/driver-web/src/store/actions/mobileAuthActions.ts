@@ -2,54 +2,32 @@ import { setAuthState, setProfile } from '../slices/authSlice';
 import { setMobileAuth, resetMobileAuth } from '../slices/mobileAuthSlice';
 import { toast } from 'react-toastify';
 import { authApi, createAuthenticatedClient } from '@mishwari/api';
-import { encryptToken, decryptToken } from '@mishwari/utils';
+import { encryptToken, decryptToken, getRecaptchaToken } from '@mishwari/utils';
 import axios from 'axios';
 import '@/config/firebase';
-import { sendFirebaseOtp, verifyFirebaseOtp, shouldUseFirebase } from '@mishwari/utils';
 
 
 export const performMobileLogin = (mobileNumber: string, onSuccess: () => void, onRequiresPassword?: (requiresPassword: boolean) => void) => async (dispatch: any) => {
   const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-  const useFirebase = shouldUseFirebase(mobileNumber);
 
   try {
-    if (useFirebase) {
-      try {
-        const checkResponse = await authApi.checkPasswordRequired(mobileNumber);
-        const requiresPassword = checkResponse.data.requires_password;
-        
-        await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
-        dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
-        if (onRequiresPassword) onRequiresPassword(requiresPassword);
-      } catch (firebaseError: any) {
-        if (firebaseError.code === 'auth/too-many-requests') {
-          const [response] = await Promise.all([
-            authApi.requestOtp({ phone: mobileNumber }),
-            delay(1000),
-          ]);
-          dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
-          if (onRequiresPassword) onRequiresPassword(response.data.requires_password);
-          toast.dismiss(waitingLogin);
-          toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
-          onSuccess();
-          return;
-        }
-        throw firebaseError;
-      }
-    } else {
-      const [response] = await Promise.all([
-        authApi.requestOtp({ phone: mobileNumber }),
-        delay(1000),
-      ]);
-      dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
-      if (onRequiresPassword) onRequiresPassword(response.data.requires_password);
-      toast.dismiss(waitingLogin);
-      toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
-      onSuccess();
-      return;
-    }
-
+    const recaptchaToken = await getRecaptchaToken('recaptcha-container');
+    const response = await authApi.requestOtp({
+      phone: mobileNumber,
+      recaptcha_token: recaptchaToken,
+      use_firebase: true
+    });
+    
+    dispatch(setMobileAuth({ 
+      number: mobileNumber, 
+      method: response.data.method,
+      sessionInfo: response.data.session_info 
+    }));
+    
+    if (onRequiresPassword) onRequiresPassword(response.data.requires_password);
+    
+    await delay(1000);
     toast.dismiss(waitingLogin);
     toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
     onSuccess();
@@ -61,18 +39,18 @@ export const performMobileLogin = (mobileNumber: string, onSuccess: () => void, 
   }
 };
 
-export const performVerifyLogin = (mobileNumber: string, otpCode: string, router: any, password?: string, verificationMethod?: 'sms' | 'firebase') => async (dispatch: any) => {
+export const performVerifyLogin = (mobileNumber: string, otpCode: string, router: any, password?: string, verificationMethod?: 'sms' | 'firebase', sessionInfo?: string) => async (dispatch: any) => {
   const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
 
   try {
-    let response;
-    
-    if (verificationMethod === 'firebase') {
-      const { token } = await verifyFirebaseOtp(otpCode);
-      response = await authApi.verifyFirebaseOtp({ firebase_token: token, password, app_type: 'driver' });
-    } else {
-      response = await authApi.verifyOtp({ phone: mobileNumber, otp: otpCode, password, app_type: 'driver' });
-    }
+    const response = await authApi.verifyOtp({ 
+      phone: mobileNumber, 
+      otp: otpCode, 
+      password, 
+      app_type: 'driver',
+      method: verificationMethod,
+      session_info: sessionInfo
+    });
     
     if (response.data.requires_password) {
       toast.dismiss(waitingLogin);

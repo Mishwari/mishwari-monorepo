@@ -17,10 +17,9 @@ import { encryptToken } from '@/utils/tokenUtils';
 import ProfileFormModal from './ProfileFormModal';
 import '@/config/firebase';
 import {
-  sendFirebaseOtp,
-  verifyFirebaseOtp,
+  useOtpProxy,
+  getRecaptchaToken,
   cleanupRecaptcha,
-  shouldUseFirebase,
 } from '@mishwari/utils';
 import { createLogger } from '@/utils/logger';
 
@@ -40,15 +39,14 @@ export default function LoginModal({
   const getMobileNumber = useSelector(
     (state: AppState) => state.mobileAuth.number
   );
-  const verificationMethod = useSelector(
-    (state: AppState) => state.mobileAuth.verificationMethod
-  );
   const dispatch = useDispatch();
   const [mobileNumber, setMobileNumber] = useState<string>('');
   const [otpCode, setOtpCode] = useState<string>('');
   const [showOtp, setShowOtp] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const loginLock = useRef(false);
+  
+  const { requestOtp, verifyLogin } = useOtpProxy();
 
   useEffect(() => {
     if (isOpen && getMobileNumber && !mobileNumber) {
@@ -63,97 +61,42 @@ export default function LoginModal({
     e.preventDefault();
     log.info('OTP request initiated', { mobileNumber, lockStatus: loginLock.current });
     
-    if (!mobileNumber) {
-      log.warn('OTP request blocked: No mobile number');
-      return;
-    }
-    
-    if (loginLock.current) {
-      log.warn('OTP request blocked: Lock active (double-click prevented)');
+    if (!mobileNumber || loginLock.current) {
+      log.warn('OTP request blocked');
       return;
     }
 
+    let waitingLogin: any = null;
     try {
       loginLock.current = true;
       log.debug('Lock acquired');
       
-      const waitingLogin = toast.info('جاري تسجيل الدخول...', {
-        autoClose: false,
-      });
-      const useFirebase = shouldUseFirebase(mobileNumber);
-      log.info('Verification method selected', { method: useFirebase ? 'Firebase' : 'SMS', phone: mobileNumber });
-
-      if (useFirebase) {
-        try {
-          log.info('Sending Firebase OTP...');
-          await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
-          log.info('Firebase OTP sent successfully');
-          dispatch(setMobileAuth({ number: mobileNumber, method: 'firebase' }));
-        } catch (firebaseError: any) {
-          log.error('Firebase OTP failed', {
-            code: firebaseError.code,
-            message: firebaseError.message,
-            phone: mobileNumber
-          });
-          
-          if (firebaseError.code === 'auth/too-many-requests') {
-            log.info('Falling back to SMS due to rate limit');
-            await authApi.requestOtp({ phone: mobileNumber });
-            dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
-          } else {
-            throw firebaseError;
-          }
-        }
-      } else {
-        log.info('Sending SMS OTP...');
-        await authApi.requestOtp({ phone: mobileNumber });
-        log.info('SMS OTP sent successfully');
-        dispatch(setMobileAuth({ number: mobileNumber, method: 'sms' }));
-      }
+      waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
+      
+      const recaptchaToken = await getRecaptchaToken('recaptcha-container');
+      log.info('ReCAPTCHA token obtained');
+      
+      await requestOtp(mobileNumber, recaptchaToken);
+      log.info('OTP request completed successfully');
       
       toast.dismiss(waitingLogin);
-      toast.success('تم ارسال رمز التحقق', {
-        autoClose: 2000,
-        hideProgressBar: true,
-      });
-      log.info('OTP request completed successfully');
+      toast.success('تم ارسال رمز التحقق', { autoClose: 2000, hideProgressBar: true });
       setShowOtp(true);
     } catch (error: any) {
-      log.error('OTP request failed', {
-        message: error.message,
-        code: error.code,
-        response: error.response?.data,
-        phone: mobileNumber
-      });
+      if (waitingLogin) toast.dismiss(waitingLogin);
+      log.error('OTP request failed', { message: error.message, phone: mobileNumber });
       
-      const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
-      toast.dismiss(waitingLogin);
       let errorMsg = 'فشل تسجيل الدخول';
       const errMsg = (error.message || '').toUpperCase();
-      const errCode = error.code || '';
       
-      if (
-        errMsg.includes('INVALID_APP_CREDENTIAL') ||
-        errMsg.includes('INVALID-APP-CREDENTIAL')
-      ) {
-        errorMsg = 'Firebase: Enable Phone Auth in Console or check API key';
-      } else if (
-        errMsg.includes('TOO MANY ATTEMPTS') ||
-        errMsg.includes('TOO-MANY-REQUESTS') ||
-        errMsg.includes('TOO_MANY_ATTEMPTS_TRY_LATER')
-      ) {
+      if (errMsg.includes('TOO MANY ATTEMPTS') || errMsg.includes('TOO-MANY-REQUESTS')) {
         errorMsg = 'محاولات كثيرة. حاول بعد قليل';
-      } else if (
-        errMsg.includes('FIREBASE NOT CONFIGURED') ||
-        errMsg.includes('FIREBASE NOT INITIALIZED')
-      ) {
+      } else if (errMsg.includes('FIREBASE NOT CONFIGURED') || errMsg.includes('FIREBASE NOT INITIALIZED')) {
         errorMsg = 'Firebase not configured';
-      } else if (errCode === 'auth/internal-error') {
-        errorMsg = 'خطأ داخلي في Firebase. يرجى المحاولة مرة أخرى';
-        log.error('Firebase internal-error detected', { phone: mobileNumber, fullError: error });
+      } else if (errMsg.includes('NETWORK ERROR')) {
+        errorMsg = 'خطأ في الاتصال. تأكد من الإنترنت';
       }
       
-      log.info('Showing error to user', { errorMsg });
       toast.error(errorMsg, { autoClose: 4000, hideProgressBar: true });
     } finally {
       loginLock.current = false;
@@ -163,107 +106,83 @@ export default function LoginModal({
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    log.info('OTP verification initiated', { mobileNumber, otpLength: otpCode.length, method: verificationMethod });
+    log.info('OTP verification initiated', { mobileNumber, otpLength: otpCode.length });
     
-    if (mobileNumber && otpCode) {
-      const waitingLogin = toast.info('جاري تسجيل الدخول...', {
-        autoClose: false,
-      });
-      try {
-        let response;
-        if (verificationMethod === 'firebase') {
-          log.info('Verifying Firebase OTP...');
-          const { token } = await verifyFirebaseOtp(otpCode);
-          log.info('Firebase token received, calling backend...');
-          response = await authApi.verifyFirebaseOtp({ firebase_token: token, app_type: 'passenger' });
-          log.info('Backend verification successful');
-        } else {
-          log.info('Verifying SMS OTP...');
-          response = await authApi.verifyOtp({
-            phone: mobileNumber,
-            otp: otpCode,
-            app_type: 'passenger',
-          });
-          log.info('SMS verification successful');
-        }
-        const accessToken = response.data.tokens.access;
+    if (!mobileNumber || !otpCode) {
+      log.warn('Verification blocked: missing data');
+      return;
+    }
 
-        dispatch(
-          setAuthState({
-            isAuthenticated: true,
-            token: encryptToken(accessToken),
-            refreshToken: encryptToken(response.data.tokens.refresh),
-          })
-        );
+    const waitingLogin = toast.info('جاري تسجيل الدخول...', { autoClose: false });
+    
+    try {
+      const response = await verifyLogin(otpCode, mobileNumber);
+      log.info('Backend verification successful');
+      
+      const accessToken = response.data.tokens.access;
 
-        log.info('Fetching user profile...');
-        const authenticatedClient = createAuthenticatedClient(accessToken);
-        const profileResponse = await authenticatedClient.get('/profile/me/');
+      dispatch(
+        setAuthState({
+          isAuthenticated: true,
+          token: encryptToken(accessToken),
+          refreshToken: encryptToken(response.data.tokens.refresh),
+        })
+      );
 
-        const profileData = profileResponse.data.profile;
-        dispatch(setProfileDetails(profileData));
+      log.info('Fetching user profile...');
+      const authenticatedClient = createAuthenticatedClient(accessToken);
+      const profileResponse = await authenticatedClient.get('/profile/me/');
 
-        const profile = { data: profileData };
+      const profileData = profileResponse.data.profile;
+      dispatch(setProfileDetails(profileData));
 
-        toast.dismiss(waitingLogin);
-        toast.success('تم تسجيل الدخول بنجاح', {
-          autoClose: 2000,
-          hideProgressBar: true,
-        });
-        log.info('Login successful', { hasFullName: !!profile.data.full_name });
+      toast.dismiss(waitingLogin);
+      toast.success('تم تسجيل الدخول بنجاح', { autoClose: 2000, hideProgressBar: true });
+      log.info('Login successful', { hasFullName: !!profileData.full_name });
 
-        setMobileNumber('');
-        setOtpCode('');
-        setShowOtp(false);
-        dispatch(setMobileAuth(''));
+      setMobileNumber('');
+      setOtpCode('');
+      setShowOtp(false);
 
-        if (!profile.data.full_name) {
-          log.info('Profile incomplete, showing profile form');
-          onClose();
-          setTimeout(() => {
-            if (onOpenProfileModal) {
-              onOpenProfileModal();
-            } else {
-              setShowProfileModal(true);
-            }
-          }, 100);
-        } else {
-          log.info('Profile complete, closing modal');
-          onClose();
-        }
-      } catch (error: any) {
-        log.error('OTP verification failed', {
-          message: error.message,
-          code: error.code,
-          response: error.response?.data,
-          method: verificationMethod,
-          phone: mobileNumber
-        });
-        
-        toast.dismiss(waitingLogin);
-        
-        if (error.response?.status === 403 && error.response?.data?.error === 'WRONG_APP') {
-          log.warn('Wrong app error detected');
-          toast.error(error.response.data.message, { autoClose: 5000, hideProgressBar: true });
-        } else {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            error.response?.data?.detail ||
-            'رمز التحقق غير صحيح أو منتهي الصلاحية';
-          
-          log.info('Showing error to user', { errorMessage });
-          toast.error('فشل تسجيل الدخول', {
-            autoClose: 2000,
-            hideProgressBar: true,
-          });
-          setTimeout(() => {
-            toast.error(errorMessage, { autoClose: 3000, hideProgressBar: true });
-          }, 2200);
-        }
+      if (!profileData.full_name) {
+        log.info('Profile incomplete, showing profile form');
+        onClose();
+        setTimeout(() => {
+          if (onOpenProfileModal) {
+            onOpenProfileModal();
+          } else {
+            setShowProfileModal(true);
+          }
+        }, 100);
+      } else {
+        log.info('Profile complete, closing modal');
+        onClose();
       }
-    } else {
-      log.warn('Verification blocked: missing data', { hasMobile: !!mobileNumber, hasOtp: !!otpCode });
+    } catch (error: any) {
+      log.error('OTP verification failed', {
+        message: error.message,
+        response: error.response?.data,
+        phone: mobileNumber
+      });
+      
+      toast.dismiss(waitingLogin);
+      
+      if (error.response?.status === 403 && error.response?.data?.error === 'WRONG_APP') {
+        log.warn('Wrong app error detected');
+        toast.error(error.response.data.message, { autoClose: 5000, hideProgressBar: true });
+      } else {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.response?.data?.detail ||
+          'رمز التحقق غير صحيح أو منتهي الصلاحية';
+        
+        log.info('Showing error to user', { errorMessage });
+        toast.error('فشل تسجيل الدخول', { autoClose: 2000, hideProgressBar: true });
+        setTimeout(() => {
+          toast.error(errorMessage, { autoClose: 3000, hideProgressBar: true });
+        }, 2200);
+      }
     }
   };
 

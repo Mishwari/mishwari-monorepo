@@ -14,6 +14,7 @@ export default function Login() {
   const { isAuthenticated } = useAuth();
   const getMobileNumber = useSelector((state: AppState) => state.mobileAuth.number);
   const verificationMethod = useSelector((state: AppState) => state.mobileAuth.verificationMethod);
+  const sessionInfo = useSelector((state: AppState) => state.mobileAuth.sessionInfo);
   const router = useRouter();
   const [mobileNumber, setMobileNumber] = useState<string>('');
   const [otpCode, setOtpCode] = useState<string>('');
@@ -53,7 +54,7 @@ export default function Login() {
   const handleVerifyOtp = async (e: any) => {
     e.preventDefault();
     try {
-      await dispatch(performVerifyLogin(mobileNumber, otpCode, router, requiresPassword ? password : undefined, verificationMethod || 'sms') as any);
+      await dispatch(performVerifyLogin(mobileNumber, otpCode, router, requiresPassword ? password : undefined, verificationMethod || 'sms', sessionInfo || undefined) as any);
     } catch (error) {
       // Error handled in action
     }

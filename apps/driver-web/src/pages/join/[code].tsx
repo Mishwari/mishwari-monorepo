@@ -5,9 +5,8 @@ import { authApi, createAuthenticatedClient } from '@mishwari/api';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { setAuthState, setProfile } from '@/store/slices/authSlice';
-import { encryptToken } from '@mishwari/utils';
+import { encryptToken, getRecaptchaToken, cleanupRecaptcha } from '@mishwari/utils';
 import '@/config/firebase';
-import { sendFirebaseOtp, verifyFirebaseOtp, cleanupRecaptcha, shouldUseFirebase } from '@mishwari/utils';
 
 export default function JoinInvitationPage() {
   const router = useRouter();
@@ -18,6 +17,7 @@ export default function JoinInvitationPage() {
   const [mobileNumber, setMobileNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [verificationMethod, setVerificationMethod] = useState<'sms' | 'firebase'>('sms');
+  const [sessionInfo, setSessionInfo] = useState<string | null>(null);
   const [showOtpInput, setShowOtpInput] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,6 @@ export default function JoinInvitationPage() {
       setInvitation(response.data);
       const phone = response.data.mobile_number;
       setMobileNumber(phone);
-      setVerificationMethod(shouldUseFirebase(phone) ? 'firebase' : 'sms');
       setStep('otp');
     } catch (error: any) {
       console.error('[JOIN] Validation failed:', error?.response?.data);
@@ -53,23 +52,18 @@ export default function JoinInvitationPage() {
     
     setLoading(true);
     try {
-      if (verificationMethod === 'firebase') {
-        try {
-          await sendFirebaseOtp(mobileNumber, 'recaptcha-container');
-          setShowOtpInput(true);
-        } catch (firebaseError: any) {
-          if (firebaseError.code === 'auth/too-many-requests') {
-            await authApi.requestOtp({ phone: mobileNumber });
-            setVerificationMethod('sms');
-            setShowOtpInput(true);
-          } else {
-            throw firebaseError;
-          }
-        }
-      } else {
-        await authApi.requestOtp({ phone: mobileNumber });
-        setShowOtpInput(true);
+      const recaptchaToken = await getRecaptchaToken('recaptcha-container');
+      const response = await authApi.requestOtp({ 
+        phone: mobileNumber,
+        recaptcha_token: recaptchaToken,
+        use_firebase: true
+      });
+      
+      setVerificationMethod(response.data.method);
+      if (response.data.session_info) {
+        setSessionInfo(response.data.session_info);
       }
+      setShowOtpInput(true);
       toast.success('تم إرسال رمز التحقق');
     } catch (error: any) {
       toast.error('فشل إرسال رمز التحقق');
@@ -81,13 +75,12 @@ export default function JoinInvitationPage() {
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
-      let response;
-      if (verificationMethod === 'firebase') {
-        const { token } = await verifyFirebaseOtp(otp);
-        response = await authApi.verifyFirebaseOtp({ firebase_token: token });
-      } else {
-        response = await authApi.verifyOtp({ phone: mobileNumber, otp });
-      }
+      const response = await authApi.verifyOtp({ 
+        phone: mobileNumber, 
+        otp,
+        method: verificationMethod,
+        session_info: sessionInfo || undefined
+      });
       const { access, refresh } = response.data.tokens;
       
       dispatch(setAuthState({
